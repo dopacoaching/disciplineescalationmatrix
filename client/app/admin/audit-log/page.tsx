@@ -9,6 +9,7 @@ import type { AuditLogEntry } from '@/types';
 
 const ACTION_META: Record<string, { label: string; dot: string }> = {
   'auth.login':        { label: 'Logged in',        dot: 'bg-blue-400' },
+  'auth.login_failed': { label: 'Login failed',      dot: 'bg-red-500' },
   'staff.create':      { label: 'Created staff',     dot: 'bg-violet-500' },
   'staff.update':      { label: 'Updated staff',     dot: 'bg-violet-400' },
   'staff.deactivate':  { label: 'Deactivated staff', dot: 'bg-red-500' },
@@ -49,21 +50,25 @@ function timeAgo(iso: string): string {
 }
 
 function AuditRow({ log }: { log: AuditLogEntry }) {
+  const isError = log.status === 'error';
   const meta = ACTION_META[log.action] ?? { label: log.action, dot: 'bg-gray-400' };
+  const dot = isError ? 'bg-red-500' : meta.dot;
   const date = new Date(log.createdAt);
+
   return (
-    <div className="flex items-start gap-3 py-3 border-b border-gray-100 last:border-0">
-      <span className={`mt-1.5 shrink-0 w-2 h-2 rounded-full ${meta.dot}`} />
+    <div className={`flex items-start gap-3 py-3 border-b border-gray-100 last:border-0 ${isError ? 'bg-red-50 -mx-4 px-4' : ''}`}>
+      <span className={`mt-1.5 shrink-0 w-2 h-2 rounded-full ${dot}`} />
       <div className="flex-1 min-w-0">
         <p className="text-sm text-gray-900">
           <span className="font-semibold">{log.actorUsername}</span>
           <span className="text-gray-400 text-xs ml-1">({log.actorRole})</span>
           {' · '}
-          <span>{meta.label}</span>
-          {log.targetName && (
-            <span className="text-gray-500"> — {log.targetName}</span>
-          )}
+          <span className={isError ? 'text-red-600 font-medium' : ''}>{meta.label}</span>
+          {log.targetName && <span className="text-gray-500"> — {log.targetName}</span>}
         </p>
+        {isError && log.details && (
+          <p className="text-xs text-red-500 mt-0.5">{log.details}</p>
+        )}
         <p className="text-xs text-gray-400 mt-0.5">
           {timeAgo(log.createdAt)}
           {' · '}
@@ -86,6 +91,8 @@ export default function AuditLogPage() {
     action: action || undefined,
   });
 
+  const errorCount = logs?.filter(l => l.status === 'error').length ?? 0;
+
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       <TopBar title="Audit Log" />
@@ -107,6 +114,13 @@ export default function AuditLogPage() {
             </button>
           ))}
         </div>
+
+        {!isLoading && errorCount > 0 && (
+          <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
+            <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
+            <p className="text-sm text-red-700 font-medium">{errorCount} error{errorCount > 1 ? 's' : ''} in this view</p>
+          </div>
+        )}
 
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-4">
           {isLoading ? (

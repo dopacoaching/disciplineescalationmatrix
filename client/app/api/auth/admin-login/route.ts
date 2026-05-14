@@ -10,9 +10,6 @@ import { writeAuditLog } from '@/lib/server/audit';
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const ip = req.headers.get('x-forwarded-for') || 'unknown';
-  if (!loginLimiter.check(ip)) {
-    return NextResponse.json({ message: 'Too many login attempts. Please try again later.' }, { status: 429 });
-  }
   try {
     await connectDB();
     const body = await req.json().catch(() => null);
@@ -20,13 +17,28 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (!result.success) return NextResponse.json({ message: result.error.errors[0].message }, { status: 400 });
     const { identifier, password } = result.data;
 
+    if (!loginLimiter.check(ip)) {
+      await writeAuditLog({ action: 'auth.login_failed', actorUsername: identifier, actorRole: 'admin', status: 'error', details: 'Rate limited' });
+      return NextResponse.json({ message: 'Too many login attempts. Please try again later.' }, { status: 429 });
+    }
+
     const admin = await Admin.findOne({
       $or: [{ email: identifier.toLowerCase() }, { username: identifier.toLowerCase() }],
     });
-    if (!admin || !admin.isActive) return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+    if (!admin) {
+      await writeAuditLog({ action: 'auth.login_failed', actorUsername: identifier, actorRole: 'admin', status: 'error', details: 'Account not found' });
+      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+    }
+    if (!admin.isActive) {
+      await writeAuditLog({ action: 'auth.login_failed', actorId: admin._id.toString(), actorUsername: admin.username, actorRole: 'admin', status: 'error', details: 'Account deactivated' });
+      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+    }
 
     const valid = await verifyPassword(password, admin.passwordHash);
-    if (!valid) return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+    if (!valid) {
+      await writeAuditLog({ action: 'auth.login_failed', actorId: admin._id.toString(), actorUsername: admin.username, actorRole: 'admin', status: 'error', details: 'Wrong password' });
+      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+    }
 
     const token = jwt.sign(
       { id: admin._id.toString(), role: 'admin', username: admin.username },

@@ -79,12 +79,14 @@ export interface StaffActivity extends Omit<Staff, 'assignedBatches'> {
 export interface AuditLogEntry {
   _id: string;
   action: string;
-  actorId: string;
+  actorId: string | null;
   actorUsername: string;
   actorRole: string;
   targetType: string | null;
   targetId: string | null;
   targetName: string | null;
+  status: 'success' | 'error';
+  details: string | null;
   createdAt: string;
 }
 
