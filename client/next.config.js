@@ -25,13 +25,14 @@ const withPWA = require('next-pwa')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Proxy /api/* → Express backend (avoids CORS and keeps SameSite cookies working)
+  // In production (Vercel), vercel.json routes /api/* to Express directly — same domain, no proxy needed.
+  // In development, proxy to the local Express server to avoid CORS and cookie issues.
   async rewrites() {
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+    if (process.env.NODE_ENV === 'production') return [];
     return [
       {
         source: '/api/:path*',
-        destination: `${backendUrl}/api/:path*`,
+        destination: 'http://localhost:5000/api/:path*',
       },
     ];
   },
