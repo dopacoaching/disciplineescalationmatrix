@@ -7,6 +7,7 @@ import { getAuthUser } from '@/lib/server/auth';
 import { getRemarkById } from '@/lib/server/remarks';
 import { computeEscalationLevel } from '@/lib/server/escalation';
 import { createEntrySchema } from '@/lib/server/validators/entry.validator';
+import { writeAuditLog } from '@/lib/server/audit';
 
 const VALID_SEVERITIES = new Set(['low', 'medium', 'high']);
 const VALID_SORTS = new Set(['oldest', 'newest', 'highest_severity']);
@@ -98,6 +99,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       customRemark: customRemark || '', severity: remark.severity, escalationLevel, createdAt: new Date(),
     });
     await Student.findByIdAndUpdate(studentId, { currentEscalationLevel: escalationLevel });
+    await writeAuditLog({ action: 'entry.create', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'student', targetId: studentId, targetName: student.fullName });
     const populated = await entry.populate([
       { path: 'studentId', select: 'fullName registerNumber batchId' },
       { path: 'staffId', select: 'fullName username role' },

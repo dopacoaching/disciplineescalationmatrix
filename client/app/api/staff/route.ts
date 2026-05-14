@@ -5,6 +5,7 @@ import Entry from '@/lib/server/models/Entry';
 import { getAuthUser } from '@/lib/server/auth';
 import { hashPassword } from '@/lib/server/hash';
 import { createStaffSchema } from '@/lib/server/validators/staff.validator';
+import { writeAuditLog } from '@/lib/server/audit';
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
@@ -60,6 +61,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       assignedBatches: assignedBatches || [], createdBy: user.id,
     });
     const { passwordHash: _, ...safe } = staff.toObject();
+    await writeAuditLog({ action: 'staff.create', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'staff', targetId: staff._id.toString(), targetName: staff.fullName });
     return NextResponse.json(safe, { status: 201 });
   } catch {
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

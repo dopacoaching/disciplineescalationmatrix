@@ -76,6 +76,18 @@ export interface StaffActivity extends Omit<Staff, 'assignedBatches'> {
   lastEntryAt: string | null;
 }
 
+export interface AuditLogEntry {
+  _id: string;
+  action: string;
+  actorId: string;
+  actorUsername: string;
+  actorRole: string;
+  targetType: string | null;
+  targetId: string | null;
+  targetName: string | null;
+  createdAt: string;
+}
+
 export interface DashboardStats {
   totalEntries: number;
   flaggedCount: number;

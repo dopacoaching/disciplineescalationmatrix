@@ -6,6 +6,7 @@ import { verifyPassword } from '@/lib/server/hash';
 import { setAuthCookie } from '@/lib/server/auth';
 import { adminLoginSchema } from '@/lib/server/validators/auth.validator';
 import { loginLimiter } from '@/lib/server/rateLimit';
+import { writeAuditLog } from '@/lib/server/audit';
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const ip = req.headers.get('x-forwarded-for') || 'unknown';
@@ -34,6 +35,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
     const res = NextResponse.json({ id: admin._id, username: admin.username, role: 'admin' });
     setAuthCookie(res, token);
+    await writeAuditLog({ action: 'auth.login', actorId: admin._id.toString(), actorUsername: admin.username, actorRole: 'admin' });
     return res;
   } catch {
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

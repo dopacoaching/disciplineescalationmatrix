@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/server/db';
 import Entry from '@/lib/server/models/Entry';
 import { getAuthUser } from '@/lib/server/auth';
 import { recalculateEscalation } from '@/lib/server/services/entry.service';
+import { writeAuditLog } from '@/lib/server/audit';
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -18,6 +19,7 @@ export async function DELETE(_req: NextRequest, { params }: Ctx): Promise<NextRe
     const studentId = entry.studentId.toString();
     await Entry.findByIdAndDelete(id);
     await recalculateEscalation(studentId);
+    await writeAuditLog({ action: 'entry.delete', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'entry', targetId: id });
     return NextResponse.json({ message: 'Entry deleted' });
   } catch {
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

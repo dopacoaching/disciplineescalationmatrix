@@ -4,6 +4,7 @@ import Staff from '@/lib/server/models/Staff';
 import { getAuthUser } from '@/lib/server/auth';
 import { hashPassword } from '@/lib/server/hash';
 import { updateStaffSchema } from '@/lib/server/validators/staff.validator';
+import { writeAuditLog } from '@/lib/server/audit';
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -23,6 +24,10 @@ export async function PATCH(req: NextRequest, { params }: Ctx): Promise<NextResp
     const staff = await Staff.findByIdAndUpdate(id, update, { new: true, runValidators: true })
       .select('-passwordHash').populate('assignedBatches', 'name');
     if (!staff) return NextResponse.json({ message: 'Staff not found' }, { status: 404 });
+    const action = 'isActive' in rest
+      ? rest.isActive ? 'staff.reactivate' : 'staff.deactivate'
+      : 'staff.update';
+    await writeAuditLog({ action, actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'staff', targetId: staff._id.toString(), targetName: staff.fullName });
     return NextResponse.json(staff);
   } catch {
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

@@ -9,6 +9,7 @@ import { DateRangeFilter } from '@/components/admin/DateRangeFilter';
 import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
 import { escalationBadgeVariant, escalationKey } from '@/lib/escalation';
+import { AuditLogFeed } from '@/components/admin/AuditLogFeed';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
@@ -83,6 +84,8 @@ export default function AdminDashboard() {
             ))}
           </div>
         </div>
+        <AuditLogFeed fromDate={from} toDate={to} />
+
         <Link href="/admin/admins">
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center justify-between">
             <p className="font-semibold text-gray-900">{t('nav.admins')}</p>

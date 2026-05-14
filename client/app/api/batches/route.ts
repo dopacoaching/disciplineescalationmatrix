@@ -4,6 +4,7 @@ import { connectDB } from '@/lib/server/db';
 import Batch from '@/lib/server/models/Batch';
 import { getAuthUser } from '@/lib/server/auth';
 import { createBatchSchema } from '@/lib/server/validators/batch.validator';
+import { writeAuditLog } from '@/lib/server/audit';
 
 export async function GET(): Promise<NextResponse> {
   try {
@@ -30,6 +31,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const result = createBatchSchema.safeParse(body);
     if (!result.success) return NextResponse.json({ message: result.error.errors[0].message }, { status: 400 });
     const batch = await Batch.create({ name: result.data.name, createdBy: user.id });
+    await writeAuditLog({ action: 'batch.create', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'batch', targetId: batch._id.toString(), targetName: batch.name });
     return NextResponse.json(batch, { status: 201 });
   } catch {
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

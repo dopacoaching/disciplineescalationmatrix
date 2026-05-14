@@ -1,5 +1,5 @@
 import { baseApi } from './baseApi';
-import type { DashboardStats, FlaggedStudent, StaffActivity } from '@/types';
+import type { AuditLogEntry, DashboardStats, FlaggedStudent, StaffActivity } from '@/types';
 
 interface DateRange {
   fromDate?: string;
@@ -20,7 +20,11 @@ export const dashboardApi = baseApi.injectEndpoints({
       query: (params) => ({ url: '/dashboard/staff-activity', params }),
       providesTags: ['Dashboard'],
     }),
+    getAuditLog: builder.query<AuditLogEntry[], { limit?: number; fromDate?: string; toDate?: string; action?: string }>({
+      query: (params) => ({ url: '/audit-log', params }),
+      providesTags: ['Dashboard'],
+    }),
   }),
 });
 
-export const { useGetDashboardStatsQuery, useGetFlaggedQuery, useGetStaffActivityQuery } = dashboardApi;
+export const { useGetDashboardStatsQuery, useGetFlaggedQuery, useGetStaffActivityQuery, useGetAuditLogQuery } = dashboardApi;
