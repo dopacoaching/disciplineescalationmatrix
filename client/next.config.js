@@ -25,12 +25,13 @@ const withPWA = require('next-pwa')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Proxy /api/* → Express on port 5000 to avoid CORS and SameSite cookie issues in dev
+  // Proxy /api/* → Express backend (avoids CORS and keeps SameSite cookies working)
   async rewrites() {
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:5000/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },

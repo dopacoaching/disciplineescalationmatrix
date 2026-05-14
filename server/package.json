@@ -9,6 +9,7 @@
     "seed": "ts-node src/scripts/seedAdmin.ts"
   },
   "dependencies": {
+    "@vercel/node": "^5.8.1",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
