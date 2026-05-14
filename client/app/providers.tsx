@@ -65,10 +65,9 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
     }
   }, [data, isLoading, isError, isPublic, dispatch, pathname, router]);
 
-  // Block protected pages from rendering (and firing queries) until /me resolves.
-  // Use RTK Query's isLoading — not Redux auth.isLoading, which is stale after
-  // clearUser() fires on the login page and stays false on the next navigation.
-  if (!isPublic && isLoading) return null;
+  // Block protected pages until /me resolves successfully.
+  // Also block on isError so dashboard queries don't fire before the redirect effect runs.
+  if (!isPublic && (isLoading || isError)) return null;
 
   return <>{children}</>;
 }
