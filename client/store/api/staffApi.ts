@@ -1,0 +1,48 @@
+import { baseApi } from './baseApi';
+import type { Staff, Entry } from '@/types';
+
+interface StaffFilters {
+  search?: string;
+  role?: string;
+  batchId?: string;
+}
+
+interface CreateStaffPayload {
+  fullName: string;
+  username: string;
+  password: string;
+  role: 'teacher' | 'warden';
+  assignedBatches?: string[];
+}
+
+interface UpdateStaffPayload {
+  fullName?: string;
+  username?: string;
+  password?: string;
+  role?: 'teacher' | 'warden';
+  assignedBatches?: string[];
+  isActive?: boolean;
+}
+
+export const staffApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    getStaff: builder.query<Staff[], StaffFilters>({
+      query: (params) => ({ url: '/staff', params }),
+      providesTags: ['Staff'],
+    }),
+    createStaff: builder.mutation<Staff, CreateStaffPayload>({
+      query: (body) => ({ url: '/staff', method: 'POST', body }),
+      invalidatesTags: ['Staff'],
+    }),
+    updateStaff: builder.mutation<Staff, { id: string; data: UpdateStaffPayload }>({
+      query: ({ id, data }) => ({ url: `/staff/${id}`, method: 'PATCH', body: data }),
+      invalidatesTags: ['Staff'],
+    }),
+    getStaffEntries: builder.query<Entry[], string>({
+      query: (id) => `/staff/${id}/entries`,
+      providesTags: ['Entry'],
+    }),
+  }),
+});
+
+export const { useGetStaffQuery, useCreateStaffMutation, useUpdateStaffMutation, useGetStaffEntriesQuery } = staffApi;

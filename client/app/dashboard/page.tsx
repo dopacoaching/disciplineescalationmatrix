@@ -1,0 +1,60 @@
+'use client';
+import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useRouter } from 'next/navigation';
+import { useGetBatchesQuery } from '@/store/api/batchesApi';
+import { TopBar } from '@/components/ui/TopBar';
+import { StaffBottomNav } from '@/components/ui/BottomNav';
+import { Card } from '@/components/ui/Card';
+import { Spinner } from '@/components/ui/Spinner';
+import { Badge } from '@/components/ui/Badge';
+import Link from 'next/link';
+import '@/lib/i18n';
+
+export default function StaffDashboard() {
+  const { t } = useTranslation();
+  const router = useRouter();
+  const { data: batches, isLoading } = useGetBatchesQuery();
+
+  useEffect(() => {
+    if (batches && batches.length === 1) {
+      router.replace(`/dashboard/batch/${batches[0]._id}`);
+    }
+  }, [batches, router]);
+
+  if (isLoading || (batches && batches.length === 1)) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-24">
+      <TopBar title={t('app.name')} />
+      <div className="px-4 pt-5 space-y-3">
+        {batches?.length === 0 ? (
+          <p className="text-gray-400 text-sm py-4">{t('empty.noBatches')}</p>
+        ) : (
+          batches?.map(batch => (
+            <Link key={batch._id} href={`/dashboard/batch/${batch._id}`}>
+              <Card className={`flex items-center justify-between ${batch.isArchived ? 'opacity-60' : ''}`}>
+                <div>
+                  <p className="font-semibold text-gray-900">{batch.name}</p>
+                  {batch.isArchived && (
+                    <Badge variant="archived" label={t('batch.archived')} className="mt-1" />
+                  )}
+                </div>
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Card>
+            </Link>
+          ))
+        )}
+      </div>
+      <StaffBottomNav />
+    </div>
+  );
+}

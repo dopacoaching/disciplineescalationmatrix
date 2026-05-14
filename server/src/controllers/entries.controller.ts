@@ -1,0 +1,140 @@
+import { Request, Response } from 'express';
+import mongoose from 'mongoose';
+import Entry from '../models/Entry';
+import Student from '../models/Student';
+import { getRemarkById } from '../constants/remarks';
+import { computeEscalationLevel } from '../utils/escalation';
+import { recalculateEscalation } from '../services/entry.service';
+
+const VALID_SEVERITIES = new Set(['low', 'medium', 'high']);
+const VALID_SORTS = new Set(['oldest', 'newest', 'highest_severity']);
+
+function parseDate(val: unknown): Date | null {
+  if (!val) return null;
+  const d = new Date(val as string);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+export async function getEntries(req: Request, res: Response): Promise<void> {
+  const user = req.user!;
+  const { studentId, staffId, fromDate, toDate, severity, sort } = req.query;
+
+  if (severity && !VALID_SEVERITIES.has(severity as string)) {
+    res.status(400).json({ message: 'Invalid severity value' });
+    return;
+  }
+  if (sort && !VALID_SORTS.has(sort as string)) {
+    res.status(400).json({ message: 'Invalid sort value' });
+    return;
+  }
+
+  const filter: Record<string, unknown> = {};
+
+  if (user.role !== 'admin') {
+    filter.staffId = new mongoose.Types.ObjectId(user.id);
+  } else if (staffId) {
+    if (!mongoose.Types.ObjectId.isValid(staffId as string)) {
+      res.status(400).json({ message: 'Invalid staffId' });
+      return;
+    }
+    filter.staffId = new mongoose.Types.ObjectId(staffId as string);
+  }
+
+  if (studentId) {
+    if (!mongoose.Types.ObjectId.isValid(studentId as string)) {
+      res.status(400).json({ message: 'Invalid studentId' });
+      return;
+    }
+    filter.studentId = new mongoose.Types.ObjectId(studentId as string);
+  }
+  if (severity) filter.severity = severity;
+
+  const from = parseDate(fromDate);
+  const to = parseDate(toDate);
+  if ((fromDate && !from) || (toDate && !to)) {
+    res.status(400).json({ message: 'Invalid date format' });
+    return;
+  }
+  if (from || to) {
+    filter.createdAt = {
+      ...(from ? { $gte: from } : {}),
+      ...(to ? { $lte: to } : {}),
+    };
+  }
+
+  const sortOption: Record<string, 1 | -1> =
+    sort === 'oldest' ? { createdAt: 1 }
+    : sort === 'highest_severity' ? { severity: -1, createdAt: -1 }
+    : { createdAt: -1 };
+
+  const entries = await Entry.find(filter)
+    .populate('studentId', 'fullName registerNumber batchId')
+    .populate('staffId', 'fullName username role')
+    .sort(sortOption);
+
+  res.json(entries);
+}
+
+export async function createEntry(req: Request, res: Response): Promise<void> {
+  const user = req.user!;
+  const { studentId, remarkId, customRemark } = req.body;
+
+  const remark = getRemarkById(remarkId);
+  if (!remark) {
+    res.status(400).json({ message: 'Invalid remarkId' });
+    return;
+  }
+
+  const student = await Student.findById(studentId);
+  if (!student) {
+    res.status(404).json({ message: 'Student not found' });
+    return;
+  }
+
+  const assignedBatches = user.assignedBatches || [];
+  if (!assignedBatches.includes(student.batchId.toString())) {
+    res.status(403).json({ message: 'Access denied to this student' });
+    return;
+  }
+
+  if (remarkId === 'other' && (!customRemark || customRemark.trim().length === 0)) {
+    res.status(400).json({ message: 'Custom remark is required' });
+    return;
+  }
+
+  const existingEntries = await Entry.find({ studentId });
+  const totalAfter = existingEntries.length + 1;
+  const hasHigh = remark.severity === 'high' || existingEntries.some(e => e.severity === 'high');
+  const escalationLevel = computeEscalationLevel(totalAfter, hasHigh);
+
+  const entry = await Entry.create({
+    studentId,
+    staffId: user.id,
+    remarkId,
+    customRemark: customRemark || '',
+    severity: remark.severity,
+    escalationLevel,
+    createdAt: new Date(),
+  });
+
+  await Student.findByIdAndUpdate(studentId, { currentEscalationLevel: escalationLevel });
+
+  const populated = await entry.populate([
+    { path: 'studentId', select: 'fullName registerNumber batchId' },
+    { path: 'staffId', select: 'fullName username role' },
+  ]);
+
+  res.status(201).json(populated);
+}
+
+export async function deleteEntry(req: Request, res: Response): Promise<void> {
+  const { id } = req.params;
+  const entry = await Entry.findById(id);
+  if (!entry) { res.status(404).json({ message: 'Entry not found' }); return; }
+
+  const studentId = entry.studentId.toString();
+  await Entry.findByIdAndDelete(id);
+  await recalculateEscalation(studentId);
+
+  res.json({ message: 'Entry deleted' });
+}
