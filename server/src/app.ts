@@ -22,8 +22,6 @@ const allowedOrigins = [
 
 app.use(cors({
   origin(origin, callback) {
-    // Allow requests with no Origin header (Next.js proxy, server-to-server)
-    // and any explicitly listed origin
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
