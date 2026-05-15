@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectDB } from '@/lib/server/db';
 import Batch from '@/lib/server/models/Batch';
 import Student from '@/lib/server/models/Student';
@@ -14,6 +15,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx): Promise<NextResp
     if (!user) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     if (user.role !== 'admin') return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
     const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ message: 'Invalid ID' }, { status: 400 });
     await connectDB();
     const body = await req.json().catch(() => null);
     const result = updateBatchSchema.safeParse(body);
@@ -33,12 +35,13 @@ export async function DELETE(_req: NextRequest, { params }: Ctx): Promise<NextRe
     if (!user) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     if (user.role !== 'admin') return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
     const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ message: 'Invalid ID' }, { status: 400 });
     await connectDB();
     const studentCount = await Student.countDocuments({ batchId: id });
     if (studentCount > 0) return NextResponse.json({ message: 'Cannot delete batch with students' }, { status: 400 });
-    const batch = await Batch.findById(id);
-    await Batch.findByIdAndDelete(id);
-    if (batch) await writeAuditLog({ action: 'batch.delete', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'batch', targetId: id, targetName: batch.name });
+    const batch = await Batch.findByIdAndDelete(id);
+    if (!batch) return NextResponse.json({ message: 'Batch not found' }, { status: 404 });
+    await writeAuditLog({ action: 'batch.delete', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'batch', targetId: id, targetName: batch.name });
     return NextResponse.json({ message: 'Batch deleted' });
   } catch {
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

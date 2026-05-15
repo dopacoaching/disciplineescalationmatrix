@@ -20,12 +20,20 @@ export async function getAuthUser(): Promise<AuthPayload | null> {
   }
 }
 
+function parseExpiryToSeconds(expiresIn: string): number {
+  const match = expiresIn.match(/^(\d+)([smhd])$/);
+  if (!match) return 8 * 60 * 60;
+  const val = parseInt(match[1], 10);
+  const multipliers: Record<string, number> = { s: 1, m: 60, h: 3600, d: 86400 };
+  return val * (multipliers[match[2]] ?? 3600);
+}
+
 export function setAuthCookie(res: NextResponse, token: string): void {
   res.cookies.set('token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    maxAge: 8 * 60 * 60,
+    maxAge: parseExpiryToSeconds(process.env.JWT_EXPIRES_IN || '8h'),
     path: '/',
   });
 }

@@ -19,5 +19,6 @@ const StudentSchema = new Schema<IStudent>({
 });
 
 StudentSchema.index({ registerNumber: 1, batchId: 1 }, { unique: true });
+StudentSchema.index({ batchId: 1, currentEscalationLevel: -1 });
 
 export default mongoose.models.Student || mongoose.model<IStudent>('Student', StudentSchema);

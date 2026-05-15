@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectDB } from '@/lib/server/db';
 import Student from '@/lib/server/models/Student';
 import Entry from '@/lib/server/models/Entry';
@@ -8,12 +9,31 @@ import { writeAuditLog } from '@/lib/server/audit';
 
 type Ctx = { params: Promise<{ id: string }> };
 
+export async function GET(_req: NextRequest, { params }: Ctx): Promise<NextResponse> {
+  try {
+    const user = await getAuthUser();
+    if (!user) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+    const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ message: 'Invalid ID' }, { status: 400 });
+    await connectDB();
+    const student = await Student.findById(id).populate('batchId', 'name isArchived');
+    if (!student) return NextResponse.json({ message: 'Student not found' }, { status: 404 });
+    if (user.role !== 'admin' && !(user.assignedBatches || []).includes(student.batchId.toString())) {
+      return NextResponse.json({ message: 'Access denied' }, { status: 403 });
+    }
+    return NextResponse.json(student);
+  } catch {
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+  }
+}
+
 export async function PATCH(req: NextRequest, { params }: Ctx): Promise<NextResponse> {
   try {
     const user = await getAuthUser();
     if (!user) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     if (user.role !== 'admin') return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
     const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ message: 'Invalid ID' }, { status: 400 });
     await connectDB();
     const body = await req.json().catch(() => null);
     const result = updateStudentSchema.safeParse(body);
@@ -33,6 +53,7 @@ export async function DELETE(_req: NextRequest, { params }: Ctx): Promise<NextRe
     if (!user) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     if (user.role !== 'admin') return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
     const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ message: 'Invalid ID' }, { status: 400 });
     await connectDB();
     const student = await Student.findById(id);
     if (!student) return NextResponse.json({ message: 'Student not found' }, { status: 404 });

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { useGetStudentsQuery, useUpdateStudentMutation, useDeleteStudentMutation } from '@/store/api/studentsApi';
+import { useGetStudentByIdQuery, useUpdateStudentMutation, useDeleteStudentMutation } from '@/store/api/studentsApi';
 import { useGetEntriesQuery, useDeleteEntryMutation } from '@/store/api/entriesApi';
 import { useGetBatchesQuery } from '@/store/api/batchesApi';
 import { TopBar } from '@/components/ui/TopBar';
@@ -21,30 +21,40 @@ export default function StudentProfilePage() {
   const [transferBatch, setTransferBatch] = useState('');
   const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
 
-  const { data: students } = useGetStudentsQuery({});
+  const { data: student } = useGetStudentByIdQuery(id);
   const { data: entries, isLoading: entriesLoading } = useGetEntriesQuery({ studentId: id });
   const { data: batches } = useGetBatchesQuery();
   const [updateStudent, { isLoading: transferLoading }] = useUpdateStudentMutation();
   const [deleteStudent] = useDeleteStudentMutation();
   const [deleteEntry, { isLoading: deletingEntry }] = useDeleteEntryMutation();
 
-  const student = students?.find(s => s._id === id);
-
   const handleTransfer = async () => {
     if (!transferBatch) return;
-    await updateStudent({ id, data: { batchId: transferBatch } }).unwrap();
-    setTransferOpen(false);
+    try {
+      await updateStudent({ id, data: { batchId: transferBatch } }).unwrap();
+      setTransferOpen(false);
+    } catch {
+      alert(t('error.generic'));
+    }
   };
 
   const handleDeleteEntry = async (entryId: string) => {
-    await deleteEntry(entryId).unwrap();
-    setDeleteEntryId(null);
+    try {
+      await deleteEntry(entryId).unwrap();
+      setDeleteEntryId(null);
+    } catch {
+      alert(t('error.generic'));
+    }
   };
 
   const handleDeleteStudent = async () => {
     if (!confirm(t('action.confirm'))) return;
-    await deleteStudent(id).unwrap();
-    router.replace('/admin/students');
+    try {
+      await deleteStudent(id).unwrap();
+      router.replace('/admin/students');
+    } catch {
+      alert(t('error.generic'));
+    }
   };
 
   return (

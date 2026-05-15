@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectDB } from '@/lib/server/db';
 import Admin from '@/lib/server/models/Admin';
 import { getAuthUser } from '@/lib/server/auth';
@@ -13,6 +14,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx): Promise<NextResp
     if (!user) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     if (user.role !== 'admin') return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
     const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ message: 'Invalid ID' }, { status: 400 });
     if (id === user.id) return NextResponse.json({ message: 'Cannot modify your own admin account' }, { status: 403 });
     await connectDB();
     const body = await req.json().catch(() => null);

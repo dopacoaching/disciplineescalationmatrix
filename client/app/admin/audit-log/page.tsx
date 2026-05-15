@@ -9,6 +9,7 @@ import type { AuditLogEntry } from '@/types';
 
 const ACTION_META: Record<string, { label: string; dot: string }> = {
   'auth.login':        { label: 'Logged in',        dot: 'bg-blue-400' },
+  'auth.logout':       { label: 'Logged out',       dot: 'bg-blue-300' },
   'auth.login_failed': { label: 'Login failed',      dot: 'bg-red-500' },
   'staff.create':      { label: 'Created staff',     dot: 'bg-violet-500' },
   'staff.update':      { label: 'Updated staff',     dot: 'bg-violet-400' },

@@ -52,15 +52,21 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     if ((fromDate && !from) || (toDate && !to)) return NextResponse.json({ message: 'Invalid date format' }, { status: 400 });
     if (from || to) filter.createdAt = { ...(from ? { $gte: from } : {}), ...(to ? { $lte: to } : {}) };
 
+    const SEVERITY_RANK: Record<string, number> = { high: 3, medium: 2, low: 1 };
     const sortOption: Record<string, 1 | -1> =
-      sort === 'oldest' ? { createdAt: 1 }
-      : sort === 'highest_severity' ? { severity: -1, createdAt: -1 }
-      : { createdAt: -1 };
+      sort === 'oldest' ? { createdAt: 1 } : { createdAt: -1 };
 
     const entries = await Entry.find(filter)
       .populate('studentId', 'fullName registerNumber batchId')
       .populate('staffId', 'fullName username role')
       .sort(sortOption);
+
+    if (sort === 'highest_severity') {
+      entries.sort((a, b) =>
+        (SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity]) ||
+        (b.createdAt.getTime() - a.createdAt.getTime())
+      );
+    }
     return NextResponse.json(entries);
   } catch {
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
@@ -89,10 +95,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ message: 'Custom remark is required' }, { status: 400 });
     }
 
-    const existingEntries = await Entry.find({ studentId });
-    const totalAfter = existingEntries.length + 1;
-    const hasHigh = remark.severity === 'high' || existingEntries.some(e => e.severity === 'high');
-    const escalationLevel = computeEscalationLevel(totalAfter, hasHigh);
+    const existingCount = await Entry.countDocuments({ studentId });
+    const hasHighExisting = await Entry.exists({ studentId, severity: 'high' });
+    const hasHigh = remark.severity === 'high' || !!hasHighExisting;
+    const escalationLevel = computeEscalationLevel(existingCount + 1, hasHigh);
 
     const entry = await Entry.create({
       studentId, staffId: user.id, remarkId,

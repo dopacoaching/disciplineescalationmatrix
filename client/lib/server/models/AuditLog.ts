@@ -6,7 +6,7 @@ export interface IAuditLog extends Document {
   actorUsername: string;
   actorRole: string;
   targetType: string | null;
-  targetId: mongoose.Types.ObjectId | null;
+  targetId: string | null;
   targetName: string | null;
   status: 'success' | 'error';
   details: string | null;
@@ -19,7 +19,7 @@ const AuditLogSchema = new Schema<IAuditLog>({
   actorUsername: { type: String, required: true },
   actorRole:     { type: String, required: true },
   targetType:    { type: String, default: null },
-  targetId:      { type: Schema.Types.ObjectId, default: null },
+  targetId:      { type: String, default: null },
   targetName:    { type: String, default: null },
   status:        { type: String, enum: ['success', 'error'], default: 'success' },
   details:       { type: String, default: null },

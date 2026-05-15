@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectDB } from '@/lib/server/db';
 import Entry from '@/lib/server/models/Entry';
 import { getAuthUser } from '@/lib/server/auth';
@@ -13,6 +14,7 @@ export async function DELETE(_req: NextRequest, { params }: Ctx): Promise<NextRe
     if (!user) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     if (user.role !== 'admin') return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
     const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ message: 'Invalid ID' }, { status: 400 });
     await connectDB();
     const entry = await Entry.findById(id);
     if (!entry) return NextResponse.json({ message: 'Entry not found' }, { status: 404 });

@@ -20,4 +20,8 @@ const EntrySchema = new Schema<IEntry>({
   createdAt: { type: Date, default: Date.now },
 });
 
+EntrySchema.index({ studentId: 1, createdAt: -1 });
+EntrySchema.index({ staffId: 1, createdAt: -1 });
+EntrySchema.index({ createdAt: -1 });
+
 export default mongoose.models.Entry || mongoose.model<IEntry>('Entry', EntrySchema);

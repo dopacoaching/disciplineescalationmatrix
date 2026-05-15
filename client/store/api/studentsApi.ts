@@ -16,6 +16,10 @@ export const studentsApi = baseApi.injectEndpoints({
       query: (params) => ({ url: '/students', params }),
       providesTags: ['Student'],
     }),
+    getStudentById: builder.query<PopulatedStudent, string>({
+      query: (id) => ({ url: `/students/${id}` }),
+      providesTags: ['Student'],
+    }),
     createStudent: builder.mutation<PopulatedStudent, { registerNumber: string; fullName: string; batchId: string }>({
       query: (body) => ({ url: '/students', method: 'POST', body }),
       invalidatesTags: ['Student'],
@@ -31,4 +35,4 @@ export const studentsApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetStudentsQuery, useCreateStudentMutation, useUpdateStudentMutation, useDeleteStudentMutation } = studentsApi;
+export const { useGetStudentsQuery, useGetStudentByIdQuery, useCreateStudentMutation, useUpdateStudentMutation, useDeleteStudentMutation } = studentsApi;

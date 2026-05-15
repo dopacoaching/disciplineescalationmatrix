@@ -20,18 +20,30 @@ export default function AdminBatchesPage() {
 
   const handleCreate = async () => {
     if (!newName.trim()) return;
-    await createBatch({ name: newName.trim() });
-    setNewName('');
+    try {
+      await createBatch({ name: newName.trim() }).unwrap();
+      setNewName('');
+    } catch (err: any) {
+      alert(err?.data?.message || t('error.generic'));
+    }
   };
 
   const handleRename = async (id: string) => {
     if (!editName.trim()) return;
-    await updateBatch({ id, data: { name: editName.trim() } });
-    setEditId(null);
+    try {
+      await updateBatch({ id, data: { name: editName.trim() } }).unwrap();
+      setEditId(null);
+    } catch (err: any) {
+      alert(err?.data?.message || t('error.generic'));
+    }
   };
 
   const handleArchive = async (id: string, current: boolean) => {
-    await updateBatch({ id, data: { isArchived: !current } });
+    try {
+      await updateBatch({ id, data: { isArchived: !current } }).unwrap();
+    } catch {
+      alert(t('error.generic'));
+    }
   };
 
   const handleDelete = async (id: string) => {
