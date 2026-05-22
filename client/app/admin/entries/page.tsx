@@ -25,8 +25,12 @@ export default function AdminEntriesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteEntry(id).unwrap();
-    setDeleteId(null);
+    try {
+      await deleteEntry(id).unwrap();
+      setDeleteId(null);
+    } catch {
+      alert(t('error.generic'));
+    }
   };
 
   return (

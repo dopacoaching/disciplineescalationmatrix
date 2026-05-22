@@ -18,7 +18,8 @@ export async function GET(_req: NextRequest, { params }: Ctx): Promise<NextRespo
     await connectDB();
     const student = await Student.findById(id).populate('batchId', 'name isArchived');
     if (!student) return NextResponse.json({ message: 'Student not found' }, { status: 404 });
-    if (user.role !== 'admin' && !(user.assignedBatches || []).includes(student.batchId.toString())) {
+    const batchIdStr = (student.batchId as any)?._id?.toString() ?? student.batchId.toString();
+    if (user.role !== 'admin' && !(user.assignedBatches || []).includes(batchIdStr)) {
       return NextResponse.json({ message: 'Access denied' }, { status: 403 });
     }
     return NextResponse.json(student);

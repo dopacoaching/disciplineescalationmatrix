@@ -57,7 +57,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       sort === 'oldest' ? { createdAt: 1 } : { createdAt: -1 };
 
     const entries = await Entry.find(filter)
-      .populate('studentId', 'fullName registerNumber batchId')
+      .populate({ path: 'studentId', select: 'fullName registerNumber batchId', populate: { path: 'batchId', select: 'name' } })
       .populate('staffId', 'fullName username role')
       .sort(sortOption);
 
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     await Student.findByIdAndUpdate(studentId, { currentEscalationLevel: escalationLevel });
     await writeAuditLog({ action: 'entry.create', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'student', targetId: studentId, targetName: student.fullName });
     const populated = await entry.populate([
-      { path: 'studentId', select: 'fullName registerNumber batchId' },
+      { path: 'studentId', select: 'fullName registerNumber batchId', populate: { path: 'batchId', select: 'name' } },
       { path: 'staffId', select: 'fullName username role' },
     ]);
     return NextResponse.json(populated, { status: 201 });
