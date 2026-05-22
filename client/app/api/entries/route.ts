@@ -3,6 +3,9 @@ import mongoose from 'mongoose';
 import { connectDB } from '@/lib/server/db';
 import Entry from '@/lib/server/models/Entry';
 import Student from '@/lib/server/models/Student';
+// Staff and Batch must be imported so Mongoose registers their models before populate runs
+import '@/lib/server/models/Staff';
+import '@/lib/server/models/Batch';
 import { getAuthUser } from '@/lib/server/auth';
 import { getRemarkById } from '@/lib/server/remarks';
 import { computeEscalationLevel } from '@/lib/server/escalation';

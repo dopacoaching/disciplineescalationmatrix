@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { connectDB } from '@/lib/server/db';
 import Student from '@/lib/server/models/Student';
 import Entry from '@/lib/server/models/Entry';
+import '@/lib/server/models/Batch';
 import { getAuthUser } from '@/lib/server/auth';
 import { updateStudentSchema } from '@/lib/server/validators/student.validator';
 import { writeAuditLog } from '@/lib/server/audit';

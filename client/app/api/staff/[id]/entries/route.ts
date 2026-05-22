@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { connectDB } from '@/lib/server/db';
 import Entry from '@/lib/server/models/Entry';
+import '@/lib/server/models/Student';
 import { getAuthUser } from '@/lib/server/auth';
 
 type Ctx = { params: Promise<{ id: string }> };

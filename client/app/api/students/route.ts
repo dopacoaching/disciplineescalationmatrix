@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { connectDB } from '@/lib/server/db';
 import Student from '@/lib/server/models/Student';
+import '@/lib/server/models/Batch';
 import { getAuthUser } from '@/lib/server/auth';
 import { getEntryCountsForStudents } from '@/lib/server/services/student.service';
 import { createStudentSchema } from '@/lib/server/validators/student.validator';

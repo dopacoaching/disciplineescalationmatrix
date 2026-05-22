@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { connectDB } from '@/lib/server/db';
 import Staff from '@/lib/server/models/Staff';
+import '@/lib/server/models/Batch';
 import { getAuthUser } from '@/lib/server/auth';
 import { hashPassword } from '@/lib/server/hash';
 import { updateStaffSchema } from '@/lib/server/validators/staff.validator';

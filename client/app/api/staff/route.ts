@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/server/db';
 import Staff from '@/lib/server/models/Staff';
 import Entry from '@/lib/server/models/Entry';
+import '@/lib/server/models/Batch';
 import { getAuthUser } from '@/lib/server/auth';
 import { hashPassword } from '@/lib/server/hash';
 import { createStaffSchema } from '@/lib/server/validators/staff.validator';

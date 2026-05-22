@@ -1,6 +1,7 @@
 import Entry from '../models/Entry';
 import Student from '../models/Student';
 import Staff from '../models/Staff';
+import '../models/Batch';
 
 export function buildDateFilter(fromDate?: string, toDate?: string): Record<string, unknown> {
   if (!fromDate && !toDate) return {};
