@@ -46,15 +46,19 @@ export default function RemarkEntryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-[#f0f4f8] pb-24">
       <TopBar title={student?.fullName || 'Entry'} showBack />
 
       <div className="px-4 pt-4 space-y-4">
+        {/* Student card */}
         {student && (
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-            <p className="font-bold text-gray-900">{student.fullName}</p>
-            <p className="text-sm text-gray-500">{student.registerNumber}</p>
-            <div className="mt-2">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-hidden">
+            <div className={`h-1 w-full ${student.currentEscalationLevel === 3 ? 'bg-danger' : student.currentEscalationLevel === 2 ? 'bg-flagged' : 'bg-success'}`} />
+            <div className="p-4 flex items-center justify-between">
+              <div>
+                <p className="font-bold text-gray-900 text-sm">{student.fullName}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{student.registerNumber}</p>
+              </div>
               <Badge
                 variant={escalationBadgeVariant(student.currentEscalationLevel)}
                 label={t(escalationKey(student.currentEscalationLevel))}
@@ -63,25 +67,25 @@ export default function RemarkEntryPage() {
           </div>
         )}
 
-        <p className="text-sm font-semibold text-gray-700">{t('remark.selectPrompt')}</p>
+        <p className="text-xs font-bold text-navy/60 uppercase tracking-wider">{t('remark.selectPrompt')}</p>
 
         <RemarkSelector selected={selected} onSelect={setSelected} />
 
         {selected === 'other' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('remark.otherPrompt')}</label>
+            <label className="block text-xs font-bold text-navy/60 uppercase tracking-wider mb-2">{t('remark.otherPrompt')}</label>
             <textarea
               value={customRemark}
               onChange={e => setCustomRemark(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary min-h-[100px] resize-none"
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-900 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 min-h-[100px] resize-none text-sm transition-all"
               placeholder="Describe the issue..."
             />
           </div>
         )}
 
         {selected && previewLevel && (
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-            <p className="text-sm text-gray-600 mb-2">After this entry:</p>
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4 flex items-center justify-between">
+            <p className="text-sm font-semibold text-gray-600">After this entry:</p>
             <Badge
               variant={escalationBadgeVariant(previewLevel)}
               label={t(escalationKey(previewLevel))}

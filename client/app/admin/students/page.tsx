@@ -17,44 +17,46 @@ export default function AdminStudentsPage() {
   const [escalationLevel, setEscalationLevel] = useState('');
   const [sort, setSort] = useState('most_flagged');
 
-  const { data: students, isLoading } = useGetStudentsQuery({ search, batchId: batchId || undefined, escalationLevel: escalationLevel ? parseInt(escalationLevel) : undefined, sort });
+  const { data: students, isLoading } = useGetStudentsQuery({
+    search, batchId: batchId || undefined,
+    escalationLevel: escalationLevel ? parseInt(escalationLevel) : undefined,
+    sort,
+  });
   const { data: batches } = useGetBatchesQuery();
 
+  const selectClass = 'h-10 px-3 rounded-xl border-2 border-gray-200 text-xs font-semibold bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-gray-700';
+
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-[#f0f4f8] pb-24">
       <TopBar title={t('nav.students')} />
       <div className="px-4 pt-4 space-y-3">
-        <input
-          type="search"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search by name or register number..."
-          className="h-12 w-full px-4 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-        />
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          <select
-            value={batchId}
-            onChange={e => setBatchId(e.target.value)}
-            className="h-10 px-3 rounded-lg border border-gray-300 text-sm bg-white focus:outline-none"
-          >
+        {/* Search */}
+        <div className="relative">
+          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="search"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search by name or register number..."
+            className="h-12 w-full pl-10 pr-4 rounded-xl border-2 border-gray-200 bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-sm text-gray-900 placeholder-gray-400"
+          />
+        </div>
+
+        {/* Filters */}
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <select value={batchId} onChange={e => setBatchId(e.target.value)} className={selectClass}>
             <option value="">All batches</option>
             {batches?.map(b => <option key={b._id} value={b._id}>{b.name}</option>)}
           </select>
-          <select
-            value={escalationLevel}
-            onChange={e => setEscalationLevel(e.target.value)}
-            className="h-10 px-3 rounded-lg border border-gray-300 text-sm bg-white focus:outline-none"
-          >
+          <select value={escalationLevel} onChange={e => setEscalationLevel(e.target.value)} className={selectClass}>
             <option value="">All levels</option>
             <option value="1">Level 1</option>
             <option value="2">Level 2</option>
             <option value="3">Level 3</option>
           </select>
-          <select
-            value={sort}
-            onChange={e => setSort(e.target.value)}
-            className="h-10 px-3 rounded-lg border border-gray-300 text-sm bg-white focus:outline-none"
-          >
+          <select value={sort} onChange={e => setSort(e.target.value)} className={selectClass}>
             <option value="most_flagged">{t('sort.mostFlagged')}</option>
             <option value="least_flagged">{t('sort.leastFlagged')}</option>
             <option value="most_recent">{t('sort.mostRecent')}</option>
@@ -62,18 +64,23 @@ export default function AdminStudentsPage() {
           </select>
         </div>
 
-        {isLoading ? <Spinner className="py-12" /> : students?.length === 0 ? (
-          <p className="text-center text-gray-400 py-12">{t('empty.noStudents')}</p>
+        {isLoading ? (
+          <Spinner className="py-12" />
+        ) : students?.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-10 text-center">
+            <p className="text-sm text-gray-400">{t('empty.noStudents')}</p>
+          </div>
         ) : (
           <div className="space-y-2">
             {students?.map(s => (
               <Link key={s._id} href={`/admin/students/${s._id}`}>
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center justify-between">
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-card hover:shadow-card-md transition-shadow p-4 flex items-center gap-3">
+                  <div className={`w-1 self-stretch rounded-full shrink-0 ${s.currentEscalationLevel === 3 ? 'bg-danger' : s.currentEscalationLevel === 2 ? 'bg-flagged' : 'bg-success'}`} />
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-900 truncate">{s.fullName}</p>
-                    <p className="text-sm text-gray-500">{s.registerNumber} · {s.batchId?.name}</p>
+                    <p className="font-semibold text-gray-900 truncate text-sm">{s.fullName}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{s.registerNumber} · {(s.batchId as any)?.name}</p>
                   </div>
-                  <div className="flex flex-col items-end gap-1 ml-2">
+                  <div className="flex flex-col items-end gap-1 ml-2 shrink-0">
                     <Badge variant={escalationBadgeVariant(s.currentEscalationLevel)} label={t(escalationKey(s.currentEscalationLevel))} />
                     <span className="text-xs text-gray-400">{s.entryCount} entries</span>
                   </div>
