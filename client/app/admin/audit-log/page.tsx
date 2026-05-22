@@ -14,11 +14,11 @@ const ACTION_META: Record<string, { label: string; dot: string }> = {
   'staff.create':      { label: 'Created staff',     dot: 'bg-violet-500' },
   'staff.update':      { label: 'Updated staff',     dot: 'bg-violet-400' },
   'staff.deactivate':  { label: 'Deactivated staff', dot: 'bg-red-500' },
-  'staff.reactivate':  { label: 'Reactivated staff', dot: 'bg-green-500' },
+  'staff.reactivate':  { label: 'Reactivated staff', dot: 'bg-emerald-500' },
   'admin.create':      { label: 'Created admin',     dot: 'bg-indigo-500' },
   'admin.update':      { label: 'Updated admin',     dot: 'bg-indigo-400' },
   'admin.deactivate':  { label: 'Deactivated admin', dot: 'bg-red-500' },
-  'admin.reactivate':  { label: 'Reactivated admin', dot: 'bg-green-500' },
+  'admin.reactivate':  { label: 'Reactivated admin', dot: 'bg-emerald-500' },
   'batch.create':      { label: 'Created batch',     dot: 'bg-emerald-500' },
   'batch.update':      { label: 'Updated batch',     dot: 'bg-emerald-400' },
   'batch.delete':      { label: 'Deleted batch',     dot: 'bg-red-500' },
@@ -46,8 +46,7 @@ function timeAgo(iso: string): string {
   if (m < 60) return `${m}m ago`;
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}h ago`;
-  const d = Math.floor(h / 24);
-  return `${d}d ago`;
+  return `${Math.floor(h / 24)}d ago`;
 }
 
 function AuditRow({ log }: { log: AuditLogEntry }) {
@@ -57,20 +56,20 @@ function AuditRow({ log }: { log: AuditLogEntry }) {
   const date = new Date(log.createdAt);
 
   return (
-    <div className={`flex items-start gap-3 py-3 border-b border-gray-100 last:border-0 ${isError ? 'bg-red-50 -mx-4 px-4' : ''}`}>
-      <span className={`mt-1.5 shrink-0 w-2 h-2 rounded-full ${dot}`} />
+    <div className={`flex items-start gap-3 py-3 border-b border-gray-50 last:border-0 ${isError ? 'bg-red-50/60 -mx-4 px-4' : ''}`}>
+      <div className={`mt-1.5 shrink-0 w-2 h-2 rounded-full ${dot} ring-2 ring-offset-1 ${isError ? 'ring-red-200' : 'ring-white'}`} />
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-900">
+        <p className="text-xs text-gray-800 leading-snug">
           <span className="font-semibold">{log.actorUsername}</span>
-          <span className="text-gray-400 text-xs ml-1">({log.actorRole})</span>
-          {' · '}
-          <span className={isError ? 'text-red-600 font-medium' : ''}>{meta.label}</span>
+          <span className="text-gray-400 ml-1">({log.actorRole})</span>
+          <span className="text-gray-300 mx-1">·</span>
+          <span className={isError ? 'text-red-600 font-semibold' : 'text-gray-700'}>{meta.label}</span>
           {log.targetName && <span className="text-gray-500"> — {log.targetName}</span>}
         </p>
         {isError && log.details && (
-          <p className="text-xs text-red-500 mt-0.5">{log.details}</p>
+          <p className="text-xs text-red-500 mt-0.5 font-medium">{log.details}</p>
         )}
-        <p className="text-xs text-gray-400 mt-0.5">
+        <p className="text-[10px] text-gray-400 mt-0.5">
           {timeAgo(log.createdAt)}
           {' · '}
           {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -95,7 +94,7 @@ export default function AuditLogPage() {
   const errorCount = logs?.filter(l => l.status === 'error').length ?? 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-[#f0f4f8] pb-24">
       <TopBar title="Audit Log" />
       <div className="px-4 pt-4 space-y-4">
         <DateRangeFilter onChange={(f, t2) => { setFrom(f); setTo(t2); }} />
@@ -108,7 +107,7 @@ export default function AuditLogPage() {
               className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                 action === f.value
                   ? 'bg-primary text-white border-primary'
-                  : 'bg-white text-gray-500 border-gray-200'
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-primary/40'
               }`}
             >
               {f.label}
@@ -117,13 +116,13 @@ export default function AuditLogPage() {
         </div>
 
         {!isLoading && errorCount > 0 && (
-          <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
+          <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-2xl px-4 py-2.5">
             <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
             <p className="text-sm text-red-700 font-medium">{errorCount} error{errorCount > 1 ? 's' : ''} in this view</p>
           </div>
         )}
 
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-4">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-card px-4">
           {isLoading ? (
             <Spinner className="py-8" />
           ) : !logs?.length ? (

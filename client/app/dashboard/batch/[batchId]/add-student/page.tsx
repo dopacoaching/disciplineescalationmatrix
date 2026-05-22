@@ -40,7 +40,7 @@ export default function AddStudentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-[#f0f4f8] pb-24">
       <TopBar title={t('student.addTitle')} showBack />
       <div className="px-4 pt-6">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">

@@ -63,7 +63,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const { passwordHash: _, ...safe } = staff.toObject();
     await writeAuditLog({ action: 'staff.create', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'staff', targetId: staff._id.toString(), targetName: staff.fullName });
     return NextResponse.json(safe, { status: 201 });
-  } catch {
+  } catch (err) {
+    if ((err as any)?.code === 11000) {
+      const field = Object.keys((err as any)?.keyPattern || {})[0];
+      return NextResponse.json({ message: field === 'username' ? 'Username already taken' : 'A staff with that value already exists' }, { status: 409 });
+    }
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

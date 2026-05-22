@@ -36,7 +36,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const { passwordHash: _, ...safe } = admin.toObject();
     await writeAuditLog({ action: 'admin.create', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'admin', targetId: admin._id.toString(), targetName: admin.username });
     return NextResponse.json(safe, { status: 201 });
-  } catch {
+  } catch (err) {
+    if ((err as any)?.code === 11000) {
+      const field = Object.keys((err as any)?.keyPattern || {})[0];
+      const message = field === 'email' ? 'Email already registered' : field === 'username' ? 'Username already taken' : 'An admin with that value already exists';
+      return NextResponse.json({ message }, { status: 409 });
+    }
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

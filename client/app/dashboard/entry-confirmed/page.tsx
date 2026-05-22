@@ -8,7 +8,7 @@ export default function EntryConfirmedPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 space-y-6">
+    <div className="min-h-screen bg-[#f0f4f8] flex flex-col items-center justify-center px-4 space-y-6">
       <div className="w-24 h-24 rounded-full bg-success-bg flex items-center justify-center">
         <svg className="w-14 h-14 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />

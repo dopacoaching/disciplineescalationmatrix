@@ -9,8 +9,6 @@ import { Card } from '@/components/ui/Card';
 import { Spinner } from '@/components/ui/Spinner';
 import { Badge } from '@/components/ui/Badge';
 import Link from 'next/link';
-import '@/lib/i18n';
-
 export default function StaffDashboard() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -24,14 +22,14 @@ export default function StaffDashboard() {
 
   if (isLoading || (batches && batches.length === 1)) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#f0f4f8] flex items-center justify-center">
         <Spinner />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-[#f0f4f8] pb-24">
       <TopBar title={t('app.name')} />
       <div className="px-4 pt-5 space-y-3">
         {batches?.length === 0 ? (

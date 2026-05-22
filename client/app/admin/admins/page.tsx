@@ -57,26 +57,37 @@ export default function AdminAdminsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-[#f0f4f8] pb-24">
       <TopBar title={t('nav.admins')} />
-      <div className="px-4 pt-4 space-y-3">
+      <div className="px-4 pt-4 space-y-4">
         <Button onClick={() => setModalOpen(true)} className="w-full">{t('admin.addAdmin')}</Button>
 
         {isLoading ? <Spinner className="py-8" /> : (
           <div className="space-y-2">
             {admins?.map(admin => (
-              <div key={admin._id} className={`bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center justify-between ${!admin.isActive ? 'opacity-60' : ''}`}>
-                <div>
-                  <p className="font-semibold text-gray-900">@{admin.username}</p>
-                  <p className="text-sm text-gray-500">{admin.email}</p>
-                  <p className="text-xs text-gray-400">Joined {new Date(admin.createdAt).toLocaleDateString()}</p>
-                  {!admin.isActive && <span className="text-xs text-danger">Inactive</span>}
+              <div
+                key={admin._id}
+                className={`bg-white rounded-2xl border border-gray-100 shadow-card p-4 flex items-center justify-between ${!admin.isActive ? 'opacity-60' : ''}`}
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-navy/10 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-navy">{admin.username.charAt(0).toUpperCase()}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 text-sm">@{admin.username}</p>
+                      <p className="text-xs text-gray-500 truncate">{admin.email}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1.5 pl-10">Joined {new Date(admin.createdAt).toLocaleDateString()}</p>
+                  {!admin.isActive && <p className="text-xs text-danger font-semibold pl-10 mt-0.5">Inactive</p>}
                 </div>
                 {admin._id !== currentUser?.id && (
                   <Button
                     size="sm"
                     variant={admin.isActive ? 'ghost' : 'secondary'}
                     onClick={() => handleToggle(admin)}
+                    className="shrink-0 ml-2"
                   >
                     {admin.isActive ? t('action.deactivate') : t('action.reactivate')}
                   </Button>
@@ -94,7 +105,7 @@ export default function AdminAdminsPage() {
           <Input label={t('admin.password')} type="password" {...register('password')} error={errors.password?.message} />
           <Input label={t('admin.confirmPassword')} type="password" {...register('confirmPassword')} error={errors.confirmPassword?.message} />
           {errors.root && (
-            <p className="text-sm text-danger bg-danger-bg rounded-lg px-3 py-2">{errors.root.message}</p>
+            <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{errors.root.message}</p>
           )}
           <Button type="submit" size="lg" loading={creating}>{t('action.add')}</Button>
         </form>

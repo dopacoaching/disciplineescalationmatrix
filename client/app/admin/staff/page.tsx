@@ -98,31 +98,39 @@ export default function AdminStaffPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-[#f0f4f8] pb-24">
       <TopBar title={t('nav.staff')} />
-      <div className="px-4 pt-4 space-y-3">
+      <div className="px-4 pt-4 space-y-4">
         <Button onClick={openCreate} className="w-full">{t('staff.addStaff')}</Button>
 
         {isLoading ? <Spinner className="py-8" /> : (
           <div className="space-y-2">
             {staff?.map(s => (
-              <div key={s._id} className={`bg-white rounded-xl border border-gray-100 shadow-sm p-4 ${!s.isActive ? 'opacity-60' : ''}`}>
+              <div
+                key={s._id}
+                className={`bg-white rounded-2xl border border-gray-100 shadow-card p-4 ${!s.isActive ? 'opacity-60' : ''}`}
+              >
                 <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-gray-900">{s.fullName}</p>
-                      <Badge variant={s.role} label={s.role} />
-                      {!s.isActive && <Badge variant="archived" label="Inactive" />}
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-sm font-bold text-primary">{s.fullName.charAt(0)}</span>
                     </div>
-                    <p className="text-sm text-gray-500">@{s.username}</p>
-                    <p className="text-sm text-gray-400">{s.entryCount} entries</p>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {(s.assignedBatches as Batch[])?.map(b => (
-                        <span key={b._id} className="text-xs bg-primary-bg text-primary px-2 py-0.5 rounded-full">{b.name}</span>
-                      ))}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-semibold text-gray-900 text-sm">{s.fullName}</p>
+                        <Badge variant={s.role} label={s.role} />
+                        {!s.isActive && <Badge variant="archived" label="Inactive" />}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-0.5">@{s.username}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{s.entryCount} entries</p>
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {(s.assignedBatches as Batch[])?.map(b => (
+                          <span key={b._id} className="text-xs bg-primary-bg text-primary px-2 py-0.5 rounded-full font-medium">{b.name}</span>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 shrink-0">
                     <Button size="sm" variant="secondary" onClick={() => openEdit(s)}>{t('action.edit')}</Button>
                     <Button size="sm" variant={s.isActive ? 'ghost' : 'secondary'} onClick={() => handleToggleActive(s)}>
                       {s.isActive ? t('action.deactivate') : t('action.reactivate')}
@@ -147,18 +155,18 @@ export default function AdminStaffPage() {
             error={errors.password?.message}
           />
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('staff.role')}</label>
-            <div className="flex gap-2">
+            <label className="block text-[10px] font-bold text-navy/50 uppercase tracking-wider mb-2">{t('staff.role')}</label>
+            <div className="flex gap-3">
               {(['teacher', 'warden'] as const).map(role => (
                 <label key={role} className="flex items-center gap-2 cursor-pointer">
                   <input type="radio" value={role} {...register('role')} className="text-primary" />
-                  <span className="text-sm">{t(`staff.role.${role}`)}</span>
+                  <span className="text-sm font-medium text-gray-700">{t(`staff.role.${role}`)}</span>
                 </label>
               ))}
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('staff.batches')}</label>
+            <label className="block text-[10px] font-bold text-navy/50 uppercase tracking-wider mb-2">{t('staff.batches')}</label>
             <div className="space-y-2">
               {batches?.filter(b => !b.isArchived).map(b => (
                 <label key={b._id} className="flex items-center gap-2 cursor-pointer">
@@ -168,13 +176,13 @@ export default function AdminStaffPage() {
                     onChange={() => toggleBatch(b._id)}
                     className="rounded text-primary"
                   />
-                  <span className="text-sm">{b.name}</span>
+                  <span className="text-sm text-gray-700">{b.name}</span>
                 </label>
               ))}
             </div>
           </div>
           {errors.root && (
-            <p className="text-sm text-danger bg-danger-bg rounded-lg px-3 py-2">{errors.root.message}</p>
+            <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{errors.root.message}</p>
           )}
           <Button type="submit" size="lg" loading={creating || updating}>
             {editingStaff ? t('action.save') : t('action.add')}
