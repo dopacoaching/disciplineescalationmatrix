@@ -1,6 +1,6 @@
 'use client';
 import { useTranslation } from 'react-i18next';
-import { useGetDashboardStatsQuery, useGetFlaggedQuery, useGetStaffActivityQuery } from '@/store/api/dashboardApi';
+import { useGetDashboardStatsQuery, useGetFlaggedQuery } from '@/store/api/dashboardApi';
 import { TopBar } from '@/components/ui/TopBar';
 import { AdminBottomNav } from '@/components/ui/BottomNav';
 import { StatCard } from '@/components/admin/StatCard';
@@ -14,7 +14,6 @@ export default function AdminDashboard() {
 
   const { data: stats, isLoading: statsLoading } = useGetDashboardStatsQuery({});
   const { data: flagged, isLoading: flaggedLoading } = useGetFlaggedQuery({});
-  const { data: staffActivity, isLoading: staffActivityLoading } = useGetStaffActivityQuery({});
 
   return (
     <div className="min-h-screen bg-[#f0f4f8] pb-24">
@@ -63,41 +62,6 @@ export default function AdminDashboard() {
                 </Link>
               ))}
             </div>
-          )}
-        </section>
-
-        {/* Staff activity */}
-        <section>
-          <h3 className="text-sm font-bold text-navy uppercase tracking-wider mb-3">{t('admin.staffActivity')}</h3>
-          {staffActivityLoading ? <Spinner className="py-6" /> : staffActivity?.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-6 text-center">
-              <p className="text-sm text-gray-400">{t('empty.noEntries')}</p>
-            </div>
-          ) : (
-          <div className="space-y-2">
-            {staffActivity?.map(s => (
-              <div
-                key={s._id}
-                className={`bg-white rounded-2xl border border-gray-100 shadow-card p-4 flex items-center justify-between transition-opacity ${s.entryCount === 0 ? 'opacity-50' : ''}`}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <span className="text-sm font-bold text-primary">{s.fullName.charAt(0)}</span>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-sm text-gray-900 truncate">{s.fullName}</p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <Badge variant={s.role} label={s.role} />
-                      <span className="text-xs text-gray-400">{s.entryCount} entries</span>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-xs text-gray-400 shrink-0 ml-2">
-                  {s.lastEntryAt ? new Date(s.lastEntryAt).toLocaleDateString() : t('admin.noEntries')}
-                </p>
-              </div>
-            ))}
-          </div>
           )}
         </section>
 
