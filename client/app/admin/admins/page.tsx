@@ -29,6 +29,7 @@ export default function AdminAdminsPage() {
   const { t } = useTranslation();
   const currentUser = useAppSelector(s => s.auth.user);
   const [modalOpen, setModalOpen] = useState(false);
+  const [toggleError, setToggleError] = useState<string | null>(null);
   const { data: admins, isLoading } = useGetAdminsQuery();
   const [createAdmin, { isLoading: creating }] = useCreateAdminMutation();
   const [updateAdmin] = useUpdateAdminMutation();
@@ -49,10 +50,11 @@ export default function AdminAdminsPage() {
 
   const handleToggle = async (admin: Admin) => {
     if (!confirm(t('action.confirm'))) return;
+    setToggleError(null);
     try {
       await updateAdmin({ id: admin._id, data: { isActive: !admin.isActive } }).unwrap();
     } catch {
-      alert(t('error.generic'));
+      setToggleError(t('error.generic'));
     }
   };
 
@@ -61,6 +63,8 @@ export default function AdminAdminsPage() {
       <TopBar title={t('nav.admins')} />
       <div className="px-4 pt-4 space-y-4">
         <Button onClick={() => setModalOpen(true)} className="w-full">{t('admin.addAdmin')}</Button>
+
+        {toggleError && <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{toggleError}</p>}
 
         {isLoading ? <Spinner className="py-8" /> : (
           <div className="space-y-2">
@@ -79,8 +83,8 @@ export default function AdminAdminsPage() {
                       <p className="text-xs text-gray-500 truncate">{admin.email}</p>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-400 mt-1.5 pl-10">Joined {new Date(admin.createdAt).toLocaleDateString()}</p>
-                  {!admin.isActive && <p className="text-xs text-danger font-semibold pl-10 mt-0.5">Inactive</p>}
+                  <p className="text-xs text-gray-400 mt-1.5 pl-10">{t('admin.joined')} {new Date(admin.createdAt).toLocaleDateString()}</p>
+                  {!admin.isActive && <p className="text-xs text-danger font-semibold pl-10 mt-0.5">{t('action.inactive')}</p>}
                 </div>
                 {admin._id !== currentUser?.id && (
                   <Button

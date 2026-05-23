@@ -17,43 +17,50 @@ export default function AdminBatchesPage() {
   const [newName, setNewName] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [renameError, setRenameError] = useState<string | null>(null);
+  const [pageError, setPageError] = useState<string | null>(null);
 
   const inputClass = 'h-11 px-3.5 rounded-xl border-2 border-gray-200 bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-sm font-medium text-gray-800 placeholder-gray-400 transition-all';
 
   const handleCreate = async () => {
     if (!newName.trim()) return;
+    setCreateError(null);
     try {
       await createBatch({ name: newName.trim() }).unwrap();
       setNewName('');
     } catch (err: any) {
-      alert(err?.data?.message || t('error.generic'));
+      setCreateError(err?.data?.message || t('error.generic'));
     }
   };
 
   const handleRename = async (id: string) => {
     if (!editName.trim()) return;
+    setRenameError(null);
     try {
       await updateBatch({ id, data: { name: editName.trim() } }).unwrap();
       setEditId(null);
     } catch (err: any) {
-      alert(err?.data?.message || t('error.generic'));
+      setRenameError(err?.data?.message || t('error.generic'));
     }
   };
 
   const handleArchive = async (id: string, current: boolean) => {
+    setPageError(null);
     try {
       await updateBatch({ id, data: { isArchived: !current } }).unwrap();
     } catch {
-      alert(t('error.generic'));
+      setPageError(t('error.generic'));
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm(t('action.confirm'))) return;
+    setPageError(null);
     try {
       await deleteBatch(id).unwrap();
     } catch (err: any) {
-      alert(err?.data?.message || t('error.generic'));
+      setPageError(err?.data?.message || t('error.generic'));
     }
   };
 
@@ -63,7 +70,7 @@ export default function AdminBatchesPage() {
       <div className="px-4 pt-4 space-y-4">
         {/* Create new */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
-          <p className="text-xs font-bold text-navy/60 uppercase tracking-wider mb-3">New Batch</p>
+          <p className="text-xs font-bold text-navy/60 uppercase tracking-wider mb-3">{t('batch.newBatch')}</p>
           <div className="flex gap-2">
             <input
               value={newName}
@@ -72,9 +79,12 @@ export default function AdminBatchesPage() {
               className={`flex-1 ${inputClass}`}
               onKeyDown={e => e.key === 'Enter' && handleCreate()}
             />
-            <Button onClick={handleCreate} loading={creating} size="md">{t('batch.newBatch')}</Button>
+            <Button onClick={handleCreate} loading={creating} size="md">{t('action.add')}</Button>
           </div>
+          {createError && <p className="text-xs text-danger mt-2">{createError}</p>}
         </div>
+
+        {pageError && <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{pageError}</p>}
 
         {isLoading ? <Spinner className="py-8" /> : (
           <div className="space-y-2">
@@ -84,16 +94,19 @@ export default function AdminBatchesPage() {
                 className={`bg-white rounded-2xl border border-gray-100 shadow-card p-4 transition-opacity ${batch.isArchived ? 'opacity-60' : ''}`}
               >
                 {editId === batch._id ? (
-                  <div className="flex gap-2">
-                    <input
-                      value={editName}
-                      onChange={e => setEditName(e.target.value)}
-                      className={`flex-1 ${inputClass}`}
-                      autoFocus
-                      onKeyDown={e => { if (e.key === 'Enter') handleRename(batch._id); if (e.key === 'Escape') setEditId(null); }}
-                    />
-                    <Button size="sm" onClick={() => handleRename(batch._id)}>{t('action.save')}</Button>
-                    <Button size="sm" variant="ghost" onClick={() => setEditId(null)}>{t('action.cancel')}</Button>
+                  <div className="space-y-1.5">
+                    <div className="flex gap-2">
+                      <input
+                        value={editName}
+                        onChange={e => setEditName(e.target.value)}
+                        className={`flex-1 ${inputClass}`}
+                        autoFocus
+                        onKeyDown={e => { if (e.key === 'Enter') handleRename(batch._id); if (e.key === 'Escape') setEditId(null); }}
+                      />
+                      <Button size="sm" onClick={() => handleRename(batch._id)}>{t('action.save')}</Button>
+                      <Button size="sm" variant="ghost" onClick={() => { setEditId(null); setRenameError(null); }}>{t('action.cancel')}</Button>
+                    </div>
+                    {renameError && <p className="text-xs text-danger">{renameError}</p>}
                   </div>
                 ) : (
                   <div className="flex items-center justify-between gap-2">

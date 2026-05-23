@@ -25,7 +25,10 @@ export default function StudentProfilePage() {
   const router = useRouter();
   const [transferOpen, setTransferOpen] = useState(false);
   const [transferBatch, setTransferBatch] = useState('');
+  const [transferError, setTransferError] = useState<string | null>(null);
   const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
+  const [deleteEntryError, setDeleteEntryError] = useState<string | null>(null);
+  const [deleteStudentError, setDeleteStudentError] = useState<string | null>(null);
 
   const { data: student } = useGetStudentByIdQuery(id);
   const { data: entries, isLoading: entriesLoading } = useGetEntriesQuery({ studentId: id });
@@ -36,30 +39,33 @@ export default function StudentProfilePage() {
 
   const handleTransfer = async () => {
     if (!transferBatch) return;
+    setTransferError(null);
     try {
       await updateStudent({ id, data: { batchId: transferBatch } }).unwrap();
       setTransferOpen(false);
     } catch {
-      alert(t('error.generic'));
+      setTransferError(t('error.generic'));
     }
   };
 
   const handleDeleteEntry = async (entryId: string) => {
+    setDeleteEntryError(null);
     try {
       await deleteEntry(entryId).unwrap();
       setDeleteEntryId(null);
     } catch {
-      alert(t('error.generic'));
+      setDeleteEntryError(t('error.generic'));
     }
   };
 
   const handleDeleteStudent = async () => {
     if (!confirm(t('action.confirm'))) return;
+    setDeleteStudentError(null);
     try {
       await deleteStudent(id).unwrap();
       router.replace('/admin/students');
     } catch {
-      alert(t('error.generic'));
+      setDeleteStudentError(t('error.generic'));
     }
   };
 
@@ -82,13 +88,16 @@ export default function StudentProfilePage() {
                 </div>
                 <Badge variant={escalationBadgeVariant(student.currentEscalationLevel)} label={t(escalationKey(student.currentEscalationLevel))} />
               </div>
-              <div className="flex gap-2 pt-3 mt-3 border-t border-gray-100">
-                <Button size="sm" variant="secondary" onClick={() => { setTransferBatch(''); setTransferOpen(true); }}>
-                  {t('student.transfer')}
-                </Button>
-                <Button size="sm" variant="danger" loading={deletingStudent} onClick={handleDeleteStudent}>
-                  {t('action.delete')}
-                </Button>
+              <div className="pt-3 mt-3 border-t border-gray-100 space-y-2">
+                <div className="flex gap-2">
+                  <Button size="sm" variant="secondary" onClick={() => { setTransferBatch(''); setTransferError(null); setTransferOpen(true); }}>
+                    {t('student.transfer')}
+                  </Button>
+                  <Button size="sm" variant="danger" loading={deletingStudent} onClick={handleDeleteStudent}>
+                    {t('action.delete')}
+                  </Button>
+                </div>
+                {deleteStudentError && <p className="text-xs text-danger">{deleteStudentError}</p>}
               </div>
             </div>
           </div>
@@ -128,13 +137,16 @@ export default function StudentProfilePage() {
                     </div>
 
                     {deleteEntryId === entry._id ? (
-                      <div className="mt-3 flex gap-2 pt-3 border-t border-gray-100">
-                        <Button size="sm" variant="danger" loading={deletingEntry} onClick={() => handleDeleteEntry(entry._id)}>
-                          Confirm delete
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => setDeleteEntryId(null)}>
-                          {t('action.cancel')}
-                        </Button>
+                      <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="danger" loading={deletingEntry} onClick={() => handleDeleteEntry(entry._id)}>
+                            {t('action.confirmDelete')}
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => { setDeleteEntryId(null); setDeleteEntryError(null); }}>
+                            {t('action.cancel')}
+                          </Button>
+                        </div>
+                        {deleteEntryError && <p className="text-xs text-danger">{deleteEntryError}</p>}
                       </div>
                     ) : (
                       <button
@@ -164,8 +176,9 @@ export default function StudentProfilePage() {
               <option key={b._id} value={b._id}>{b.name}</option>
             ))}
           </select>
+          {transferError && <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{transferError}</p>}
           <Button size="lg" loading={transferLoading} onClick={handleTransfer} disabled={!transferBatch}>
-            Confirm Transfer
+            {t('action.confirmTransfer')}
           </Button>
         </div>
       </Modal>

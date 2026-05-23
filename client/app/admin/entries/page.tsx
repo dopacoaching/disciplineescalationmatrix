@@ -21,6 +21,7 @@ export default function AdminEntriesPage() {
   const [to, setTo] = useState<string | undefined>();
   const [sort, setSort] = useState('newest');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const { data: entries, isLoading } = useGetEntriesQuery({ fromDate: from, toDate: to, sort });
   const [deleteEntry, { isLoading: deleting }] = useDeleteEntryMutation();
@@ -28,11 +29,12 @@ export default function AdminEntriesPage() {
   const handleDateChange = (f?: string, t2?: string) => { setFrom(f); setTo(t2); };
 
   const handleDelete = async (id: string) => {
+    setDeleteError(null);
     try {
       await deleteEntry(id).unwrap();
       setDeleteId(null);
     } catch {
-      alert(t('error.generic'));
+      setDeleteError(t('error.generic'));
     }
   };
 
@@ -48,8 +50,8 @@ export default function AdminEntriesPage() {
           className="h-10 w-full px-3 rounded-xl border-2 border-gray-200 text-sm bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 font-medium text-gray-700"
         >
           <option value="newest">{t('sort.mostRecent')}</option>
-          <option value="oldest">Oldest first</option>
-          <option value="highest_severity">Highest severity</option>
+          <option value="oldest">{t('sort.oldest')}</option>
+          <option value="highest_severity">{t('sort.highestSeverity')}</option>
         </select>
 
         {isLoading ? (
@@ -89,11 +91,14 @@ export default function AdminEntriesPage() {
                   </div>
 
                   {deleteId === entry._id ? (
-                    <div className="mt-3 flex gap-2 pt-3 border-t border-gray-100">
-                      <Button size="sm" variant="danger" loading={deleting} onClick={() => handleDelete(entry._id)}>
-                        Confirm delete
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => setDeleteId(null)}>{t('action.cancel')}</Button>
+                    <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="danger" loading={deleting} onClick={() => handleDelete(entry._id)}>
+                          {t('action.confirmDelete')}
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => { setDeleteId(null); setDeleteError(null); }}>{t('action.cancel')}</Button>
+                      </div>
+                      {deleteError && <p className="text-xs text-danger">{deleteError}</p>}
                     </div>
                   ) : (
                     <button

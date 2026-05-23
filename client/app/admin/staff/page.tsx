@@ -31,6 +31,7 @@ export default function AdminStaffPage() {
   const { t } = useTranslation();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
+  const [toggleError, setToggleError] = useState<string | null>(null);
   const { data: staff, isLoading } = useGetStaffQuery({});
   const { data: batches } = useGetBatchesQuery();
   const [createStaff, { isLoading: creating }] = useCreateStaffMutation();
@@ -79,10 +80,11 @@ export default function AdminStaffPage() {
 
   const handleToggleActive = async (s: Staff) => {
     if (!confirm(t('action.confirm'))) return;
+    setToggleError(null);
     try {
       await updateStaff({ id: s._id, data: { isActive: !s.isActive } }).unwrap();
     } catch {
-      alert(t('error.generic'));
+      setToggleError(t('error.generic'));
     }
   };
 
@@ -102,6 +104,8 @@ export default function AdminStaffPage() {
       <TopBar title={t('nav.staff')} />
       <div className="px-4 pt-4 space-y-4">
         <Button onClick={openCreate} className="w-full">{t('staff.addStaff')}</Button>
+
+        {toggleError && <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{toggleError}</p>}
 
         {isLoading ? <Spinner className="py-8" /> : (
           <div className="space-y-2">

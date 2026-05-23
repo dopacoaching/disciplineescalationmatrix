@@ -112,12 +112,6 @@ export default function LoginPage() {
             {t('login.submit')}
           </Button>
         </form>
-
-        <div className="border-t border-gray-100 pt-4 text-center">
-          <a href="/admin/login" className="text-sm text-primary-dark font-semibold hover:underline">
-            {t('login.adminLink')}
-          </a>
-        </div>
       </div>
     </main>
   );

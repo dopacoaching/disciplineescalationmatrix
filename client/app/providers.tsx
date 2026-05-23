@@ -12,7 +12,7 @@ import { baseApi } from '@/store/api/baseApi';
 import { useTranslation } from 'react-i18next';
 
 // Public paths where no session exists yet — skip /me entirely to avoid 401 noise
-const PUBLIC_PATHS = ['/login', '/admin/login', '/offline'];
+const PUBLIC_PATHS = ['/', '/login', '/admin/login', '/offline'];
 
 function AuthInitializer({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
@@ -21,7 +21,9 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
   const { i18n } = useTranslation();
   const lang = useAppSelector(s => s.language.current);
 
-  const isPublic = PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'));
+  // If pathname is null (e.g. server-side or during initial client hydration/routing transitions),
+  // default to isPublic=true to prevent making /me API requests before the route is ready.
+  const isPublic = !pathname || PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'));
 
   const { data, isLoading, isError } = useMeQuery(undefined, { skip: isPublic });
 
@@ -52,7 +54,7 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
     if (isPublic || isLoading) return;
     if (isError) {
       dispatch(clearUser());
-      const isAdmin = pathname.startsWith('/admin');
+      const isAdmin = pathname ? pathname.startsWith('/admin') : false;
       router.replace(isAdmin ? '/admin/login' : '/login');
     } else if (data) {
       dispatch(setUser({
