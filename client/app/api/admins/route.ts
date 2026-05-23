@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectDB } from '@/lib/server/db';
+import { connectDB, isDuplicateKeyError } from '@/lib/server/db';
 import Admin from '@/lib/server/models/Admin';
 import { getAuthUser } from '@/lib/server/auth';
 import { hashPassword } from '@/lib/server/hash';
@@ -37,8 +37,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     await writeAuditLog({ action: 'admin.create', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'admin', targetId: admin._id.toString(), targetName: admin.username });
     return NextResponse.json(safe, { status: 201 });
   } catch (err) {
-    if ((err as any)?.code === 11000) {
-      const field = Object.keys((err as any)?.keyPattern || {})[0];
+    if (isDuplicateKeyError(err)) {
+      const field = Object.keys(err.keyPattern)[0];
       const message = field === 'email' ? 'Email already registered' : field === 'username' ? 'Username already taken' : 'An admin with that value already exists';
       return NextResponse.json({ message }, { status: 409 });
     }

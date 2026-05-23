@@ -26,7 +26,7 @@ export const studentsApi = baseApi.injectEndpoints({
     }),
     updateStudent: builder.mutation<PopulatedStudent, { id: string; data: Partial<Pick<PopulatedStudent, 'fullName'> & { batchId: string }> }>({
       query: ({ id, data }) => ({ url: `/students/${id}`, method: 'PATCH', body: data }),
-      invalidatesTags: ['Student'],
+      invalidatesTags: ['Student', 'Dashboard'],
     }),
     deleteStudent: builder.mutation<{ message: string }, string>({
       query: (id) => ({ url: `/students/${id}`, method: 'DELETE' }),

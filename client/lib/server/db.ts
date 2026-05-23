@@ -1,5 +1,10 @@
 import mongoose from 'mongoose';
 
+interface MongoError { code: number; keyPattern: Record<string, number> }
+export function isDuplicateKeyError(err: unknown): err is MongoError {
+  return typeof err === 'object' && err !== null && (err as MongoError).code === 11000;
+}
+
 let _connectPromise: Promise<typeof mongoose> | null = null;
 
 export async function connectDB(): Promise<void> {

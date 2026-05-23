@@ -46,13 +46,6 @@ module.exports = {
         'fab':      '0 4px 16px rgba(6,174,198,0.40), 0 2px 6px rgba(6,174,198,0.20)',
         'input':    '0 1px 2px 0 rgba(0,0,0,0.05)',
       },
-      backgroundImage: {
-        'primary-gradient': 'linear-gradient(135deg, #06aec6 0%, #17829e 100%)',
-        'navy-gradient':    'linear-gradient(135deg, #1a365d 0%, #224585 100%)',
-        'danger-gradient':  'linear-gradient(135deg, #dc2626 0%, #A32D2D 100%)',
-        'flagged-gradient': 'linear-gradient(135deg, #f59e0b 0%, #854F0B 100%)',
-        'success-gradient': 'linear-gradient(135deg, #22c55e 0%, #3B6D11 100%)',
-      },
       borderRadius: {
         'xl':  '0.875rem',
         '2xl': '1.125rem',
