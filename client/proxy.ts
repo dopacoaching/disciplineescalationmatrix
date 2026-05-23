@@ -2,6 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const PUBLIC_PATHS = ['/login', '/admin/login', '/offline'];
 
+// Decode JWT payload without signature verification — safe for a UX gate.
+// Real security is enforced per-route via getAuthUser() + jsonwebtoken.
+function getJwtRole(token: string): string | null {
+  try {
+    const raw = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(raw));
+    return typeof payload?.role === 'string' ? payload.role : null;
+  } catch {
+    return null;
+  }
+}
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -9,14 +21,25 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Cookie presence only — JWT validity is enforced in each API route via getAuthUser().
-  // The proxy is a UX gate (redirect to login) not a security boundary.
   const token = request.cookies.get('token')?.value;
+  const isAdminPath = pathname.startsWith('/admin');
+
   if (!token) {
-    const isAdmin = pathname.startsWith('/admin');
     return NextResponse.redirect(
-      new URL(isAdmin ? '/admin/login' : '/login', request.url)
+      new URL(isAdminPath ? '/admin/login' : '/login', request.url)
     );
+  }
+
+  const role = getJwtRole(token);
+
+  // Staff trying to access admin pages → redirect to their own login
+  if (isAdminPath && role !== 'admin') {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  // Admin trying to access staff pages → redirect to admin dashboard
+  if (!isAdminPath && role === 'admin') {
+    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
   }
 
   return NextResponse.next();
