@@ -147,14 +147,14 @@ export default function AdminStaffPage() {
         )}
       </div>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editingStaff ? 'Edit Staff' : t('staff.addStaff')}>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editingStaff ? t('staff.editStaff') : t('staff.addStaff')}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input label={t('staff.fullName')} {...register('fullName')} error={errors.fullName?.message} />
           <Input label={t('staff.username')} {...register('username')} error={errors.username?.message} />
           <Input
             label={t('staff.password')}
             type="password"
-            placeholder={editingStaff ? 'Leave blank to keep current' : ''}
+            placeholder={editingStaff ? t('staff.passwordPlaceholder') : ''}
             {...register('password')}
             error={errors.password?.message}
           />
@@ -172,7 +172,7 @@ export default function AdminStaffPage() {
           <div>
             <label className="block text-[10px] font-bold text-navy/50 uppercase tracking-wider mb-2">{t('staff.batches')}</label>
             {batches?.filter(b => !b.isArchived).length === 0 ? (
-              <p className="text-sm text-gray-400 italic">No active batches available.</p>
+              <p className="text-sm text-gray-400 italic">{t('staff.noActiveBatches')}</p>
             ) : (
               <div className="space-y-2">
                 {batches?.filter(b => !b.isArchived).map(b => (

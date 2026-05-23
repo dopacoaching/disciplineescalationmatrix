@@ -87,7 +87,7 @@ export default function RemarkEntryPage() {
 
         {selected && previewLevel && (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4 flex items-center justify-between">
-            <p className="text-sm font-semibold text-gray-600">After this entry:</p>
+            <p className="text-sm font-semibold text-gray-600">{t('entry.afterEntry')}</p>
             <Badge
               variant={escalationBadgeVariant(previewLevel)}
               label={t(escalationKey(previewLevel))}

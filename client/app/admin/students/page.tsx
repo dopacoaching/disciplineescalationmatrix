@@ -47,14 +47,14 @@ export default function AdminStudentsPage() {
         {/* Filters */}
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
           <select value={batchId} onChange={e => setBatchId(e.target.value)} className={selectClass}>
-            <option value="">All batches</option>
+            <option value="">{t('filter.allBatches')}</option>
             {batches?.map(b => <option key={b._id} value={b._id}>{b.name}</option>)}
           </select>
           <select value={escalationLevel} onChange={e => setEscalationLevel(e.target.value)} className={selectClass}>
-            <option value="">All levels</option>
-            <option value="1">Level 1</option>
-            <option value="2">Level 2</option>
-            <option value="3">Level 3</option>
+            <option value="">{t('filter.allLevels')}</option>
+            <option value="1">{t('escalation.level1Short')}</option>
+            <option value="2">{t('escalation.level2Short')}</option>
+            <option value="3">{t('escalation.level3Short')}</option>
           </select>
           <select value={sort} onChange={e => setSort(e.target.value)} className={selectClass}>
             <option value="most_flagged">{t('sort.mostFlagged')}</option>

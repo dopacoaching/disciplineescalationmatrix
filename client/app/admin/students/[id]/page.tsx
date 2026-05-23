@@ -105,7 +105,7 @@ export default function StudentProfilePage() {
 
         {/* Entry history */}
         <div>
-          <h3 className="text-sm font-bold text-navy uppercase tracking-wider mb-3">Entry History</h3>
+          <h3 className="text-sm font-bold text-navy uppercase tracking-wider mb-3">{t('student.entryHistory')}</h3>
 
           {entriesLoading ? (
             <Spinner className="py-8" />
@@ -171,7 +171,7 @@ export default function StudentProfilePage() {
             onChange={e => setTransferBatch(e.target.value)}
             className="h-12 w-full px-4 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-sm font-medium text-gray-700 bg-white"
           >
-            <option value="">Select batch...</option>
+            <option value="">{t('student.selectBatch')}</option>
             {batches?.filter(b => !b.isArchived && b._id !== student?.batchId?._id).map(b => (
               <option key={b._id} value={b._id}>{b.name}</option>
             ))}
