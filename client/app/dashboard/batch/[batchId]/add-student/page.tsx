@@ -32,7 +32,7 @@ export default function AddStudentPage() {
       router.replace(`/dashboard/batch/${batchId}`);
     } catch (err: any) {
       if (err?.data?.message?.includes('already exists')) {
-        setError('registerNumber', { message: 'Register number already used in this batch' });
+        setError('registerNumber', { message: t('error.duplicateRegister') });
       } else {
         setError('root', { message: t('error.generic') });
       }

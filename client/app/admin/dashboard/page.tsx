@@ -37,7 +37,7 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-bold text-navy uppercase tracking-wider">{t('admin.flaggedList')}</h3>
             <Link href="/admin/students?sort=most_flagged" className="text-xs font-semibold text-primary hover:underline">
-              View all
+              {t('action.viewAll')}
             </Link>
           </div>
           {flaggedLoading ? <Spinner className="py-6" /> : flagged?.length === 0 ? (
@@ -52,7 +52,7 @@ export default function AdminDashboard() {
                     <div className={`w-1 self-stretch rounded-full shrink-0 ${s.currentEscalationLevel === 3 ? 'bg-danger' : 'bg-flagged'}`} />
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-gray-900 truncate text-sm">{s.fullName}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{(s.batchId as any)?.name} · {s.entryCount} entries</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{(s.batchId as any)?.name} · {s.entryCount} {t('student.entriesCount')}</p>
                       {s.lastEntryAt && (
                         <p className="text-xs text-gray-400 mt-0.5">{t('admin.lastEntry')}: {new Date(s.lastEntryAt).toLocaleDateString()}</p>
                       )}

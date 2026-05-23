@@ -16,7 +16,7 @@ export default function EntryConfirmedPage() {
       </div>
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900">{t('confirm.entryRecorded')}</h2>
-        <p className="text-gray-500 mt-1">Entry has been submitted successfully</p>
+        <p className="text-gray-500 mt-1">{t('confirm.submitted')}</p>
       </div>
       <div className="w-full max-w-sm space-y-3">
         <Button size="lg" onClick={() => router.push('/dashboard')}>

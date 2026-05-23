@@ -1,0 +1,6 @@
+public/sw.js
+public/workbox-*.js
+tsconfig.tsbuildinfo
+.next/
+node_modules/
+.env.local

@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGetAuditLogQuery } from '@/store/api/dashboardApi';
 import { TopBar } from '@/components/ui/TopBar';
 import { AdminBottomNav } from '@/components/ui/BottomNav';
@@ -80,6 +81,7 @@ function AuditRow({ log }: { log: AuditLogEntry }) {
 }
 
 export default function AuditLogPage() {
+  const { t } = useTranslation();
   const [from, setFrom] = useState<string | undefined>();
   const [to, setTo]     = useState<string | undefined>();
   const [action, setAction] = useState('');
@@ -95,7 +97,7 @@ export default function AuditLogPage() {
 
   return (
     <div className="min-h-screen bg-[#f0f4f8] pb-24">
-      <TopBar title="Audit Log" />
+      <TopBar title={t('nav.auditLog')} />
       <div className="px-4 pt-4 space-y-4">
         <DateRangeFilter onChange={(f, t2) => { setFrom(f); setTo(t2); }} />
 
@@ -126,12 +128,12 @@ export default function AuditLogPage() {
           {isLoading ? (
             <Spinner className="py-8" />
           ) : !logs?.length ? (
-            <p className="text-sm text-gray-400 py-8 text-center">No activity found</p>
+            <p className="text-sm text-gray-400 py-8 text-center">{t('empty.noActivity')}</p>
           ) : (
             <>
               {logs.map(log => <AuditRow key={log._id} log={log} />)}
               {logs.length === 100 && (
-                <p className="text-xs text-gray-400 text-center py-3">Showing most recent 100 entries</p>
+                <p className="text-xs text-gray-400 text-center py-3">{t('audit.showingLimit')}</p>
               )}
             </>
           )}

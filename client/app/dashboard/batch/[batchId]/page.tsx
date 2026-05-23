@@ -65,7 +65,7 @@ export default function BatchStudentList() {
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   <Badge variant={escalationBadgeVariant(student.currentEscalationLevel)} label={t(escalationKey(student.currentEscalationLevel))} />
-                  <span className="text-xs text-gray-400">{student.entryCount} entries</span>
+                  <span className="text-xs text-gray-400">{student.entryCount} {t('student.entriesCount')}</span>
                 </div>
               </button>
             ))}

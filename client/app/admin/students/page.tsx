@@ -82,7 +82,7 @@ export default function AdminStudentsPage() {
                   </div>
                   <div className="flex flex-col items-end gap-1 ml-2 shrink-0">
                     <Badge variant={escalationBadgeVariant(s.currentEscalationLevel)} label={t(escalationKey(s.currentEscalationLevel))} />
-                    <span className="text-xs text-gray-400">{s.entryCount} entries</span>
+                    <span className="text-xs text-gray-400">{s.entryCount} {t('student.entriesCount')}</span>
                   </div>
                 </div>
               </Link>

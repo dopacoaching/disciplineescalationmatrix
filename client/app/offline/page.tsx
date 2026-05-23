@@ -1,7 +1,9 @@
 'use client';
 import '@/lib/i18n';
+import { useTranslation } from 'react-i18next';
 
 export default function OfflinePage() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-[#f0f4f8] flex flex-col items-center justify-center px-6 text-center space-y-6">
       <div className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center">
@@ -10,19 +12,14 @@ export default function OfflinePage() {
         </svg>
       </div>
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Discipline Escalation Matrix</h1>
-        <p className="text-gray-500 mt-3 max-w-xs">
-          You are offline. Please reconnect to submit entries.
-        </p>
-        <p className="text-gray-400 mt-1 max-w-xs text-sm">
-          ഓഫ്‌ലൈൻ. എൻട്രികൾ സമർപ്പിക്കാൻ ദയവായി വീണ്ടും ബന്ധിപ്പിക്കൂ.
-        </p>
+        <h1 className="text-2xl font-bold text-gray-900">{t('app.name')}</h1>
+        <p className="text-gray-500 mt-3 max-w-xs">{t('offline.message')}</p>
       </div>
       <button
         onClick={() => window.location.reload()}
         className="px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-light transition-colors"
       >
-        Try Again
+        {t('action.tryAgain')}
       </button>
     </div>
   );
