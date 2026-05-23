@@ -30,7 +30,7 @@ export const studentsApi = baseApi.injectEndpoints({
     }),
     deleteStudent: builder.mutation<{ message: string }, string>({
       query: (id) => ({ url: `/students/${id}`, method: 'DELETE' }),
-      invalidatesTags: ['Student', 'Entry'],
+      invalidatesTags: ['Student', 'Entry', 'Dashboard'],
     }),
   }),
 });
