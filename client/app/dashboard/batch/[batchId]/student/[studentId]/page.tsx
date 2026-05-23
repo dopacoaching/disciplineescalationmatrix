@@ -18,6 +18,7 @@ export default function RemarkEntryPage() {
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
   const [customRemark, setCustomRemark] = useState('');
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [createEntry, { isLoading }] = useCreateEntryMutation();
   const { data: students } = useGetStudentsQuery({ batchId });
 
@@ -27,12 +28,13 @@ export default function RemarkEntryPage() {
   const previewLevel = selected
     ? computePreviewLevel(
         currentCount + 1,
-        selectedRemark?.severity === 'high' || (student?.currentEscalationLevel === 3 && selected !== null)
+        selectedRemark?.severity === 'high' || student?.currentEscalationLevel === 3
       )
     : null;
 
   const handleSubmit = async () => {
     if (!selected) return;
+    setSubmitError(null);
     try {
       await createEntry({
         studentId,
@@ -40,8 +42,8 @@ export default function RemarkEntryPage() {
         customRemark: selected === 'other' ? customRemark : undefined,
       }).unwrap();
       router.replace('/dashboard/entry-confirmed');
-    } catch {
-      alert(t('error.generic'));
+    } catch (err: any) {
+      setSubmitError(err?.data?.message || t('error.generic'));
     }
   };
 
@@ -90,6 +92,12 @@ export default function RemarkEntryPage() {
               variant={escalationBadgeVariant(previewLevel)}
               label={t(escalationKey(previewLevel))}
             />
+          </div>
+        )}
+
+        {submitError && (
+          <div className="bg-danger-bg rounded-xl px-4 py-3">
+            <p className="text-sm font-medium text-danger">{submitError}</p>
           </div>
         )}
 

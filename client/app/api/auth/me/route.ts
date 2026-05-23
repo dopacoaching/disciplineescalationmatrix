@@ -11,11 +11,11 @@ export async function GET(): Promise<NextResponse> {
     await connectDB();
     if (user.role === 'admin') {
       const admin = await Admin.findById(user.id).select('-passwordHash');
-      if (!admin) return NextResponse.json({ message: 'Account not found' }, { status: 401 });
+      if (!admin || !admin.isActive) return NextResponse.json({ message: 'Account not found' }, { status: 401 });
       return NextResponse.json({ ...admin.toObject(), role: 'admin' });
     }
     const staff = await Staff.findById(user.id).select('-passwordHash');
-    if (!staff) return NextResponse.json({ message: 'Account not found' }, { status: 401 });
+    if (!staff || !staff.isActive) return NextResponse.json({ message: 'Account not found' }, { status: 401 });
     return NextResponse.json({ ...staff.toObject(), role: staff.role });
   } catch {
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

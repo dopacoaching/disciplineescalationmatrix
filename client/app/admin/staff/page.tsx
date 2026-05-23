@@ -167,19 +167,23 @@ export default function AdminStaffPage() {
           </div>
           <div>
             <label className="block text-[10px] font-bold text-navy/50 uppercase tracking-wider mb-2">{t('staff.batches')}</label>
-            <div className="space-y-2">
-              {batches?.filter(b => !b.isArchived).map(b => (
-                <label key={b._id} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={watchedBatches?.includes(b._id)}
-                    onChange={() => toggleBatch(b._id)}
-                    className="rounded text-primary"
-                  />
-                  <span className="text-sm text-gray-700">{b.name}</span>
-                </label>
-              ))}
-            </div>
+            {batches?.filter(b => !b.isArchived).length === 0 ? (
+              <p className="text-sm text-gray-400 italic">No active batches available.</p>
+            ) : (
+              <div className="space-y-2">
+                {batches?.filter(b => !b.isArchived).map(b => (
+                  <label key={b._id} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={watchedBatches?.includes(b._id)}
+                      onChange={() => toggleBatch(b._id)}
+                      className="rounded text-primary"
+                    />
+                    <span className="text-sm text-gray-700">{b.name}</span>
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
           {errors.root && (
             <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{errors.root.message}</p>

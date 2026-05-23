@@ -19,7 +19,7 @@ export default function AdminDashboard() {
 
   const { data: stats, isLoading: statsLoading } = useGetDashboardStatsQuery({ fromDate: from, toDate: to });
   const { data: flagged, isLoading: flaggedLoading } = useGetFlaggedQuery({ fromDate: from, toDate: to });
-  const { data: staffActivity } = useGetStaffActivityQuery({ fromDate: from, toDate: to });
+  const { data: staffActivity, isLoading: staffActivityLoading } = useGetStaffActivityQuery({ fromDate: from, toDate: to });
 
   const handleDateChange = (f?: string, t2?: string) => { setFrom(f); setTo(t2); };
 
@@ -46,7 +46,7 @@ export default function AdminDashboard() {
         <section>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-bold text-navy uppercase tracking-wider">{t('admin.flaggedList')}</h3>
-            <Link href="/admin/students?escalationLevel=3" className="text-xs font-semibold text-primary hover:underline">
+            <Link href="/admin/students?sort=most_flagged" className="text-xs font-semibold text-primary hover:underline">
               View all
             </Link>
           </div>
@@ -78,6 +78,11 @@ export default function AdminDashboard() {
         {/* Staff activity */}
         <section>
           <h3 className="text-sm font-bold text-navy uppercase tracking-wider mb-3">{t('admin.staffActivity')}</h3>
+          {staffActivityLoading ? <Spinner className="py-6" /> : staffActivity?.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-6 text-center">
+              <p className="text-sm text-gray-400">{t('empty.noEntries')}</p>
+            </div>
+          ) : (
           <div className="space-y-2">
             {staffActivity?.map(s => (
               <div
@@ -102,6 +107,7 @@ export default function AdminDashboard() {
               </div>
             ))}
           </div>
+          )}
         </section>
 
         <AuditLogFeed fromDate={from} toDate={to} />

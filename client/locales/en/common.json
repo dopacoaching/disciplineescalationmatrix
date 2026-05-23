@@ -77,6 +77,7 @@
   "empty.noStudents": "No students yet. Tap + to add one.",
   "empty.noEntries": "No entries yet.",
   "empty.noBatches": "No batches assigned.",
+  "empty.contactAdmin": "Contact your administrator to get assigned.",
   "offline.message": "You are offline. Please reconnect to submit entries.",
   "dashboard.greeting": "Good morning",
   "dashboard.todayEntries": "Today's entries",

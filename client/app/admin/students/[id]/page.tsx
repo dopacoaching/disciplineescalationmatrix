@@ -31,7 +31,7 @@ export default function StudentProfilePage() {
   const { data: entries, isLoading: entriesLoading } = useGetEntriesQuery({ studentId: id });
   const { data: batches } = useGetBatchesQuery();
   const [updateStudent, { isLoading: transferLoading }] = useUpdateStudentMutation();
-  const [deleteStudent] = useDeleteStudentMutation();
+  const [deleteStudent, { isLoading: deletingStudent }] = useDeleteStudentMutation();
   const [deleteEntry, { isLoading: deletingEntry }] = useDeleteEntryMutation();
 
   const handleTransfer = async () => {
@@ -86,7 +86,7 @@ export default function StudentProfilePage() {
                 <Button size="sm" variant="secondary" onClick={() => { setTransferBatch(''); setTransferOpen(true); }}>
                   {t('student.transfer')}
                 </Button>
-                <Button size="sm" variant="danger" onClick={handleDeleteStudent}>
+                <Button size="sm" variant="danger" loading={deletingStudent} onClick={handleDeleteStudent}>
                   {t('action.delete')}
                 </Button>
               </div>
