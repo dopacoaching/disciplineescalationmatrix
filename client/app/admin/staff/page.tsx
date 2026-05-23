@@ -67,7 +67,7 @@ export default function AdminStaffPage() {
         await updateStaff({ id: editingStaff._id, data: password ? { ...rest, password } : rest }).unwrap();
       } else {
         if (!data.password) {
-          setError('password', { message: 'Password is required' });
+          setError('password', { message: t('error.passwordRequired') });
           return;
         }
         await createStaff({ ...data, password: data.password }).unwrap();

@@ -8,36 +8,36 @@ import { DateRangeFilter } from '@/components/admin/DateRangeFilter';
 import { Spinner } from '@/components/ui/Spinner';
 import type { AuditLogEntry } from '@/types';
 
-const ACTION_META: Record<string, { label: string; dot: string }> = {
-  'auth.login':        { label: 'Logged in',        dot: 'bg-blue-400' },
-  'auth.logout':       { label: 'Logged out',       dot: 'bg-blue-300' },
-  'auth.login_failed': { label: 'Login failed',      dot: 'bg-red-500' },
-  'staff.create':      { label: 'Created staff',     dot: 'bg-violet-500' },
-  'staff.update':      { label: 'Updated staff',     dot: 'bg-violet-400' },
-  'staff.deactivate':  { label: 'Deactivated staff', dot: 'bg-red-500' },
-  'staff.reactivate':  { label: 'Reactivated staff', dot: 'bg-emerald-500' },
-  'admin.create':      { label: 'Created admin',     dot: 'bg-indigo-500' },
-  'admin.update':      { label: 'Updated admin',     dot: 'bg-indigo-400' },
-  'admin.deactivate':  { label: 'Deactivated admin', dot: 'bg-red-500' },
-  'admin.reactivate':  { label: 'Reactivated admin', dot: 'bg-emerald-500' },
-  'batch.create':      { label: 'Created batch',     dot: 'bg-emerald-500' },
-  'batch.update':      { label: 'Updated batch',     dot: 'bg-emerald-400' },
-  'batch.delete':      { label: 'Deleted batch',     dot: 'bg-red-500' },
-  'student.create':    { label: 'Added student',     dot: 'bg-amber-500' },
-  'student.update':    { label: 'Updated student',   dot: 'bg-amber-400' },
-  'student.delete':    { label: 'Deleted student',   dot: 'bg-red-500' },
-  'entry.create':      { label: 'Logged entry',      dot: 'bg-orange-400' },
-  'entry.delete':      { label: 'Deleted entry',     dot: 'bg-red-500' },
+const ACTION_META: Record<string, { key: string; dot: string }> = {
+  'auth.login':        { key: 'audit.action.login',           dot: 'bg-blue-400' },
+  'auth.logout':       { key: 'audit.action.logout',          dot: 'bg-blue-300' },
+  'auth.login_failed': { key: 'audit.action.loginFailed',     dot: 'bg-red-500' },
+  'staff.create':      { key: 'audit.action.staffCreate',     dot: 'bg-violet-500' },
+  'staff.update':      { key: 'audit.action.staffUpdate',     dot: 'bg-violet-400' },
+  'staff.deactivate':  { key: 'audit.action.staffDeactivate', dot: 'bg-red-500' },
+  'staff.reactivate':  { key: 'audit.action.staffReactivate', dot: 'bg-emerald-500' },
+  'admin.create':      { key: 'audit.action.adminCreate',     dot: 'bg-indigo-500' },
+  'admin.update':      { key: 'audit.action.adminUpdate',     dot: 'bg-indigo-400' },
+  'admin.deactivate':  { key: 'audit.action.adminDeactivate', dot: 'bg-red-500' },
+  'admin.reactivate':  { key: 'audit.action.adminReactivate', dot: 'bg-emerald-500' },
+  'batch.create':      { key: 'audit.action.batchCreate',     dot: 'bg-emerald-500' },
+  'batch.update':      { key: 'audit.action.batchUpdate',     dot: 'bg-emerald-400' },
+  'batch.delete':      { key: 'audit.action.batchDelete',     dot: 'bg-red-500' },
+  'student.create':    { key: 'audit.action.studentCreate',   dot: 'bg-amber-500' },
+  'student.update':    { key: 'audit.action.studentUpdate',   dot: 'bg-amber-400' },
+  'student.delete':    { key: 'audit.action.studentDelete',   dot: 'bg-red-500' },
+  'entry.create':      { key: 'audit.action.entryCreate',     dot: 'bg-orange-400' },
+  'entry.delete':      { key: 'audit.action.entryDelete',     dot: 'bg-red-500' },
 };
 
 const FILTERS = [
-  { value: '',        label: 'All' },
-  { value: 'auth',    label: 'Auth' },
-  { value: 'entry',   label: 'Entries' },
-  { value: 'student', label: 'Students' },
-  { value: 'staff',   label: 'Staff' },
-  { value: 'admin',   label: 'Admins' },
-  { value: 'batch',   label: 'Batches' },
+  { value: '',        labelKey: 'audit.filter.all' },
+  { value: 'auth',    labelKey: 'audit.filter.auth' },
+  { value: 'entry',   labelKey: 'audit.filter.entries' },
+  { value: 'student', labelKey: 'audit.filter.students' },
+  { value: 'staff',   labelKey: 'audit.filter.staff' },
+  { value: 'admin',   labelKey: 'audit.filter.admins' },
+  { value: 'batch',   labelKey: 'audit.filter.batches' },
 ];
 
 function timeAgo(iso: string): string {
@@ -51,8 +51,9 @@ function timeAgo(iso: string): string {
 }
 
 function AuditRow({ log }: { log: AuditLogEntry }) {
+  const { t } = useTranslation();
   const isError = log.status === 'error';
-  const meta = ACTION_META[log.action] ?? { label: log.action, dot: 'bg-gray-400' };
+  const meta = ACTION_META[log.action] ?? { key: null, dot: 'bg-gray-400' };
   const dot = isError ? 'bg-red-500' : meta.dot;
   const date = new Date(log.createdAt);
 
@@ -64,7 +65,7 @@ function AuditRow({ log }: { log: AuditLogEntry }) {
           <span className="font-semibold">{log.actorUsername}</span>
           <span className="text-gray-400 ml-1">({log.actorRole})</span>
           <span className="text-gray-300 mx-1">·</span>
-          <span className={isError ? 'text-red-600 font-semibold' : 'text-gray-700'}>{meta.label}</span>
+          <span className={isError ? 'text-red-600 font-semibold' : 'text-gray-700'}>{meta.key ? t(meta.key) : log.action}</span>
           {log.targetName && <span className="text-gray-500"> — {log.targetName}</span>}
         </p>
         {isError && log.details && (
@@ -112,7 +113,7 @@ export default function AuditLogPage() {
                   : 'bg-white text-gray-500 border-gray-200 hover:border-primary/40'
               }`}
             >
-              {f.label}
+              {t(f.labelKey)}
             </button>
           ))}
         </div>
@@ -120,7 +121,7 @@ export default function AuditLogPage() {
         {!isLoading && errorCount > 0 && (
           <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-2xl px-4 py-2.5">
             <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
-            <p className="text-sm text-red-700 font-medium">{errorCount} error{errorCount > 1 ? 's' : ''} in this view</p>
+            <p className="text-sm text-red-700 font-medium">{errorCount} {errorCount > 1 ? t('audit.errorsInView') : t('audit.errorInView')}</p>
           </div>
         )}
 
