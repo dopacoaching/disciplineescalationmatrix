@@ -1,11 +1,9 @@
 'use client';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGetDashboardStatsQuery, useGetFlaggedQuery, useGetStaffActivityQuery } from '@/store/api/dashboardApi';
 import { TopBar } from '@/components/ui/TopBar';
 import { AdminBottomNav } from '@/components/ui/BottomNav';
 import { StatCard } from '@/components/admin/StatCard';
-import { DateRangeFilter } from '@/components/admin/DateRangeFilter';
 import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
 import { escalationBadgeVariant, escalationKey } from '@/lib/escalation';
@@ -13,22 +11,16 @@ import Link from 'next/link';
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
-  const [from, setFrom] = useState<string | undefined>();
-  const [to, setTo] = useState<string | undefined>();
 
-  const { data: stats, isLoading: statsLoading } = useGetDashboardStatsQuery({ fromDate: from, toDate: to });
-  const { data: flagged, isLoading: flaggedLoading } = useGetFlaggedQuery({ fromDate: from, toDate: to });
-  const { data: staffActivity, isLoading: staffActivityLoading } = useGetStaffActivityQuery({ fromDate: from, toDate: to });
-
-  const handleDateChange = (f?: string, t2?: string) => { setFrom(f); setTo(t2); };
+  const { data: stats, isLoading: statsLoading } = useGetDashboardStatsQuery({});
+  const { data: flagged, isLoading: flaggedLoading } = useGetFlaggedQuery({});
+  const { data: staffActivity, isLoading: staffActivityLoading } = useGetStaffActivityQuery({});
 
   return (
     <div className="min-h-screen bg-[#f0f4f8] pb-24">
       <TopBar title={t('admin.dashboard.title')} />
 
       <div className="px-4 pt-4 space-y-5">
-        <DateRangeFilter onChange={handleDateChange} />
-
         {/* Stats grid */}
         {statsLoading ? (
           <Spinner className="py-8" />
