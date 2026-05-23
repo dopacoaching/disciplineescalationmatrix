@@ -32,14 +32,18 @@ export function proxy(request: NextRequest) {
 
   const role = getJwtRole(token);
 
-  // Staff trying to access admin pages → redirect to their own login
+  // Staff trying to access admin pages → clear stale cookie + redirect to admin login
   if (isAdminPath && role !== 'admin') {
-    return NextResponse.redirect(new URL('/login', request.url));
+    const res = NextResponse.redirect(new URL('/admin/login', request.url));
+    res.cookies.delete('token');
+    return res;
   }
 
-  // Admin trying to access staff pages → redirect to admin dashboard
+  // Admin trying to access staff pages → clear stale cookie + redirect to admin dashboard
   if (!isAdminPath && role === 'admin') {
-    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    const res = NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    res.cookies.delete('token');
+    return res;
   }
 
   return NextResponse.next();
