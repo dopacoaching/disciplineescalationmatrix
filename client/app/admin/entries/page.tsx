@@ -72,7 +72,7 @@ export default function AdminEntriesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f0f4f8] pb-24">
+    <div className="min-h-screen bg-page pb-24">
       <TopBar title={t('nav.entries')} />
       <div className="px-4 pt-4 space-y-3">
         <DateRangeFilter onChange={handleDateChange} />
@@ -97,7 +97,7 @@ export default function AdminEntriesPage() {
           <button
             onClick={() => handleExport('excel')}
             disabled={!!downloading}
-            className="flex-1 flex items-center justify-center gap-1.5 h-10 rounded-xl border-2 border-emerald-500/30 bg-emerald-500/5 text-emerald-700 text-xs font-semibold hover:bg-emerald-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 h-10 rounded-xl border-2 border-emerald-500/30 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400 text-xs font-semibold hover:bg-emerald-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {downloading === 'excel' ? (
               <>{t('export.downloading')}</>
@@ -118,7 +118,7 @@ export default function AdminEntriesPage() {
         <select
           value={sort}
           onChange={e => setSort(e.target.value)}
-          className="h-10 w-full px-3 rounded-xl border-2 border-gray-200 text-sm bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 font-medium text-gray-700"
+          className="h-10 w-full px-3 rounded-xl border-2 border-bmedium text-sm bg-surface text-gray-700 dark:text-gray-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 font-medium"
         >
           <option value="newest">{t('sort.mostRecent')}</option>
           <option value="oldest">{t('sort.oldest')}</option>
@@ -128,7 +128,7 @@ export default function AdminEntriesPage() {
         {isLoading ? (
           <Spinner className="py-12" />
         ) : entries?.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-10 text-center">
+          <div className="bg-surface rounded-2xl border border-bsoft shadow-card p-10 text-center">
             <p className="text-sm text-gray-400">{t('empty.noEntries')}</p>
           </div>
         ) : (
@@ -136,17 +136,17 @@ export default function AdminEntriesPage() {
             {entries?.map(entry => (
               <div
                 key={entry._id}
-                className={`bg-white rounded-2xl border-l-4 border border-gray-100 shadow-card ${severityBorder[entry.severity] ?? 'border-l-gray-200'}`}
+                className={`bg-surface rounded-2xl border-l-4 border border-bsoft shadow-card ${severityBorder[entry.severity] ?? 'border-l-gray-200'}`}
               >
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 truncate text-sm">{entry.studentId?.fullName}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="font-bold text-gray-900 dark:text-gray-100 truncate text-sm">{entry.studentId?.fullName}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                         {entry.studentId?.registerNumber}
                         {(entry.studentId?.batchId as any)?.name && ` · ${(entry.studentId.batchId as any).name}`}
                       </p>
-                      <p className="text-sm text-gray-700 mt-2 font-medium">{t(`remark.${entry.remarkId}`)}</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mt-2 font-medium">{t(`remark.${entry.remarkId}`)}</p>
                       {entry.customRemark && (
                         <p className="text-xs text-gray-400 italic mt-0.5">"{entry.customRemark}"</p>
                       )}
@@ -162,7 +162,7 @@ export default function AdminEntriesPage() {
                   </div>
 
                   {deleteId === entry._id ? (
-                    <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
+                    <div className="mt-3 pt-3 border-t border-bsoft space-y-2">
                       <div className="flex gap-2">
                         <Button size="sm" variant="danger" loading={deleting} onClick={() => handleDelete(entry._id)}>
                           {t('action.confirmDelete')}

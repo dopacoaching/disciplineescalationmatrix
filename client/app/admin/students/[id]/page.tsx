@@ -70,25 +70,24 @@ export default function StudentProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f0f4f8] pb-24">
+    <div className="min-h-screen bg-page pb-24">
       <TopBar title={student?.fullName || 'Student'} showBack backHref="/admin/students" />
 
       <div className="px-4 pt-4 space-y-4">
         {/* Student card */}
         {student && (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-card-md overflow-hidden">
-            {/* Escalation level color strip */}
+          <div className="bg-surface rounded-2xl border border-bsoft shadow-card-md overflow-hidden">
             <div className={`h-1.5 w-full ${student.currentEscalationLevel === 3 ? 'bg-danger' : student.currentEscalationLevel === 2 ? 'bg-flagged' : 'bg-success'}`} />
             <div className="p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-lg font-extrabold text-gray-900">{student.fullName}</p>
-                  <p className="text-sm text-gray-500 mt-0.5">{student.registerNumber}</p>
+                  <p className="text-lg font-extrabold text-gray-900 dark:text-gray-100">{student.fullName}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{student.registerNumber}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{student.batchId?.name}</p>
                 </div>
                 <Badge variant={escalationBadgeVariant(student.currentEscalationLevel)} label={t(escalationKey(student.currentEscalationLevel))} />
               </div>
-              <div className="pt-3 mt-3 border-t border-gray-100 space-y-2">
+              <div className="pt-3 mt-3 border-t border-bsoft space-y-2">
                 <div className="flex gap-2">
                   <Button size="sm" variant="secondary" onClick={() => { setTransferBatch(''); setTransferError(null); setTransferOpen(true); }}>
                     {t('student.transfer')}
@@ -105,12 +104,12 @@ export default function StudentProfilePage() {
 
         {/* Entry history */}
         <div>
-          <h3 className="text-sm font-bold text-navy uppercase tracking-wider mb-3">{t('student.entryHistory')}</h3>
+          <h3 className="text-sm font-bold text-navy dark:text-gray-200 uppercase tracking-wider mb-3">{t('student.entryHistory')}</h3>
 
           {entriesLoading ? (
             <Spinner className="py-8" />
           ) : entries?.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-8 text-center">
+            <div className="bg-surface rounded-2xl border border-bsoft shadow-card p-8 text-center">
               <p className="text-sm text-gray-400">{t('empty.noEntries')}</p>
             </div>
           ) : (
@@ -118,18 +117,18 @@ export default function StudentProfilePage() {
               {entries?.map(entry => (
                 <div
                   key={entry._id}
-                  className={`bg-white rounded-2xl border-l-4 border border-gray-100 shadow-card ${severityBorder[entry.severity] ?? 'border-l-gray-200'}`}
+                  className={`bg-surface rounded-2xl border-l-4 border border-bsoft shadow-card ${severityBorder[entry.severity] ?? 'border-l-gray-200'}`}
                 >
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1">
-                        <p className="text-sm font-semibold text-gray-900">{t(`remark.${entry.remarkId}`)}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t(`remark.${entry.remarkId}`)}</p>
                         {entry.customRemark && (
                           <p className="text-xs text-gray-400 italic mt-0.5">"{entry.customRemark}"</p>
                         )}
                         <p className="text-xs text-gray-400 mt-1.5">
-                          {t('admin.reportedBy')}: <span className="font-medium">{entry.staffId?.fullName}</span>
-                          <span className="text-gray-300 mx-1">·</span>{entry.staffId?.role}
+                          {t('admin.reportedBy')}: <span className="font-medium text-gray-600 dark:text-gray-300">{entry.staffId?.fullName}</span>
+                          <span className="text-gray-300 dark:text-gray-600 mx-1">·</span>{entry.staffId?.role}
                         </p>
                         <p className="text-xs text-gray-400">{new Date(entry.createdAt).toLocaleString()}</p>
                       </div>
@@ -137,7 +136,7 @@ export default function StudentProfilePage() {
                     </div>
 
                     {deleteEntryId === entry._id ? (
-                      <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
+                      <div className="mt-3 pt-3 border-t border-bsoft space-y-2">
                         <div className="flex gap-2">
                           <Button size="sm" variant="danger" loading={deletingEntry} onClick={() => handleDeleteEntry(entry._id)}>
                             {t('action.confirmDelete')}
@@ -169,7 +168,7 @@ export default function StudentProfilePage() {
           <select
             value={transferBatch}
             onChange={e => setTransferBatch(e.target.value)}
-            className="h-12 w-full px-4 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-sm font-medium text-gray-700 bg-white"
+            className="h-12 w-full px-4 rounded-xl border-2 border-bmedium bg-surface text-gray-700 dark:text-gray-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-sm font-medium"
           >
             <option value="">{t('student.selectBatch')}</option>
             {batches?.filter(b => !b.isArchived && b._id !== student?.batchId?._id).map(b => (

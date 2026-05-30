@@ -23,11 +23,11 @@ export function Button({
     primary:
       'bg-gradient-to-br from-primary to-primary-dark text-white shadow-md hover:brightness-110 focus-visible:ring-primary disabled:opacity-60 disabled:shadow-none',
     secondary:
-      'bg-primary-bg text-primary-dark border border-primary/20 hover:bg-cyan-100 focus-visible:ring-primary',
+      'bg-primary-bg text-primary-dark border border-primary/20 hover:bg-cyan-100 dark:bg-primary/10 dark:text-primary dark:border-primary/30 dark:hover:bg-primary/20 focus-visible:ring-primary',
     danger:
       'bg-gradient-to-br from-red-500 to-danger text-white shadow-md hover:brightness-110 focus-visible:ring-danger disabled:opacity-60',
     ghost:
-      'bg-transparent text-neutral hover:bg-gray-100 focus-visible:ring-gray-300',
+      'bg-transparent text-neutral dark:text-gray-400 hover:bg-surface2 focus-visible:ring-gray-300',
   };
 
   const sizes = {

@@ -30,18 +30,18 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
       <div className="absolute inset-0 bg-navy/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Sheet */}
-      <div className="relative bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg shadow-card-lg z-10 max-h-[90dvh] flex flex-col overflow-hidden">
+      <div className="relative bg-surface rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg shadow-card-lg z-10 max-h-[90dvh] flex flex-col overflow-hidden transition-colors duration-200">
         {/* Mobile drag handle */}
         <div className="sm:hidden flex justify-center pt-3 pb-0 shrink-0">
-          <div className="w-10 h-1 rounded-full bg-gray-200" />
+          <div className="w-10 h-1 rounded-full bg-bmedium" />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-gray-100 shrink-0">
-          <h2 className="text-base font-bold text-navy">{title}</h2>
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-bsoft shrink-0">
+          <h2 className="text-base font-bold text-navy dark:text-gray-100">{title}</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface2 text-gray-400 dark:text-gray-500 transition-colors"
             aria-label="Close"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

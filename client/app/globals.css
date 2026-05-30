@@ -8,6 +8,23 @@
   --color-primary:      #06aec6;
   --color-primary-dark: #17829e;
   --color-navy:         #1a365d;
+
+  /* Semantic surface tokens — light mode */
+  --color-page:    #f0f4f8;
+  --color-surface: #ffffff;
+  --color-surface2: #f8fafc;
+  --color-bsoft:   #f1f5f9;  /* border-gray-100 equivalent */
+  --color-bmedium: #e5e7eb;  /* border-gray-200 equivalent */
+}
+
+.dark {
+  color-scheme: dark;
+  /* Semantic surface tokens — dark mode (navy-tinted palette) */
+  --color-page:    #0f1b2d;
+  --color-surface: #1a2742;
+  --color-surface2: #223352;
+  --color-bsoft:   #2a3f5c;
+  --color-bmedium: #374f72;
 }
 
 html {
@@ -24,8 +41,13 @@ body {
   font-family: 'Montserrat', 'Noto Sans', 'Noto Sans Malayalam', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f0f4f8;
+  background-color: var(--color-page);
   color: #1a365d;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dark body {
+  color: #e2e8f0;
 }
 
 :lang(ml) {

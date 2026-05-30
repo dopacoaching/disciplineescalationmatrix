@@ -27,7 +27,7 @@ export default function BatchStudentList() {
   );
 
   return (
-    <div className="min-h-screen bg-[#f0f4f8] pb-24">
+    <div className="min-h-screen bg-page pb-24">
       <TopBar title={batch?.name || t('batch.students')} showBack />
 
       <div className="px-4 pt-4 space-y-3">
@@ -40,14 +40,14 @@ export default function BatchStudentList() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search by name or register number..."
-            className="h-12 w-full pl-10 pr-4 rounded-xl border-2 border-gray-200 bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-sm text-gray-900 placeholder-gray-400"
+            className="h-12 w-full pl-10 pr-4 rounded-xl border-2 border-bmedium bg-surface text-gray-900 dark:text-gray-100 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-sm placeholder-gray-400 dark:placeholder-gray-600"
           />
         </div>
 
         {isLoading ? (
           <Spinner className="py-12" />
         ) : filtered?.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-10 text-center">
+          <div className="bg-surface rounded-2xl border border-bsoft shadow-card p-10 text-center">
             <p className="text-sm text-gray-400">{t('empty.noStudents')}</p>
           </div>
         ) : (
@@ -56,12 +56,12 @@ export default function BatchStudentList() {
               <button
                 key={student._id}
                 onClick={() => router.push(`/dashboard/batch/${batchId}/student/${student._id}`)}
-                className="w-full bg-white rounded-2xl border border-gray-100 shadow-card hover:shadow-card-md active:scale-[0.985] transition-all p-4 text-left flex items-center gap-3"
+                className="w-full bg-surface rounded-2xl border border-bsoft shadow-card hover:shadow-card-md active:scale-[0.985] transition-all p-4 text-left flex items-center gap-3"
               >
                 <div className={`w-1 self-stretch rounded-full shrink-0 ${student.currentEscalationLevel === 3 ? 'bg-danger' : student.currentEscalationLevel === 2 ? 'bg-flagged' : 'bg-success'}`} />
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 truncate text-sm">{student.fullName}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{student.registerNumber}</p>
+                  <p className="font-semibold text-gray-900 dark:text-gray-100 truncate text-sm">{student.fullName}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{student.registerNumber}</p>
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   <Badge variant={escalationBadgeVariant(student.currentEscalationLevel)} label={t(escalationKey(student.currentEscalationLevel))} />

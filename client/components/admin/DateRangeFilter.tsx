@@ -25,17 +25,17 @@ export function DateRangeFilter({ onChange }: DateRangeFilterProps) {
     onChange(undefined, undefined);
   };
 
-  const dateInputClass = 'h-10 w-full px-3 rounded-xl border-2 border-gray-200 text-sm bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 font-medium text-gray-700 transition-all';
+  const dateInputClass = 'h-10 w-full px-3 rounded-xl border-2 border-bmedium text-sm bg-surface text-gray-900 dark:text-gray-100 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 font-medium transition-all';
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4 space-y-3">
+    <div className="bg-surface rounded-2xl border border-bsoft shadow-card p-4 space-y-3 transition-colors duration-200">
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="block text-[10px] font-bold text-navy/50 uppercase tracking-wider mb-1">{t('filter.from')}</label>
+          <label className="block text-[10px] font-bold text-navy/50 dark:text-gray-500 uppercase tracking-wider mb-1">{t('filter.from')}</label>
           <input type="date" value={from} onChange={e => setFrom(e.target.value)} className={dateInputClass} />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-navy/50 uppercase tracking-wider mb-1">{t('filter.to')}</label>
+          <label className="block text-[10px] font-bold text-navy/50 dark:text-gray-500 uppercase tracking-wider mb-1">{t('filter.to')}</label>
           <input type="date" value={to} onChange={e => setTo(e.target.value)} className={dateInputClass} />
         </div>
       </div>

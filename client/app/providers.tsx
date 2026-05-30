@@ -7,12 +7,34 @@ import '@/lib/i18n';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setUser, clearUser } from '@/store/authSlice';
 import { setLanguage } from '@/store/languageSlice';
+import { setTheme } from '@/store/themeSlice';
 import { useMeQuery } from '@/store/api/authApi';
 import { baseApi } from '@/store/api/baseApi';
 import { useTranslation } from 'react-i18next';
 
 // Public paths where no session exists yet — skip /me entirely to avoid 401 noise
 const PUBLIC_PATHS = ['/', '/login', '/admin/login', '/offline'];
+
+function ThemeInitializer() {
+  const dispatch = useAppDispatch();
+  const theme = useAppSelector(s => s.theme.current);
+
+  // Apply saved theme on first mount
+  useEffect(() => {
+    const stored = localStorage.getItem('dopa_theme') as 'light' | 'dark' | null;
+    const resolved = stored ?? 'light';
+    dispatch(setTheme(resolved));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keep <html> class in sync whenever theme changes
+  useEffect(() => {
+    if (theme === 'dark') document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+  }, [theme]);
+
+  return null;
+}
 
 function AuthInitializer({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
@@ -77,6 +99,7 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <Provider store={store}>
+      <ThemeInitializer />
       <AuthInitializer>{children}</AuthInitializer>
     </Provider>
   );

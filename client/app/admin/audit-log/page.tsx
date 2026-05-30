@@ -58,15 +58,15 @@ function AuditRow({ log }: { log: AuditLogEntry }) {
   const date = new Date(log.createdAt);
 
   return (
-    <div className={`flex items-start gap-3 py-3 border-b border-gray-50 last:border-0 ${isError ? 'bg-red-50/60 -mx-4 px-4' : ''}`}>
-      <div className={`mt-1.5 shrink-0 w-2 h-2 rounded-full ${dot} ring-2 ring-offset-1 ${isError ? 'ring-red-200' : 'ring-white'}`} />
+    <div className={`flex items-start gap-3 py-3 border-b border-bsoft last:border-0 ${isError ? 'bg-red-50/60 dark:bg-red-900/10 -mx-4 px-4' : ''}`}>
+      <div className={`mt-1.5 shrink-0 w-2 h-2 rounded-full ${dot} ring-2 ring-offset-1 ${isError ? 'ring-red-200 dark:ring-red-800' : 'ring-surface dark:ring-surface'}`} />
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-gray-800 leading-snug">
+        <p className="text-xs text-gray-800 dark:text-gray-200 leading-snug">
           <span className="font-semibold">{log.actorUsername}</span>
           <span className="text-gray-400 ml-1">({log.actorRole})</span>
-          <span className="text-gray-300 mx-1">·</span>
-          <span className={isError ? 'text-red-600 font-semibold' : 'text-gray-700'}>{meta.key ? t(meta.key) : log.action}</span>
-          {log.targetName && <span className="text-gray-500"> — {log.targetName}</span>}
+          <span className="text-gray-300 dark:text-gray-600 mx-1">·</span>
+          <span className={isError ? 'text-red-600 font-semibold' : 'text-gray-700 dark:text-gray-300'}>{meta.key ? t(meta.key) : log.action}</span>
+          {log.targetName && <span className="text-gray-500 dark:text-gray-400"> — {log.targetName}</span>}
         </p>
         {isError && log.details && (
           <p className="text-xs text-red-500 mt-0.5 font-medium">{log.details}</p>
@@ -97,7 +97,7 @@ export default function AuditLogPage() {
   const errorCount = logs?.filter(l => l.status === 'error').length ?? 0;
 
   return (
-    <div className="min-h-screen bg-[#f0f4f8] pb-24">
+    <div className="min-h-screen bg-page pb-24">
       <TopBar title={t('nav.auditLog')} />
       <div className="px-4 pt-4 space-y-4">
         <DateRangeFilter onChange={(f, t2) => { setFrom(f); setTo(t2); }} />
@@ -110,7 +110,7 @@ export default function AuditLogPage() {
               className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                 action === f.value
                   ? 'bg-primary text-white border-primary'
-                  : 'bg-white text-gray-500 border-gray-200 hover:border-primary/40'
+                  : 'bg-surface text-gray-500 dark:text-gray-400 border-bmedium hover:border-primary/40'
               }`}
             >
               {t(f.labelKey)}
@@ -119,13 +119,13 @@ export default function AuditLogPage() {
         </div>
 
         {!isLoading && errorCount > 0 && (
-          <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-2xl px-4 py-2.5">
+          <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl px-4 py-2.5">
             <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
-            <p className="text-sm text-red-700 font-medium">{errorCount} {errorCount > 1 ? t('audit.errorsInView') : t('audit.errorInView')}</p>
+            <p className="text-sm text-red-700 dark:text-red-400 font-medium">{errorCount} {errorCount > 1 ? t('audit.errorsInView') : t('audit.errorInView')}</p>
           </div>
         )}
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-card px-4">
+        <div className="bg-surface rounded-2xl border border-bsoft shadow-card px-4">
           {isLoading ? (
             <Spinner className="py-8" />
           ) : !logs?.length ? (

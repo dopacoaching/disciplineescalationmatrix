@@ -21,7 +21,7 @@ export default function AdminBatchesPage() {
   const [renameError, setRenameError] = useState<string | null>(null);
   const [pageError, setPageError] = useState<string | null>(null);
 
-  const inputClass = 'h-11 px-3.5 rounded-xl border-2 border-gray-200 bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-sm font-medium text-gray-800 placeholder-gray-400 transition-all';
+  const inputClass = 'h-11 px-3.5 rounded-xl border-2 border-bmedium bg-surface text-gray-800 dark:text-gray-100 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-sm font-medium placeholder-gray-400 dark:placeholder-gray-600 transition-all';
 
   const handleCreate = async () => {
     if (!newName.trim()) return;
@@ -65,12 +65,12 @@ export default function AdminBatchesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f0f4f8] pb-24">
+    <div className="min-h-screen bg-page pb-24">
       <TopBar title={t('nav.batches')} />
       <div className="px-4 pt-4 space-y-4">
         {/* Create new */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-4">
-          <p className="text-xs font-bold text-navy/60 uppercase tracking-wider mb-3">{t('batch.newBatch')}</p>
+        <div className="bg-surface rounded-2xl border border-bsoft shadow-card p-4">
+          <p className="text-xs font-bold text-navy/60 dark:text-gray-400 uppercase tracking-wider mb-3">{t('batch.newBatch')}</p>
           <div className="flex gap-2">
             <input
               value={newName}
@@ -91,7 +91,7 @@ export default function AdminBatchesPage() {
             {batches?.map(batch => (
               <div
                 key={batch._id}
-                className={`bg-white rounded-2xl border border-gray-100 shadow-card p-4 transition-opacity ${batch.isArchived ? 'opacity-60' : ''}`}
+                className={`bg-surface rounded-2xl border border-bsoft shadow-card p-4 transition-opacity ${batch.isArchived ? 'opacity-60' : ''}`}
               >
                 {editId === batch._id ? (
                   <div className="space-y-1.5">
@@ -111,19 +111,19 @@ export default function AdminBatchesPage() {
                 ) : (
                   <div className="flex items-center justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="font-semibold text-gray-900 text-sm truncate">{batch.name}</p>
+                      <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">{batch.name}</p>
                       {batch.isArchived && <Badge variant="archived" label={t('batch.archived')} className="mt-1" />}
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <button
                         onClick={() => { setEditId(batch._id); setEditName(batch.name); }}
-                        className="text-xs font-semibold text-primary hover:underline px-2 py-1.5 rounded-lg hover:bg-primary-bg transition-colors"
+                        className="text-xs font-semibold text-primary hover:underline px-2 py-1.5 rounded-lg hover:bg-primary-bg dark:hover:bg-primary/10 transition-colors"
                       >
                         {t('action.edit')}
                       </button>
                       <button
                         onClick={() => handleArchive(batch._id, batch.isArchived)}
-                        className="text-xs font-semibold text-gray-500 hover:underline px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                        className="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:underline px-2 py-1.5 rounded-lg hover:bg-surface2 transition-colors"
                       >
                         {batch.isArchived ? t('batch.unarchive') : t('batch.archive')}
                       </button>

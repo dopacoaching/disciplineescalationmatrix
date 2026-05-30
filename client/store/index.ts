@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import authReducer from './authSlice';
 import languageReducer from './languageSlice';
+import themeReducer from './themeSlice';
 import { baseApi } from './api/baseApi';
 
 // Import all injected endpoints to register them
@@ -17,6 +18,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     language: languageReducer,
+    theme: themeReducer,
     [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>

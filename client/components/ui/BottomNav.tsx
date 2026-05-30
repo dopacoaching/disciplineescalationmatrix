@@ -28,7 +28,7 @@ export function StaffBottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white shadow-nav flex z-30">
+    <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-bsoft shadow-nav flex z-30 transition-colors duration-200">
       {items.map(item => {
         const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
         return (
@@ -38,14 +38,14 @@ export function StaffBottomNav() {
             className="relative flex-1 flex flex-col items-center justify-center py-2 gap-0.5 min-h-[56px] transition-colors"
           >
             {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-primary rounded-full" />}
-            <span className={`transition-colors ${active ? 'text-primary' : 'text-gray-400'}`}>{item.icon}</span>
-            <span className={`text-[10px] font-semibold transition-colors ${active ? 'text-primary' : 'text-gray-400'}`}>{item.label}</span>
+            <span className={`transition-colors ${active ? 'text-primary' : 'text-gray-400 dark:text-gray-500'}`}>{item.icon}</span>
+            <span className={`text-[10px] font-semibold transition-colors ${active ? 'text-primary' : 'text-gray-400 dark:text-gray-500'}`}>{item.label}</span>
           </Link>
         );
       })}
       <button
         onClick={handleLogout}
-        className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 min-h-[56px] text-gray-400 hover:text-danger transition-colors"
+        className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 min-h-[56px] text-gray-400 dark:text-gray-500 hover:text-danger transition-colors"
       >
         <LogoutIcon />
         <span className="text-[10px] font-semibold">{t('nav.logout')}</span>
@@ -74,11 +74,11 @@ export function AdminBottomNav() {
     { href: '/admin/staff',     label: t('nav.staff'),     icon: <PersonIcon /> },
     { href: '/admin/batches',   label: t('nav.batches'),   icon: <FolderIcon /> },
     { href: '/admin/entries',   label: t('nav.entries'),   icon: <ListIcon /> },
-    { href: '/admin/audit-log', label: 'Audit',            icon: <AuditIcon /> },
+    { href: '/admin/audit-log', label: t('nav.auditLog'),  icon: <AuditIcon /> },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white shadow-nav flex z-30">
+    <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-bsoft shadow-nav flex z-30 transition-colors duration-200">
       {items.map(item => {
         const active = pathname === item.href || pathname.startsWith(item.href + '/');
         return (
@@ -88,14 +88,14 @@ export function AdminBottomNav() {
             className="relative flex-1 flex flex-col items-center justify-center py-2 gap-0.5 min-h-[56px] transition-colors"
           >
             {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] bg-primary rounded-full" />}
-            <span className={`transition-colors ${active ? 'text-primary' : 'text-gray-400'}`}>{item.icon}</span>
-            <span className={`text-[9px] font-semibold truncate w-full text-center transition-colors ${active ? 'text-primary' : 'text-gray-400'}`}>{item.label}</span>
+            <span className={`transition-colors ${active ? 'text-primary' : 'text-gray-400 dark:text-gray-500'}`}>{item.icon}</span>
+            <span className={`text-[9px] font-semibold truncate w-full text-center transition-colors ${active ? 'text-primary' : 'text-gray-400 dark:text-gray-500'}`}>{item.label}</span>
           </Link>
         );
       })}
       <button
         onClick={handleLogout}
-        className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 min-h-[56px] text-gray-400 hover:text-danger transition-colors"
+        className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 min-h-[56px] text-gray-400 dark:text-gray-500 hover:text-danger transition-colors"
       >
         <LogoutIcon />
         <span className="text-[9px] font-semibold">{t('nav.logout')}</span>

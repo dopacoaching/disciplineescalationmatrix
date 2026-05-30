@@ -15,13 +15,13 @@ const styles: Record<BadgeVariant, { chip: string; dot: string }> = {
   low:      { chip: 'bg-success/12 text-success border border-success/20',    dot: 'bg-success' },
   medium:   { chip: 'bg-flagged/12 text-flagged border border-flagged/20',    dot: 'bg-flagged' },
   high:     { chip: 'bg-danger/12 text-danger border border-danger/20',       dot: 'bg-danger' },
-  level1:   { chip: 'bg-blue-50 text-blue-700 border border-blue-200',        dot: 'bg-blue-400' },
+  level1:   { chip: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700', dot: 'bg-blue-400' },
   level2:   { chip: 'bg-flagged-bg text-flagged border border-flagged/25',    dot: 'bg-flagged' },
   level3:   { chip: 'bg-danger-bg text-danger border border-danger/25',       dot: 'bg-danger' },
-  teacher:  { chip: 'bg-primary-bg text-primary-dark border border-primary/20', dot: 'bg-primary' },
-  warden:   { chip: 'bg-purple-50 text-purple-700 border border-purple-200',  dot: 'bg-purple-500' },
-  admin:    { chip: 'bg-navy-bg text-navy border border-navy/20',             dot: 'bg-navy' },
-  archived: { chip: 'bg-gray-100 text-gray-500 border border-gray-200',       dot: 'bg-gray-400' },
+  teacher:  { chip: 'bg-primary-bg text-primary-dark border border-primary/20 dark:bg-primary/10 dark:text-primary dark:border-primary/30', dot: 'bg-primary' },
+  warden:   { chip: 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700', dot: 'bg-purple-500' },
+  admin:    { chip: 'bg-navy-bg text-navy border border-navy/20 dark:bg-navy/20 dark:text-gray-200 dark:border-navy/40', dot: 'bg-navy' },
+  archived: { chip: 'bg-surface2 text-gray-500 dark:text-gray-400 border border-bmedium', dot: 'bg-gray-400' },
 };
 
 const SHOW_DOT: BadgeVariant[] = ['low', 'medium', 'high', 'level1', 'level2', 'level3'];

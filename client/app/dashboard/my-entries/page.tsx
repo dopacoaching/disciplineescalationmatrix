@@ -23,7 +23,7 @@ export default function MyEntriesPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#f0f4f8] pb-24">
+    <div className="min-h-screen bg-page pb-24">
       <TopBar title={t('nav.myEntries')} />
       <div className="px-4 pt-4 space-y-3">
         <div className="relative">
@@ -35,14 +35,14 @@ export default function MyEntriesPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search by student name..."
-            className="h-12 w-full pl-10 pr-4 rounded-xl border-2 border-gray-200 bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-sm text-gray-900 placeholder-gray-400"
+            className="h-12 w-full pl-10 pr-4 rounded-xl border-2 border-bmedium bg-surface text-gray-900 dark:text-gray-100 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-sm placeholder-gray-400 dark:placeholder-gray-600"
           />
         </div>
 
         {isLoading ? (
           <Spinner className="py-12" />
         ) : filtered?.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-10 text-center">
+          <div className="bg-surface rounded-2xl border border-bsoft shadow-card p-10 text-center">
             <p className="text-sm text-gray-400">{t('empty.noEntries')}</p>
           </div>
         ) : (
@@ -50,13 +50,13 @@ export default function MyEntriesPage() {
             {filtered?.map(entry => (
               <div
                 key={entry._id}
-                className={`bg-white rounded-2xl border-l-4 border border-gray-100 shadow-card ${severityBorder[entry.severity] ?? 'border-l-gray-200'}`}
+                className={`bg-surface rounded-2xl border-l-4 border border-bsoft shadow-card ${severityBorder[entry.severity] ?? 'border-l-gray-200'}`}
               >
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 truncate text-sm">{entry.studentId?.fullName}</p>
-                      <p className="text-sm text-gray-700 mt-1 font-medium">{t(`remark.${entry.remarkId}`)}</p>
+                      <p className="font-bold text-gray-900 dark:text-gray-100 truncate text-sm">{entry.studentId?.fullName}</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 font-medium">{t(`remark.${entry.remarkId}`)}</p>
                       {entry.customRemark && (
                         <p className="text-xs text-gray-400 italic mt-0.5">"{entry.customRemark}"</p>
                       )}

@@ -59,7 +59,7 @@ export default function AdminAdminsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f0f4f8] pb-24">
+    <div className="min-h-screen bg-page pb-24">
       <TopBar title={t('nav.admins')} />
       <div className="px-4 pt-4 space-y-4">
         <Button onClick={() => setModalOpen(true)} className="w-full">{t('admin.addAdmin')}</Button>
@@ -71,16 +71,16 @@ export default function AdminAdminsPage() {
             {admins?.map(admin => (
               <div
                 key={admin._id}
-                className={`bg-white rounded-2xl border border-gray-100 shadow-card p-4 flex items-center justify-between ${!admin.isActive ? 'opacity-60' : ''}`}
+                className={`bg-surface rounded-2xl border border-bsoft shadow-card p-4 flex items-center justify-between ${!admin.isActive ? 'opacity-60' : ''}`}
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-navy/10 flex items-center justify-center shrink-0">
-                      <span className="text-xs font-bold text-navy">{admin.username.charAt(0).toUpperCase()}</span>
+                    <div className="w-8 h-8 rounded-full bg-navy/10 dark:bg-navy/20 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-navy dark:text-gray-300">{admin.username.charAt(0).toUpperCase()}</span>
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-gray-900 text-sm">@{admin.username}</p>
-                      <p className="text-xs text-gray-500 truncate">{admin.email}</p>
+                      <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">@{admin.username}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{admin.email}</p>
                     </div>
                   </div>
                   <p className="text-xs text-gray-400 mt-1.5 pl-10">{t('admin.joined')} {new Date(admin.createdAt).toLocaleDateString()}</p>

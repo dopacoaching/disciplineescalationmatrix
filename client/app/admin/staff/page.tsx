@@ -15,8 +15,6 @@ import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { Spinner } from '@/components/ui/Spinner';
 
-// Used for both create and edit — password is optional to allow "keep existing" on edit.
-// Required-on-create is enforced in onSubmit.
 const schema = z.object({
   fullName: z.string().min(1),
   username: z.string().min(1),
@@ -24,7 +22,6 @@ const schema = z.object({
   role: z.enum(['teacher', 'warden']),
   assignedBatches: z.array(z.string()),
 });
-
 type FormData = z.infer<typeof schema>;
 
 export default function AdminStaffPage() {
@@ -100,7 +97,7 @@ export default function AdminStaffPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f0f4f8] pb-24">
+    <div className="min-h-screen bg-page pb-24">
       <TopBar title={t('nav.staff')} />
       <div className="px-4 pt-4 space-y-4">
         <Button onClick={openCreate} className="w-full">{t('staff.addStaff')}</Button>
@@ -112,7 +109,7 @@ export default function AdminStaffPage() {
             {staff?.map(s => (
               <div
                 key={s._id}
-                className={`bg-white rounded-2xl border border-gray-100 shadow-card p-4 ${!s.isActive ? 'opacity-60' : ''}`}
+                className={`bg-surface rounded-2xl border border-bsoft shadow-card p-4 ${!s.isActive ? 'opacity-60' : ''}`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -121,15 +118,15 @@ export default function AdminStaffPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-semibold text-gray-900 text-sm">{s.fullName}</p>
+                        <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{s.fullName}</p>
                         <Badge variant={s.role} label={s.role} />
                         {!s.isActive && <Badge variant="archived" label={t('action.inactive')} />}
                       </div>
-                      <p className="text-xs text-gray-500 mt-0.5">@{s.username}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">@{s.username}</p>
                       <p className="text-xs text-gray-400 mt-0.5">{s.entryCount} {t('student.entriesCount')}</p>
                       <div className="flex flex-wrap gap-1 mt-1.5">
                         {(s.assignedBatches as Batch[])?.map(b => (
-                          <span key={b._id} className="text-xs bg-primary-bg text-primary px-2 py-0.5 rounded-full font-medium">{b.name}</span>
+                          <span key={b._id} className="text-xs bg-primary-bg dark:bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">{b.name}</span>
                         ))}
                       </div>
                     </div>
@@ -159,18 +156,18 @@ export default function AdminStaffPage() {
             error={errors.password?.message}
           />
           <div>
-            <label className="block text-[10px] font-bold text-navy/50 uppercase tracking-wider mb-2">{t('staff.role')}</label>
+            <label className="block text-[10px] font-bold text-navy/50 dark:text-gray-500 uppercase tracking-wider mb-2">{t('staff.role')}</label>
             <div className="flex gap-3">
               {(['teacher', 'warden'] as const).map(role => (
                 <label key={role} className="flex items-center gap-2 cursor-pointer">
                   <input type="radio" value={role} {...register('role')} className="text-primary" />
-                  <span className="text-sm font-medium text-gray-700">{t(`staff.role.${role}`)}</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t(`staff.role.${role}`)}</span>
                 </label>
               ))}
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-navy/50 uppercase tracking-wider mb-2">{t('staff.batches')}</label>
+            <label className="block text-[10px] font-bold text-navy/50 dark:text-gray-500 uppercase tracking-wider mb-2">{t('staff.batches')}</label>
             {batches?.filter(b => !b.isArchived).length === 0 ? (
               <p className="text-sm text-gray-400 italic">{t('staff.noActiveBatches')}</p>
             ) : (
@@ -183,7 +180,7 @@ export default function AdminStaffPage() {
                       onChange={() => toggleBatch(b._id)}
                       className="rounded text-primary"
                     />
-                    <span className="text-sm text-gray-700">{b.name}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{b.name}</span>
                   </label>
                 ))}
               </div>

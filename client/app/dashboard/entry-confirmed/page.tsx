@@ -8,15 +8,15 @@ export default function EntryConfirmedPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-[#f0f4f8] flex flex-col items-center justify-center px-4 space-y-6">
+    <div className="min-h-screen bg-page flex flex-col items-center justify-center px-4 space-y-6">
       <div className="w-24 h-24 rounded-full bg-success-bg flex items-center justify-center">
         <svg className="w-14 h-14 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
         </svg>
       </div>
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900">{t('confirm.entryRecorded')}</h2>
-        <p className="text-gray-500 mt-1">{t('confirm.submitted')}</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('confirm.entryRecorded')}</h2>
+        <p className="text-gray-500 dark:text-gray-400 mt-1">{t('confirm.submitted')}</p>
       </div>
       <div className="w-full max-w-sm space-y-3">
         <Button size="lg" onClick={() => router.push('/dashboard')}>

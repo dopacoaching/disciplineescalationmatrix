@@ -8,6 +8,7 @@ import { useStaffLoginMutation } from '@/store/api/authApi';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setUser } from '@/store/authSlice';
 import { setLanguage } from '@/store/languageSlice';
+import { toggleTheme } from '@/store/themeSlice';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import '@/lib/i18n';
@@ -18,11 +19,19 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
+function SunIcon() {
+  return <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m8.66-9h-1M4.34 12h-1m15.07-6.07-.71.71M6.34 17.66l-.71.71M17.66 17.66l-.71-.71M6.34 6.34l-.71-.71M12 7a5 5 0 100 10A5 5 0 0012 7z" /></svg>;
+}
+function MoonIcon() {
+  return <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>;
+}
+
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const dispatch = useAppDispatch();
   const lang = useAppSelector(s => s.language.current);
+  const theme = useAppSelector(s => s.theme.current);
   const [staffLogin, { isLoading }] = useStaffLoginMutation();
 
   const { register, handleSubmit, formState: { errors }, setError } = useForm<FormData>({
@@ -61,8 +70,15 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-navy via-navy-light to-[#17829e] flex flex-col items-center justify-center px-4 py-10">
-      {/* Language toggle */}
-      <div className="absolute top-4 right-4">
+      {/* Controls: language + theme */}
+      <div className="absolute top-4 right-4 flex gap-2">
+        <button
+          onClick={() => dispatch(toggleTheme())}
+          className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/15 text-white border border-white/25 hover:bg-white/25 transition-colors"
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+        </button>
         <button
           onClick={toggleLang}
           className="text-xs font-bold px-3 py-1.5 rounded-lg bg-white/15 text-white border border-white/25 hover:bg-white/25 transition-colors"
@@ -81,7 +97,7 @@ export default function LoginPage() {
       </div>
 
       {/* Card */}
-      <div className="w-full max-w-sm bg-white rounded-3xl shadow-card-lg p-6 space-y-5">
+      <div className="w-full max-w-sm bg-surface rounded-3xl shadow-card-lg p-6 space-y-5">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
             label={t('login.username')}

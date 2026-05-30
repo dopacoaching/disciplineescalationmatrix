@@ -24,10 +24,10 @@ export default function AdminStudentsPage() {
   });
   const { data: batches } = useGetBatchesQuery();
 
-  const selectClass = 'h-10 px-3 rounded-xl border-2 border-gray-200 text-xs font-semibold bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-gray-700';
+  const selectClass = 'h-10 px-3 rounded-xl border-2 border-bmedium text-xs font-semibold bg-surface text-gray-700 dark:text-gray-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15';
 
   return (
-    <div className="min-h-screen bg-[#f0f4f8] pb-24">
+    <div className="min-h-screen bg-page pb-24">
       <TopBar title={t('nav.students')} />
       <div className="px-4 pt-4 space-y-3">
         {/* Search */}
@@ -40,7 +40,7 @@ export default function AdminStudentsPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search by name or register number..."
-            className="h-12 w-full pl-10 pr-4 rounded-xl border-2 border-gray-200 bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-sm text-gray-900 placeholder-gray-400"
+            className="h-12 w-full pl-10 pr-4 rounded-xl border-2 border-bmedium bg-surface text-gray-900 dark:text-gray-100 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-sm placeholder-gray-400 dark:placeholder-gray-600"
           />
         </div>
 
@@ -67,18 +67,18 @@ export default function AdminStudentsPage() {
         {isLoading ? (
           <Spinner className="py-12" />
         ) : students?.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-10 text-center">
+          <div className="bg-surface rounded-2xl border border-bsoft shadow-card p-10 text-center">
             <p className="text-sm text-gray-400">{t('empty.noStudents')}</p>
           </div>
         ) : (
           <div className="space-y-2">
             {students?.map(s => (
               <Link key={s._id} href={`/admin/students/${s._id}`}>
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-card hover:shadow-card-md transition-shadow p-4 flex items-center gap-3">
+                <div className="bg-surface rounded-2xl border border-bsoft shadow-card hover:shadow-card-md transition-shadow p-4 flex items-center gap-3">
                   <div className={`w-1 self-stretch rounded-full shrink-0 ${s.currentEscalationLevel === 3 ? 'bg-danger' : s.currentEscalationLevel === 2 ? 'bg-flagged' : 'bg-success'}`} />
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-900 truncate text-sm">{s.fullName}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{s.registerNumber} · {(s.batchId as any)?.name}</p>
+                    <p className="font-semibold text-gray-900 dark:text-gray-100 truncate text-sm">{s.fullName}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{s.registerNumber} · {(s.batchId as any)?.name}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1 ml-2 shrink-0">
                     <Badge variant={escalationBadgeVariant(s.currentEscalationLevel)} label={t(escalationKey(s.currentEscalationLevel))} />

@@ -4,9 +4,16 @@ module.exports = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
+        // Semantic tokens — values come from CSS variables so they flip with dark mode
+        page:     'var(--color-page)',
+        surface:  'var(--color-surface)',
+        surface2: 'var(--color-surface2)',
+        bsoft:    'var(--color-bsoft)',
+        bmedium:  'var(--color-bmedium)',
         primary: {
           DEFAULT: '#06aec6',
           dark:    '#17829e',

@@ -20,20 +20,19 @@ export function RemarkSelector({ selected, onSelect }: RemarkSelectorProps) {
     <div className="space-y-2">
       {PRESET_REMARKS.map(remark => {
         const isSelected = selected === remark.id;
-        const { dot, ring } = severityConfig[remark.severity];
+        const { dot } = severityConfig[remark.severity];
         return (
           <button
             key={remark.id}
             onClick={() => onSelect(isSelected ? null : remark.id)}
             className={`w-full text-left px-4 py-3.5 rounded-xl border-2 transition-all duration-150 flex items-center gap-3
               ${isSelected
-                ? `border-primary bg-primary/5 shadow-sm`
-                : `border-transparent bg-white shadow-card hover:shadow-card-md hover:border-gray-200`
+                ? 'border-primary bg-primary/5 dark:bg-primary/10 shadow-sm'
+                : 'border-transparent bg-surface shadow-card hover:shadow-card-md hover:border-bmedium'
               }`}
           >
-            {/* Severity dot */}
             <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isSelected ? 'bg-primary' : dot}`} />
-            <span className={`text-sm font-medium flex-1 ${isSelected ? 'text-primary-dark' : 'text-gray-800'}`}>
+            <span className={`text-sm font-medium flex-1 ${isSelected ? 'text-primary-dark dark:text-primary' : 'text-gray-800 dark:text-gray-200'}`}>
               {t(`remark.${remark.id}`)}
             </span>
             {isSelected && (
