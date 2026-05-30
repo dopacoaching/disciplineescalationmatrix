@@ -26,9 +26,14 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       const ids = (user.assignedBatches || []).map(id => new mongoose.Types.ObjectId(id));
       filter.batchId = { $in: ids };
     } else if (batchId) {
+      if (!mongoose.Types.ObjectId.isValid(batchId)) return NextResponse.json({ message: 'Invalid batchId' }, { status: 400 });
       filter.batchId = new mongoose.Types.ObjectId(batchId);
     }
-    if (escalationLevel) filter.currentEscalationLevel = parseInt(escalationLevel, 10);
+    if (escalationLevel) {
+      const lvl = parseInt(escalationLevel, 10);
+      if (![1, 2, 3].includes(lvl)) return NextResponse.json({ message: 'Invalid escalationLevel' }, { status: 400 });
+      filter.currentEscalationLevel = lvl;
+    }
     if (search) {
       const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').slice(0, 100);
       filter.$or = [

@@ -53,7 +53,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const from = parseDate(fromDate);
     const to = parseDate(toDate);
     if ((fromDate && !from) || (toDate && !to)) return NextResponse.json({ message: 'Invalid date format' }, { status: 400 });
-    if (from || to) filter.createdAt = { ...(from ? { $gte: from } : {}), ...(to ? { $lte: to } : {}) };
+    if (from || to) filter.createdAt = {
+      ...(from ? { $gte: from } : {}),
+      ...(to   ? { $lte: new Date(to.getTime() + 86399999) } : {}),
+    };
 
     const SEVERITY_RANK: Record<string, number> = { high: 3, medium: 2, low: 1 };
     const sortOption: Record<string, 1 | -1> =

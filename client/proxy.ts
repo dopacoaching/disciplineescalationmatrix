@@ -39,11 +39,9 @@ export function proxy(request: NextRequest) {
     return res;
   }
 
-  // Admin trying to access staff pages → clear stale cookie + redirect to admin dashboard
+  // Admin trying to access staff pages → redirect to admin dashboard (keep their token)
   if (!isAdminPath && role === 'admin') {
-    const res = NextResponse.redirect(new URL('/admin/dashboard', request.url));
-    res.cookies.delete('token');
-    return res;
+    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
   }
 
   return NextResponse.next();

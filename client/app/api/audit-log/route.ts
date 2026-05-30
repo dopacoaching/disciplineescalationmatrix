@@ -23,7 +23,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     if (fromDate || toDate) {
       const dateFilter: Record<string, Date> = {};
       if (fromDate) { const d = new Date(fromDate); if (!isNaN(d.getTime())) dateFilter.$gte = d; }
-      if (toDate)   { const d = new Date(toDate);   if (!isNaN(d.getTime())) dateFilter.$lte = d; }
+      if (toDate)   { const d = new Date(toDate);   if (!isNaN(d.getTime())) dateFilter.$lte = new Date(d.getTime() + 86399999); }
       if (Object.keys(dateFilter).length) filter.createdAt = dateFilter;
     }
 

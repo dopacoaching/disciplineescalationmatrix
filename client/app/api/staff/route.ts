@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectDB, isDuplicateKeyError } from '@/lib/server/db';
 import Staff from '@/lib/server/models/Staff';
 import Entry from '@/lib/server/models/Entry';
@@ -19,13 +20,16 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const role = sp.get('role');
     const batchId = sp.get('batchId');
 
+    if (role && !['teacher', 'warden'].includes(role)) return NextResponse.json({ message: 'Invalid role' }, { status: 400 });
+    if (batchId && !mongoose.Types.ObjectId.isValid(batchId)) return NextResponse.json({ message: 'Invalid batchId' }, { status: 400 });
+
     const filter: Record<string, unknown> = {};
     if (search) {
       const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').slice(0, 100);
       filter.$or = [{ fullName: { $regex: escaped, $options: 'i' } }, { username: { $regex: escaped, $options: 'i' } }];
     }
     if (role) filter.role = role;
-    if (batchId) filter.assignedBatches = batchId;
+    if (batchId) filter.assignedBatches = new mongoose.Types.ObjectId(batchId);
 
     const staff = await Staff.find(filter).select('-passwordHash').populate('assignedBatches', 'name');
     const staffIds = staff.map(s => s._id);
