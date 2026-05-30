@@ -8,7 +8,7 @@ export function buildDateFilter(fromDate?: string, toDate?: string): Record<stri
   return {
     createdAt: {
       ...(fromDate ? { $gte: new Date(fromDate) } : {}),
-      ...(toDate ? { $lte: new Date(toDate) } : {}),
+      ...(toDate ? { $lte: new Date(new Date(toDate).getTime() + 86399999) } : {}),
     },
   };
 }

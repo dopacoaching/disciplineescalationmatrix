@@ -10,7 +10,7 @@ export async function getEntryCountsForStudents(
   if (fromDate || toDate) {
     match.createdAt = {
       ...(fromDate ? { $gte: new Date(fromDate) } : {}),
-      ...(toDate ? { $lte: new Date(toDate) } : {}),
+      ...(toDate ? { $lte: new Date(new Date(toDate).getTime() + 86399999) } : {}),
     };
   }
   const counts = await Entry.aggregate([
