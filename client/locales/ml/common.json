@@ -163,5 +163,9 @@
   "audit.action.entryDelete": "എൻട്രി ഇല്ലാതാക്കി",
   "error.duplicateRegister": "ഈ ബാച്ചിൽ ഈ രജിസ്ട്രേഷൻ നമ്പർ ഇതിനകം ഉപയോഗിച്ചു",
   "error.passwordRequired": "പാസ്‌വേഡ് ആവശ്യമാണ്",
-  "error.generic": "എന്തോ തെറ്റ് സംഭവിച്ചു. ദയവായി വീണ്ടും ശ്രമിക്കൂ."
+  "error.generic": "എന്തോ തെറ്റ് സംഭവിച്ചു. ദയവായി വീണ്ടും ശ്രമിക്കൂ.",
+  "export.pdf": "PDF ഡൗൺലോഡ്",
+  "export.excel": "Excel ഡൗൺലോഡ്",
+  "export.downloading": "ഡൗൺലോഡ് ചെയ്യുന്നു...",
+  "export.failed": "ഡൗൺലോഡ് പരാജയപ്പെട്ടു. ദയവായി വീണ്ടും ശ്രമിക്കൂ."
 }

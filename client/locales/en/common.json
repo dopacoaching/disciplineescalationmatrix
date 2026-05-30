@@ -163,5 +163,9 @@
   "audit.action.entryDelete": "Deleted entry",
   "error.duplicateRegister": "Register number already used in this batch",
   "error.passwordRequired": "Password is required",
-  "error.generic": "Something went wrong. Please try again."
+  "error.generic": "Something went wrong. Please try again.",
+  "export.pdf": "Download PDF",
+  "export.excel": "Download Excel",
+  "export.downloading": "Downloading...",
+  "export.failed": "Download failed. Please try again."
 }
