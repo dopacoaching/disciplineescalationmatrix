@@ -30,7 +30,7 @@ app.use(cors({
   },
   credentials: true,
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10kb' }));  // cap body size to prevent memory exhaustion
 app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);

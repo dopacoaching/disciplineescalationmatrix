@@ -46,6 +46,15 @@ export async function getEntries(req: Request, res: Response): Promise<void> {
       return;
     }
     filter.studentId = new mongoose.Types.ObjectId(studentId as string);
+
+    // Staff can only query entries for students in their own assigned batches
+    if (user.role !== 'admin') {
+      const student = await Student.findById(studentId).select('batchId').lean();
+      if (!student || !(user.assignedBatches || []).includes(student.batchId.toString())) {
+        res.status(403).json({ message: 'Access denied to this student' });
+        return;
+      }
+    }
   }
   if (severity) filter.severity = severity;
 
@@ -58,7 +67,7 @@ export async function getEntries(req: Request, res: Response): Promise<void> {
   if (from || to) {
     filter.createdAt = {
       ...(from ? { $gte: from } : {}),
-      ...(to ? { $lte: to } : {}),
+      ...(to   ? { $lte: new Date(to.getTime() + 86399999) } : {}),
     };
   }
 
@@ -102,10 +111,13 @@ export async function createEntry(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const existingEntries = await Entry.find({ studentId });
-  const totalAfter = existingEntries.length + 1;
-  const hasHigh = remark.severity === 'high' || existingEntries.some(e => e.severity === 'high');
-  const escalationLevel = computeEscalationLevel(totalAfter, hasHigh);
+  // Use countDocuments + exists instead of fetching all documents (performance fix)
+  const [existingCount, hasHighExisting] = await Promise.all([
+    Entry.countDocuments({ studentId }),
+    Entry.exists({ studentId, severity: 'high' }),
+  ]);
+  const hasHigh = remark.severity === 'high' || !!hasHighExisting;
+  const escalationLevel = computeEscalationLevel(existingCount + 1, hasHigh);
 
   const entry = await Entry.create({
     studentId,
@@ -129,6 +141,10 @@ export async function createEntry(req: Request, res: Response): Promise<void> {
 
 export async function deleteEntry(req: Request, res: Response): Promise<void> {
   const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    res.status(400).json({ message: 'Invalid entry ID' });
+    return;
+  }
   const entry = await Entry.findById(id);
   if (!entry) { res.status(404).json({ message: 'Entry not found' }); return; }
 

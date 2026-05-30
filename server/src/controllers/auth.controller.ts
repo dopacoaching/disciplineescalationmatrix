@@ -5,12 +5,22 @@ import Admin from '../models/Admin';
 import Staff from '../models/Staff';
 import { verifyPassword } from '../utils/hash';
 
+function parseExpiryToMs(expiresIn: string): number {
+  const match = expiresIn.match(/^(\d+)([smhd])$/);
+  if (!match) return 8 * 60 * 60 * 1000;
+  const val = parseInt(match[1], 10);
+  const mult: Record<string, number> = { s: 1000, m: 60_000, h: 3_600_000, d: 86_400_000 };
+  return val * (mult[match[2]] ?? 3_600_000);
+}
+
 function setAuthCookie(res: Response, token: string): void {
   res.cookie('token', token, {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
     sameSite: 'strict',
-    maxAge: 8 * 60 * 60 * 1000,
+    // maxAge must match the JWT expiry so the cookie and token expire together
+    maxAge: parseExpiryToMs(env.JWT_EXPIRES_IN),
+    path: '/',
   });
 }
 
@@ -89,10 +99,12 @@ export async function staffLogin(req: Request, res: Response): Promise<void> {
 }
 
 export async function logout(_req: Request, res: Response): Promise<void> {
+  // path must match the path used when setting the cookie
   res.clearCookie('token', {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
     sameSite: 'strict',
+    path: '/',
   });
   res.json({ message: 'Logged out' });
 }

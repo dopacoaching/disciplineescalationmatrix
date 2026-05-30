@@ -1,13 +1,28 @@
-import { env } from '../config/env';
 import { connectDB } from '../config/db';
 import Admin from '../models/Admin';
 import { hashPassword } from '../utils/hash';
 import mongoose from 'mongoose';
 
+// Parse here (seed script only) so plaintext passwords never exist in the main server process
+function parseAdminCredentials(): Array<{ email: string; username: string; password: string }> {
+  const raw = process.env.ADMIN_CREDENTIALS || '';
+  if (!raw) return [];
+  return raw.split(',').map(entry => {
+    const trimmed = entry.trim();
+    const colonIdx = trimmed.indexOf(':');
+    if (colonIdx === -1) throw new Error(`Invalid ADMIN_CREDENTIALS entry: "${entry}". Format: email:password`);
+    const identifier = trimmed.substring(0, colonIdx);
+    const password   = trimmed.substring(colonIdx + 1);
+    if (!identifier || !password) throw new Error(`Invalid ADMIN_CREDENTIALS entry: "${entry}". Format: email:password`);
+    const username = identifier.includes('@') ? identifier.split('@')[0].toLowerCase() : identifier.toLowerCase();
+    return { email: identifier.toLowerCase(), username, password };
+  });
+}
+
 async function seed() {
   await connectDB();
 
-  const credentials = env.ADMIN_CREDENTIALS;
+  const credentials = parseAdminCredentials();
   if (credentials.length === 0) {
     console.error('No admin credentials found. Set ADMIN_CREDENTIALS in .env');
     console.error('Format: ADMIN_CREDENTIALS=email1:password1,email2:password2');

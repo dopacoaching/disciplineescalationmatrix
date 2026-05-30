@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import Admin from '../models/Admin';
 import { hashPassword } from '../utils/hash';
 
@@ -22,11 +23,19 @@ export async function createAdmin(req: Request, res: Response): Promise<void> {
 
 export async function updateAdmin(req: Request, res: Response): Promise<void> {
   const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    res.status(400).json({ message: 'Invalid admin ID' });
+    return;
+  }
   if (id === req.user!.id) {
     res.status(403).json({ message: 'Cannot modify your own admin account' });
     return;
   }
-  const admin = await Admin.findByIdAndUpdate(id, req.body, { new: true, runValidators: true })
+  // Build update explicitly — updateAdminSchema only allows isActive
+  const update: Record<string, unknown> = {};
+  if (req.body.isActive !== undefined) update.isActive = req.body.isActive;
+
+  const admin = await Admin.findByIdAndUpdate(id, update, { new: true, runValidators: true })
     .select('-passwordHash');
   if (!admin) { res.status(404).json({ message: 'Admin not found' }); return; }
   res.json(admin);

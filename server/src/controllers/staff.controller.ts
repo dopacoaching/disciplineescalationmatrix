@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import Staff from '../models/Staff';
 import Entry from '../models/Entry';
 import { hashPassword } from '../utils/hash';
@@ -14,8 +15,20 @@ export async function getStaff(req: Request, res: Response): Promise<void> {
       { username: { $regex: escaped, $options: 'i' } },
     ];
   }
-  if (role) filter.role = role;
-  if (batchId) filter.assignedBatches = batchId;
+  if (role) {
+    if (!['teacher', 'warden'].includes(role as string)) {
+      res.status(400).json({ message: 'Invalid role' });
+      return;
+    }
+    filter.role = role;
+  }
+  if (batchId) {
+    if (!mongoose.Types.ObjectId.isValid(batchId as string)) {
+      res.status(400).json({ message: 'Invalid batchId' });
+      return;
+    }
+    filter.assignedBatches = new mongoose.Types.ObjectId(batchId as string);
+  }
 
   const staff = await Staff.find(filter).select('-passwordHash').populate('assignedBatches', 'name');
 
@@ -56,6 +69,10 @@ export async function createStaff(req: Request, res: Response): Promise<void> {
 
 export async function updateStaff(req: Request, res: Response): Promise<void> {
   const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    res.status(400).json({ message: 'Invalid staff ID' });
+    return;
+  }
   const { password, ...rest } = req.body;
 
   const update: Record<string, unknown> = { ...rest };
@@ -71,6 +88,10 @@ export async function updateStaff(req: Request, res: Response): Promise<void> {
 
 export async function getStaffEntries(req: Request, res: Response): Promise<void> {
   const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    res.status(400).json({ message: 'Invalid staff ID' });
+    return;
+  }
   const entries = await Entry.find({ staffId: id })
     .populate('studentId', 'fullName registerNumber')
     .sort({ createdAt: -1 });

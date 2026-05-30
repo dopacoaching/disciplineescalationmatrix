@@ -3,13 +3,14 @@ import { getStaff, createStaff, updateStaff, getStaffEntries } from '../controll
 import { authenticate } from '../middleware/authenticate';
 import { requireAdmin } from '../middleware/requireAdmin';
 import { validateBody } from '../middleware/validateBody';
+import { asyncHandler } from '../middleware/asyncHandler';
 import { createStaffSchema, updateStaffSchema } from '../validators/staff.validator';
 
 const router = Router();
 
-router.get('/', authenticate, requireAdmin, getStaff);
-router.post('/', authenticate, requireAdmin, validateBody(createStaffSchema), createStaff);
-router.patch('/:id', authenticate, requireAdmin, validateBody(updateStaffSchema), updateStaff);
-router.get('/:id/entries', authenticate, requireAdmin, getStaffEntries);
+router.get('/',           authenticate, requireAdmin, asyncHandler(getStaff));
+router.post('/',          authenticate, requireAdmin, validateBody(createStaffSchema),  asyncHandler(createStaff));
+router.patch('/:id',      authenticate, requireAdmin, validateBody(updateStaffSchema),  asyncHandler(updateStaff));
+router.get('/:id/entries',authenticate, requireAdmin, asyncHandler(getStaffEntries));
 
 export default router;

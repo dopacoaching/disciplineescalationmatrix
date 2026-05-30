@@ -8,7 +8,7 @@ export const REMARK_IDS = [
 ] as const;
 
 export const createEntrySchema = z.object({
-  studentId: z.string().min(1),
-  remarkId: z.enum(REMARK_IDS),
+  studentId:    z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid student ID'),
+  remarkId:     z.enum(REMARK_IDS),
   customRemark: z.string().max(500).optional(),
 });

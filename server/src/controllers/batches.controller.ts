@@ -23,18 +23,32 @@ export async function createBatch(req: Request, res: Response): Promise<void> {
 
 export async function updateBatch(req: Request, res: Response): Promise<void> {
   const { id } = req.params;
-  const batch = await Batch.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    res.status(400).json({ message: 'Invalid batch ID' });
+    return;
+  }
+  // Build update explicitly from validated fields only (prevents mass-assignment)
+  const update: Record<string, unknown> = {};
+  if (req.body.name       !== undefined) update.name       = req.body.name;
+  if (req.body.isArchived !== undefined) update.isArchived = req.body.isArchived;
+
+  const batch = await Batch.findByIdAndUpdate(id, update, { new: true, runValidators: true });
   if (!batch) { res.status(404).json({ message: 'Batch not found' }); return; }
   res.json(batch);
 }
 
 export async function deleteBatch(req: Request, res: Response): Promise<void> {
   const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    res.status(400).json({ message: 'Invalid batch ID' });
+    return;
+  }
   const studentCount = await Student.countDocuments({ batchId: id });
   if (studentCount > 0) {
     res.status(400).json({ message: 'Cannot delete batch with students' });
     return;
   }
-  await Batch.findByIdAndDelete(id);
+  const batch = await Batch.findByIdAndDelete(id);
+  if (!batch) { res.status(404).json({ message: 'Batch not found' }); return; }
   res.json({ message: 'Batch deleted' });
 }

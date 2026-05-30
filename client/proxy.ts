@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const PUBLIC_PATHS = ['/login', '/admin/login', '/offline'];
 
-// Decode JWT payload without signature verification — safe for a UX gate.
-// Real security is enforced per-route via getAuthUser() + jsonwebtoken.
+// ⚠️ SECURITY NOTE: This middleware is a UX-only routing gate — it routes the browser to
+// the right login page but does NOT enforce security. The unverified JWT role decode below
+// is intentional and documented. Real authentication and authorization are enforced
+// per-route inside each API handler via getAuthUser() + jsonwebtoken signature verification.
+// NEVER remove getAuthUser() from an API route assuming this middleware protects it.
 function getJwtRole(token: string): string | null {
   try {
     const raw = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');

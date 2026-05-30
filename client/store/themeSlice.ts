@@ -1,8 +1,10 @@
 'use client';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark';
 
+// Read localStorage once at module load — safe because this only runs in the browser
+// (the store is never imported by Next.js server-side RSC code in this project).
 function getInitialTheme(): Theme {
   if (typeof window !== 'undefined') {
     const stored = localStorage.getItem('dopa_theme');
@@ -15,24 +17,12 @@ const themeSlice = createSlice({
   name: 'theme',
   initialState: { current: getInitialTheme() } as { current: Theme },
   reducers: {
+    // Reducers are pure — all DOM/localStorage side-effects live in ThemeInitializer (providers.tsx)
     setTheme(state, action: PayloadAction<Theme>) {
       state.current = action.payload;
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('dopa_theme', action.payload);
-        const html = document.documentElement;
-        if (action.payload === 'dark') html.classList.add('dark');
-        else html.classList.remove('dark');
-      }
     },
     toggleTheme(state) {
-      const next: Theme = state.current === 'light' ? 'dark' : 'light';
-      state.current = next;
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('dopa_theme', next);
-        const html = document.documentElement;
-        if (next === 'dark') html.classList.add('dark');
-        else html.classList.remove('dark');
-      }
+      state.current = state.current === 'light' ? 'dark' : 'light';
     },
   },
 });

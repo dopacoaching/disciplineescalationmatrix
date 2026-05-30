@@ -19,16 +19,17 @@ function ThemeInitializer() {
   const dispatch = useAppDispatch();
   const theme = useAppSelector(s => s.theme.current);
 
-  // Apply saved theme on first mount
+  // On first mount, read localStorage and sync Redux state if it differs from the
+  // slice's own initialState read (handles SSR hydration edge cases).
   useEffect(() => {
     const stored = localStorage.getItem('dopa_theme') as 'light' | 'dark' | null;
-    const resolved = stored ?? 'light';
-    dispatch(setTheme(resolved));
+    if (stored && stored !== theme) dispatch(setTheme(stored));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keep <html> class in sync whenever theme changes
+  // All DOM/localStorage side-effects live here — reducers are kept pure.
   useEffect(() => {
+    localStorage.setItem('dopa_theme', theme);
     if (theme === 'dark') document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
   }, [theme]);

@@ -7,7 +7,8 @@ export function buildDateFilter(fromDate?: string, toDate?: string): Record<stri
   return {
     createdAt: {
       ...(fromDate ? { $gte: new Date(fromDate) } : {}),
-      ...(toDate ? { $lte: new Date(toDate) } : {}),
+      // Add 86399999 ms (23:59:59.999) so toDate is inclusive of the full selected day
+      ...(toDate ? { $lte: new Date(new Date(toDate).getTime() + 86399999) } : {}),
     },
   };
 }
