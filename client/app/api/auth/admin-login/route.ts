@@ -31,7 +31,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
     if (!admin.isActive) {
       await writeAuditLog({ action: 'auth.login_failed', actorId: admin._id.toString(), actorUsername: admin.username, actorRole: 'admin', status: 'error', details: 'Account deactivated' });
-      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+      return NextResponse.json({ message: 'Account deactivated' }, { status: 403 });
     }
 
     const valid = await verifyPassword(password, admin.passwordHash);

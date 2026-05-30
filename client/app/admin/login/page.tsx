@@ -41,8 +41,12 @@ export default function AdminLoginPage() {
       const user = await adminLogin(data).unwrap();
       dispatch(setUser({ id: user.id, username: user.username, role: 'admin' }));
       router.replace('/admin/dashboard');
-    } catch {
-      setError('root', { message: t('login.error') });
+    } catch (err: any) {
+      if (err?.data?.message === 'Account deactivated') {
+        setError('root', { message: t('login.deactivated') });
+      } else {
+        setError('root', { message: t('login.error') });
+      }
     }
   };
 
