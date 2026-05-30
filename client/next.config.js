@@ -23,6 +23,10 @@ const withPWA = require('@ducanh2912/next-pwa').default({
 const nextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ['pdfkit', 'exceljs'],
+  // Bundle Noto Sans TTF files with the PDF export route on Vercel
+  outputFileTracingIncludes: {
+    '/api/entries/export': ['./lib/server/fonts/**/*'],
+  },
   async headers() {
     return [
       {

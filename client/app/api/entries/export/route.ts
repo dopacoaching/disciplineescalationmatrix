@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import path from 'path';
 import { connectDB } from '@/lib/server/db';
 import Entry from '@/lib/server/models/Entry';
 import '@/lib/server/models/Staff';
@@ -6,6 +7,22 @@ import '@/lib/server/models/Batch';
 import { getAuthUser } from '@/lib/server/auth';
 import ExcelJS from 'exceljs';
 import PDFDocument from 'pdfkit';
+
+// PDFKit's built-in Helvetica/Times/Courier only support Latin-1 — Malayalam and
+// other non-Latin characters render as gibberish. We embed Noto Sans (Latin) and
+// Noto Sans Malayalam, then pick per text run based on whether the string contains
+// any Malayalam codepoints.
+const FONT_DIR = path.join(process.cwd(), 'lib', 'server', 'fonts');
+const FONT_LATIN_REGULAR  = path.join(FONT_DIR, 'NotoSans-Regular.ttf');
+const FONT_LATIN_BOLD     = path.join(FONT_DIR, 'NotoSans-Bold.ttf');
+const FONT_ML_REGULAR     = path.join(FONT_DIR, 'NotoSansMalayalam-Regular.ttf');
+const FONT_ML_BOLD        = path.join(FONT_DIR, 'NotoSansMalayalam-Bold.ttf');
+const MALAYALAM_RE = /[ഀ-ൿ]/;
+
+function fontFor(text: string, bold = false): string {
+  if (MALAYALAM_RE.test(text)) return bold ? 'BodyMl-Bold' : 'BodyMl';
+  return bold ? 'Body-Bold' : 'Body';
+}
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -474,6 +491,11 @@ async function generatePDF(
   entries: any[], dateLabel: string, fileBase: string, stats: Stats,
 ): Promise<NextResponse> {
   const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 40, autoFirstPage: true });
+  doc.registerFont('Body',         FONT_LATIN_REGULAR);
+  doc.registerFont('Body-Bold',    FONT_LATIN_BOLD);
+  doc.registerFont('BodyMl',       FONT_ML_REGULAR);
+  doc.registerFont('BodyMl-Bold',  FONT_ML_BOLD);
+
   const chunks: Buffer[] = [];
   doc.on('data', (c: Buffer) => chunks.push(c));
   const done = new Promise<void>(resolve => doc.on('end', resolve));
@@ -504,13 +526,13 @@ async function generatePDF(
     // Full-width navy band
     doc.rect(0, 0, PAGE_W, 52).fill('#0f2942');
     // Org name (right)
-    doc.font('Helvetica').fontSize(7.5).fillColor('#7fa8c8')
+    doc.font('Body').fontSize(7.5).fillColor('#7fa8c8')
        .text('DOPA Coaching', M, 10, { width: usableW, align: 'right', lineBreak: false });
     // Report title
-    doc.font('Helvetica-Bold').fontSize(16).fillColor('#ffffff')
+    doc.font('Body-Bold').fontSize(16).fillColor('#ffffff')
        .text('Discipline Entries Report', M, 16, { width: usableW * 0.6, lineBreak: false });
     // Subtitle
-    doc.font('Helvetica').fontSize(8).fillColor('#a8c8e0')
+    doc.font('Body').fontSize(8).fillColor('#a8c8e0')
        .text('Discipline Escalation Matrix', M, 36, { width: usableW * 0.6, lineBreak: false });
 
     // Stats row
@@ -528,15 +550,15 @@ async function generatePDF(
     let bx = M;
     for (const b of boxes) {
       doc.roundedRect(bx, statsY, boxW, statsH, 5).fill(b.bg);
-      doc.font('Helvetica-Bold').fontSize(15).fillColor(b.fg)
+      doc.font('Body-Bold').fontSize(15).fillColor(b.fg)
          .text(String(b.val), bx, statsY + 4, { width: boxW, align: 'center', lineBreak: false });
-      doc.font('Helvetica').fontSize(6.5).fillColor(b.fg === '#ffffff' ? '#a8c8e0' : b.fg)
+      doc.font('Body').fontSize(6.5).fillColor(b.fg === '#ffffff' ? '#a8c8e0' : b.fg)
          .text(b.label, bx, statsY + 22, { width: boxW, align: 'center', lineBreak: false });
       bx += boxW + gap;
     }
 
     // Date label
-    doc.font('Helvetica').fontSize(7.5).fillColor('#6b7280')
+    doc.font('Body').fontSize(7.5).fillColor('#6b7280')
        .text(
          `Date range: ${dateLabel}  ·  Generated: ${new Date().toLocaleString('en-IN')}`,
          M, statsY + statsH + 6, { width: usableW, lineBreak: false },
@@ -548,9 +570,9 @@ async function generatePDF(
   // ── Page 2+ mini-header ────────────────────────────────────────────────
   const drawContinuationHeader = (): number => {
     doc.rect(0, 0, PAGE_W, 24).fill('#0f2942');
-    doc.font('Helvetica-Bold').fontSize(8.5).fillColor('#ffffff')
+    doc.font('Body-Bold').fontSize(8.5).fillColor('#ffffff')
        .text('Discipline Entries Report (continued)', M, 8, { lineBreak: false });
-    doc.font('Helvetica').fontSize(7.5).fillColor('#7fa8c8')
+    doc.font('Body').fontSize(7.5).fillColor('#7fa8c8')
        .text('DOPA Coaching', M, 8, { width: usableW, align: 'right', lineBreak: false });
     return 28; // y where table starts
   };
@@ -564,7 +586,7 @@ async function generatePDF(
 
     let x = M;
     for (const col of cols) {
-      doc.font('Helvetica-Bold').fontSize(7.5).fillColor('#ffffff')
+      doc.font('Body-Bold').fontSize(7.5).fillColor('#ffffff')
          .text(col.label, x + 4, y + 9, { width: col.w - 6, lineBreak: false });
       x += col.w;
     }
@@ -611,33 +633,37 @@ async function generatePDF(
     let x = M;
 
     // # col
-    doc.font('Helvetica').fontSize(7).fillColor('#9ca3af')
+    doc.font('Body').fontSize(7).fillColor('#9ca3af')
        .text(String(idx + 1), x + 3, y + 8, { width: cols[0].w - 5, align: 'center', lineBreak: false });
     x += cols[0].w;
 
     // Date col (shows datetime)
-    doc.font('Helvetica').fontSize(7).fillColor('#374151')
+    doc.font('Body').fontSize(7).fillColor('#374151')
        .text(fmtDateTime(entry.createdAt), x + 4, y + 8, { width: cols[1].w - 6, lineBreak: false });
     x += cols[1].w;
 
     // Student name (bold)
-    doc.font('Helvetica-Bold').fontSize(7.5).fillColor('#111827')
-       .text(entry.studentId?.fullName || '—', x + 4, y + 7, { width: cols[2].w - 6, lineBreak: false, ellipsis: true });
+    const studentName = entry.studentId?.fullName || '—';
+    doc.font(fontFor(studentName, true)).fontSize(7.5).fillColor('#111827')
+       .text(studentName, x + 4, y + 7, { width: cols[2].w - 6, lineBreak: false, ellipsis: true });
     x += cols[2].w;
 
     // Reg No
-    doc.font('Helvetica').fontSize(7).fillColor('#6b7280')
-       .text(entry.studentId?.registerNumber || '—', x + 4, y + 8, { width: cols[3].w - 6, lineBreak: false });
+    const regNo = entry.studentId?.registerNumber || '—';
+    doc.font(fontFor(regNo)).fontSize(7).fillColor('#6b7280')
+       .text(regNo, x + 4, y + 8, { width: cols[3].w - 6, lineBreak: false });
     x += cols[3].w;
 
     // Batch
-    doc.font('Helvetica').fontSize(7).fillColor('#374151')
-       .text((entry.studentId?.batchId as any)?.name || '—', x + 4, y + 8, { width: cols[4].w - 6, lineBreak: false, ellipsis: true });
+    const batchName = (entry.studentId?.batchId as any)?.name || '—';
+    doc.font(fontFor(batchName)).fontSize(7).fillColor('#374151')
+       .text(batchName, x + 4, y + 8, { width: cols[4].w - 6, lineBreak: false, ellipsis: true });
     x += cols[4].w;
 
     // Remark
-    doc.font('Helvetica').fontSize(7.5).fillColor('#1f2937')
-       .text(remarkLabel(entry.remarkId, entry.customRemark), x + 4, y + 7, { width: cols[5].w - 6, lineBreak: false, ellipsis: true });
+    const remarkText = remarkLabel(entry.remarkId, entry.customRemark);
+    doc.font(fontFor(remarkText)).fontSize(7.5).fillColor('#1f2937')
+       .text(remarkText, x + 4, y + 7, { width: cols[5].w - 6, lineBreak: false, ellipsis: true });
     x += cols[5].w;
 
     // Severity pill
@@ -646,7 +672,7 @@ async function generatePDF(
     const pillX = x + 5;
     const pillY = y + (ROW_H - pillH) / 2;
     doc.roundedRect(pillX, pillY, pillW, pillH, 3).fill(sc.pill);
-    doc.font('Helvetica-Bold').fontSize(6.5).fillColor(sc.fg)
+    doc.font('Body-Bold').fontSize(6.5).fillColor(sc.fg)
        .text(sev.toUpperCase(), pillX, pillY + 3.5, { width: pillW, align: 'center', lineBreak: false });
     x += cols[6].w;
 
@@ -655,13 +681,14 @@ async function generatePDF(
     doc.roundedRect(x + 7, y + (ROW_H - 13) / 2, cols[7].w - 12, 13, 3).fill(
       entry.escalationLevel === 3 ? '#fef2f2' : entry.escalationLevel === 2 ? '#fffbeb' : '#eff6ff',
     );
-    doc.font('Helvetica-Bold').fontSize(8).fillColor(lvlFg)
+    doc.font('Body-Bold').fontSize(8).fillColor(lvlFg)
        .text(lvlLabel, x + 6, y + 7, { width: cols[7].w - 10, align: 'center', lineBreak: false });
     x += cols[7].w;
 
     // Reported by
-    doc.font('Helvetica').fontSize(7).fillColor('#374151')
-       .text(entry.staffId?.fullName || '—', x + 4, y + 8, { width: cols[8].w - 6, lineBreak: false, ellipsis: true });
+    const staffName = entry.staffId?.fullName || '—';
+    doc.font(fontFor(staffName)).fontSize(7).fillColor('#374151')
+       .text(staffName, x + 4, y + 8, { width: cols[8].w - 6, lineBreak: false, ellipsis: true });
   };
 
   // ── Footer ─────────────────────────────────────────────────────────────
@@ -669,9 +696,9 @@ async function generatePDF(
     const fy = PAGE_H - 24;
     doc.moveTo(M, fy).lineTo(M + usableW, fy)
        .strokeColor('#e2e8f0').lineWidth(0.5).stroke();
-    doc.font('Helvetica').fontSize(7).fillColor('#9ca3af')
+    doc.font('Body').fontSize(7).fillColor('#9ca3af')
        .text('DOPA Coaching · Discipline Escalation Matrix · Confidential', M, fy + 4, { lineBreak: false });
-    doc.font('Helvetica').fontSize(7).fillColor('#9ca3af')
+    doc.font('Body').fontSize(7).fillColor('#9ca3af')
        .text(`Page ${pageNum}`, M, fy + 4, { width: usableW, align: 'right', lineBreak: false });
   };
 
@@ -682,7 +709,7 @@ async function generatePDF(
   let y = tableTop + HDR_H;
 
   if (entries.length === 0) {
-    doc.font('Helvetica').fontSize(11).fillColor('#9ca3af')
+    doc.font('Body').fontSize(11).fillColor('#9ca3af')
        .text('No entries found for the selected date range.', M, y + 20, { align: 'center', width: usableW });
   }
 
