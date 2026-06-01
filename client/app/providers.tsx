@@ -1,7 +1,7 @@
 'use client';
 import { Provider } from 'react-redux';
 import { store } from '@/store';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import '@/lib/i18n';
 import { useAppDispatch, useAppSelector } from '@/store';
@@ -9,7 +9,6 @@ import { setUser, clearUser } from '@/store/authSlice';
 import { setLanguage } from '@/store/languageSlice';
 import { setTheme } from '@/store/themeSlice';
 import { useMeQuery } from '@/store/api/authApi';
-import { baseApi } from '@/store/api/baseApi';
 import { useTranslation } from 'react-i18next';
 
 // Public paths where no session exists yet — skip /me entirely to avoid 401 noise
@@ -44,11 +43,24 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
   const { i18n } = useTranslation();
   const lang = useAppSelector(s => s.language.current);
 
-  // If pathname is null (e.g. server-side or during initial client hydration/routing transitions),
-  // default to isPublic=true to prevent making /me API requests before the route is ready.
+  // Guard: prevent a second redirect from firing while the first navigation is still
+  // in-flight. Without this, rapid state updates (isError → resetApiState → re-render)
+  // can cause duplicate router.replace calls and an infinite render cascade.
+  const redirectingRef = useRef(false);
+
+  // If pathname is null (SSR / initial hydration transition), treat as public to avoid
+  // making /me requests before the route is known.
   const isPublic = !pathname || PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'));
 
-  const { data, isLoading, isError } = useMeQuery(undefined, { skip: isPublic });
+  // refetchOnMountOrArgChange: true ensures a fresh /me request fires every time the
+  // user navigates from a public page to a protected one — even if there is a stale
+  // cached error result. This replaces the previous resetApiState() approach which
+  // cleared the entire RTK cache and caused an infinite re-render cascade:
+  //   isError → redirect → resetApiState → query re-fires → isError → redirect …
+  const { data, isLoading, isError } = useMeQuery(undefined, {
+    skip: isPublic,
+    refetchOnMountOrArgChange: true,
+  });
 
   // Restore language preference from localStorage once on mount
   useEffect(() => {
@@ -64,22 +76,29 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
     i18n.changeLanguage(lang);
   }, [lang, i18n]);
 
-  // When landing on a public page, wipe auth + RTK Query cache so the next
-  // protected-page visit always re-fetches /me with isLoading=true (gate blocks).
+  // When landing on a public page: clear auth state and reset the redirect guard.
+  // Do NOT call resetApiState() here — it clears active query subscriptions mid-flight
+  // and causes the cascade loop described above.
   useEffect(() => {
     if (!isPublic) return;
+    redirectingRef.current = false;
     dispatch(clearUser());
-    dispatch(baseApi.util.resetApiState());
   }, [isPublic, dispatch]);
 
   // Sync auth state from /me response on protected pages
   useEffect(() => {
     if (isPublic || isLoading) return;
+
     if (isError) {
+      // Only redirect once per auth failure — guard against the effect firing
+      // a second time while the router.replace navigation is still pending.
+      if (redirectingRef.current) return;
+      redirectingRef.current = true;
       dispatch(clearUser());
       const isAdmin = pathname ? pathname.startsWith('/admin') : false;
       router.replace(isAdmin ? '/admin/login' : '/login');
     } else if (data) {
+      redirectingRef.current = false;
       dispatch(setUser({
         id: data._id || data.id,
         username: data.username,
@@ -90,8 +109,8 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
     }
   }, [data, isLoading, isError, isPublic, dispatch, pathname, router]);
 
-  // Block protected pages until /me resolves successfully.
-  // Also block on isError so dashboard queries don't fire before the redirect effect runs.
+  // Block protected-page content until /me resolves.
+  // Block on isError too so child queries don't fire before the redirect runs.
   if (!isPublic && (isLoading || isError)) return null;
 
   return <>{children}</>;
