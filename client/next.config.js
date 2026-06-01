@@ -22,6 +22,8 @@ const withPWA = require('@ducanh2912/next-pwa').default({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Silence "multiple lockfiles" warning — monorepo has both root + client lockfiles
+  outputFileTracingRoot: require('path').join(__dirname, '../'),
   serverExternalPackages: ['pdfkit', 'exceljs'],
   // Bundle Noto Sans TTF files with the PDF export route on Vercel
   outputFileTracingIncludes: {
