@@ -31,7 +31,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     if (role) filter.role = role;
     if (batchId) filter.assignedBatches = new mongoose.Types.ObjectId(batchId);
 
-    const staff = await Staff.find(filter).select('-passwordHash').populate('assignedBatches', 'name');
+    const staff = await Staff.find(filter)
+      .select('-passwordHash')
+      .populate('assignedBatches', 'name')
+      .lean();  // skip document hydration — plain objects are all we need
     const staffIds = staff.map(s => s._id);
     const entryCounts = await Entry.aggregate([
       { $match: { staffId: { $in: staffIds } } },
@@ -40,7 +43,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const countMap: Record<string, { count: number; lastEntry: Date | null }> = {};
     entryCounts.forEach(e => { countMap[e._id.toString()] = { count: e.count, lastEntry: e.lastEntry }; });
     const result = staff.map(s => ({
-      ...s.toObject(),
+      ...s,
       entryCount: countMap[s._id.toString()]?.count || 0,
       lastEntryAt: countMap[s._id.toString()]?.lastEntry || null,
     }));

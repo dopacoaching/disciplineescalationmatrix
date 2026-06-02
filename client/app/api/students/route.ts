@@ -48,10 +48,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       : sort === 'least_flagged' ? { currentEscalationLevel: 1 }
       : { createdAt: -1 };
 
-    const students = await Student.find(filter).populate('batchId', 'name isArchived').sort(sortOption);
+    const students = await Student.find(filter)
+      .populate('batchId', 'name isArchived')
+      .sort(sortOption)
+      .lean();  // skip Mongoose document hydration — we only need plain objects here
     const studentIds = students.map(s => s._id as mongoose.Types.ObjectId);
     const entryCountMap = await getEntryCountsForStudents(studentIds, fromDate, toDate);
-    const result = students.map(s => ({ ...s.toObject(), entryCount: entryCountMap[s._id.toString()] || 0 }));
+    const result = students.map(s => ({ ...s, entryCount: entryCountMap[s._id.toString()] || 0 }));
     return NextResponse.json(result);
   } catch {
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

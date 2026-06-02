@@ -35,10 +35,27 @@ const nextConfig = {
         source: '/(.*)',
         headers: [
           { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          // DENY is stricter than SAMEORIGIN — no legitimate reason to iframe this app
+          { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-XSS-Protection', value: '1; mode=block' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          // HSTS — tell browsers to enforce HTTPS for 2 years; Vercel already does this at edge
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+          // CSP — tightened for Next.js + Tailwind (needs unsafe-inline) + Google Fonts
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com data:",
+              "img-src 'self' data: blob:",
+              "connect-src 'self'",
+              "worker-src 'self' blob:",
+              "frame-ancestors 'none'",
+            ].join('; '),
+          },
         ],
       },
     ];

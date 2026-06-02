@@ -71,9 +71,12 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Keep i18n in sync with Redux language state
+  // Keep i18n + <html lang> in sync with Redux language state.
+  // Updating the lang attribute is an accessibility requirement — screen readers
+  // use it to select the correct TTS voice for the page content.
   useEffect(() => {
     i18n.changeLanguage(lang);
+    document.documentElement.lang = lang;
   }, [lang, i18n]);
 
   // When landing on a public page: clear auth state and reset the redirect guard.
