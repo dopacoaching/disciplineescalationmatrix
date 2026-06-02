@@ -51,7 +51,10 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
               "img-src 'self' data: blob:",
-              "connect-src 'self'",
+              // The Workbox service worker uses fetch() to cache external resources.
+              // font domains must be in connect-src (not just style-src/font-src) because
+              // the SW caches them via the Fetch API, which is governed by connect-src.
+              "connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
               "worker-src 'self' blob:",
               "frame-ancestors 'none'",
             ].join('; '),
