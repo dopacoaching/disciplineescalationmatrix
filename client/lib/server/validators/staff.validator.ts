@@ -2,15 +2,12 @@ import { z } from 'zod';
 
 const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid ID format');
 
-// Normalize to lowercase first, THEN validate character set.
-// This lets admins type "Teacher1" which becomes "teacher1" — matching how the
-// server stores usernames (always lowercased). The previous plain .regex() check
-// rejected any uppercase input and caused a 400 Bad Request.
+// Username accepts any characters — letters, numbers, symbols, spaces, etc.
+// The server lowercases it before saving so logins are case-insensitive.
 const usernameField = z.string()
-  .min(3, 'Username must be at least 3 characters')
+  .min(1, 'Username is required')
   .max(50, 'Username must be at most 50 characters')
-  .transform(v => v.trim().toLowerCase())
-  .refine(v => /^[a-z0-9._-]+$/.test(v), 'Username can only contain letters, numbers, dots, underscores, and hyphens');
+  .transform(v => v.toLowerCase());
 
 export const createStaffSchema = z.object({
   fullName:        z.string().min(1).max(100),
