@@ -4,6 +4,7 @@ import type { Entry } from '@/types';
 interface EntryFilters {
   studentId?: string;
   staffId?: string;
+  batchId?: string;
   fromDate?: string;
   toDate?: string;
   severity?: string;

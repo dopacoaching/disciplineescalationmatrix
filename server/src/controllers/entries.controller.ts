@@ -17,7 +17,7 @@ function parseDate(val: unknown): Date | null {
 
 export async function getEntries(req: Request, res: Response): Promise<void> {
   const user = req.user!;
-  const { studentId, staffId, fromDate, toDate, severity, sort } = req.query;
+  const { studentId, staffId, batchId, fromDate, toDate, severity, sort } = req.query;
 
   if (severity && !VALID_SEVERITIES.has(severity as string)) {
     res.status(400).json({ message: 'Invalid severity value' });
@@ -55,6 +55,13 @@ export async function getEntries(req: Request, res: Response): Promise<void> {
         return;
       }
     }
+  } else if (batchId) {
+    if (!mongoose.Types.ObjectId.isValid(batchId as string)) {
+      res.status(400).json({ message: 'Invalid batchId' });
+      return;
+    }
+    const studentsInBatch = await Student.find({ batchId: new mongoose.Types.ObjectId(batchId as string) }).select('_id').lean();
+    filter.studentId = { $in: studentsInBatch.map(s => s._id) };
   }
   if (severity) filter.severity = severity;
 
@@ -71,15 +78,23 @@ export async function getEntries(req: Request, res: Response): Promise<void> {
     };
   }
 
+  // For highest_severity, fetch newest-first then re-sort in memory using numeric rank.
+  // MongoDB string sort on 'severity' is alphabetical (medium > low > high) which is wrong.
+  const SEVERITY_RANK: Record<string, number> = { high: 3, medium: 2, low: 1 };
   const sortOption: Record<string, 1 | -1> =
-    sort === 'oldest' ? { createdAt: 1 }
-    : sort === 'highest_severity' ? { severity: -1, createdAt: -1 }
-    : { createdAt: -1 };
+    sort === 'oldest' ? { createdAt: 1 } : { createdAt: -1 };
 
   const entries = await Entry.find(filter)
     .populate('studentId', 'fullName registerNumber batchId')
     .populate('staffId', 'fullName username role')
     .sort(sortOption);
+
+  if (sort === 'highest_severity') {
+    entries.sort((a, b) =>
+      (SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity]) ||
+      (b.createdAt.getTime() - a.createdAt.getTime())
+    );
+  }
 
   res.json(entries);
 }

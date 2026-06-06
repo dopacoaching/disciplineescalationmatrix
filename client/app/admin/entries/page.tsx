@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGetEntriesQuery, useDeleteEntryMutation } from '@/store/api/entriesApi';
+import { useGetBatchesQuery } from '@/store/api/batchesApi';
 import { TopBar } from '@/components/ui/TopBar';
 import { AdminBottomNav } from '@/components/ui/BottomNav';
 import { Badge, type BadgeVariant } from '@/components/ui/Badge';
@@ -34,12 +35,14 @@ export default function AdminEntriesPage() {
   const [from, setFrom] = useState<string | undefined>();
   const [to, setTo] = useState<string | undefined>();
   const [sort, setSort] = useState('newest');
+  const [batchId, setBatchId] = useState<string | undefined>();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<'pdf' | 'excel' | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
 
-  const { data: entries, isLoading } = useGetEntriesQuery({ fromDate: from, toDate: to, sort });
+  const { data: batches } = useGetBatchesQuery();
+  const { data: entries, isLoading } = useGetEntriesQuery({ fromDate: from, toDate: to, sort, batchId });
   const [deleteEntry, { isLoading: deleting }] = useDeleteEntryMutation();
 
   const handleDateChange = (f?: string, t2?: string) => { setFrom(f); setTo(t2); };
@@ -51,6 +54,7 @@ export default function AdminEntriesPage() {
       const params = new URLSearchParams({ format, sort });
       if (from) params.set('fromDate', from);
       if (to) params.set('toDate', to);
+      if (batchId) params.set('batchId', batchId);
       const ext = format === 'pdf' ? 'pdf' : 'xlsx';
       const label = from && to ? `${from}-to-${to}` : 'all';
       await downloadFile(`/api/entries/export?${params}`, `entries-${label}.${ext}`);
@@ -76,6 +80,17 @@ export default function AdminEntriesPage() {
       <TopBar title={t('nav.entries')} />
       <div className="px-4 pt-4 space-y-3">
         <DateRangeFilter onChange={handleDateChange} />
+
+        <select
+          value={batchId ?? ''}
+          onChange={e => setBatchId(e.target.value || undefined)}
+          className="h-10 w-full px-3 rounded-xl border-2 border-bmedium text-sm bg-surface text-gray-700 dark:text-gray-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 font-medium"
+        >
+          <option value="">{t('filter.allBatches')}</option>
+          {batches?.map(b => (
+            <option key={b._id} value={b._id}>{b.name}{b.isArchived ? ` (${t('batch.archived')})` : ''}</option>
+          ))}
+        </select>
 
         <div className="flex gap-2">
           <button

@@ -29,6 +29,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const sp = req.nextUrl.searchParams;
     const studentId = sp.get('studentId');
     const staffId = sp.get('staffId');
+    const batchId = sp.get('batchId');
     const fromDate = sp.get('fromDate');
     const toDate = sp.get('toDate');
     const severity = sp.get('severity');
@@ -47,6 +48,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     if (studentId) {
       if (!mongoose.Types.ObjectId.isValid(studentId)) return NextResponse.json({ message: 'Invalid studentId' }, { status: 400 });
       filter.studentId = new mongoose.Types.ObjectId(studentId);
+    } else if (batchId) {
+      if (!mongoose.Types.ObjectId.isValid(batchId)) return NextResponse.json({ message: 'Invalid batchId' }, { status: 400 });
+      const studentsInBatch = await Student.find({ batchId: new mongoose.Types.ObjectId(batchId) }).select('_id').lean();
+      filter.studentId = { $in: studentsInBatch.map(s => s._id) };
     }
     if (severity) filter.severity = severity;
 
