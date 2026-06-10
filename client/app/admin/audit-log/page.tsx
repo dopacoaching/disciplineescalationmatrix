@@ -28,6 +28,7 @@ const ACTION_META: Record<string, { key: string; dot: string }> = {
   'student.delete':    { key: 'audit.action.studentDelete',   dot: 'bg-red-500' },
   'entry.create':      { key: 'audit.action.entryCreate',     dot: 'bg-orange-400' },
   'entry.delete':      { key: 'audit.action.entryDelete',     dot: 'bg-red-500' },
+  'student.clearFlag': { key: 'audit.action.studentClearFlag', dot: 'bg-emerald-500' },
 };
 
 const FILTERS = [

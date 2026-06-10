@@ -71,19 +71,23 @@ export default function AdminStudentsPage() {
             <p className="text-sm text-gray-400">{t('empty.noStudents')}</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="bg-surface rounded-2xl border border-bsoft shadow-card overflow-hidden">
+            {/* Column headers */}
+            <div className="flex items-center gap-3 px-4 py-2 border-b border-bsoft bg-page/50">
+              <div className="w-1 shrink-0" />
+              <p className="flex-1 text-[10px] font-bold uppercase tracking-wider text-navy/50 dark:text-gray-500">{t('col.name')}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-navy/50 dark:text-gray-500 w-16 text-right">{t('col.level')}</p>
+            </div>
             {students?.map(s => (
               <Link key={s._id} href={`/admin/students/${s._id}`}>
-                <div className="bg-surface rounded-2xl border border-bsoft shadow-card hover:shadow-card-md transition-shadow p-4 flex items-center gap-3">
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-bsoft last:border-0 hover:bg-page/40 active:bg-page/60 transition-colors">
                   <div className={`w-1 self-stretch rounded-full shrink-0 ${s.currentEscalationLevel === 3 ? 'bg-danger' : s.currentEscalationLevel === 2 ? 'bg-flagged' : 'bg-success'}`} />
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-900 dark:text-gray-100 truncate text-sm">{s.fullName}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{s.registerNumber} · {(s.batchId as any)?.name}</p>
+                    <p className="text-xs text-gray-400">{s.entryCount} {t('student.entriesCount')}</p>
                   </div>
-                  <div className="flex flex-col items-end gap-1 ml-2 shrink-0">
-                    <Badge variant={escalationBadgeVariant(s.currentEscalationLevel)} label={t(escalationKey(s.currentEscalationLevel))} />
-                    <span className="text-xs text-gray-400">{s.entryCount} {t('student.entriesCount')}</span>
-                  </div>
+                  <Badge variant={escalationBadgeVariant(s.currentEscalationLevel)} label={t(escalationKey(s.currentEscalationLevel))} />
                 </div>
               </Link>
             ))}

@@ -103,6 +103,26 @@ export async function updateStudent(req: Request, res: Response): Promise<void> 
   res.json(student);
 }
 
+export async function clearStudentFlag(req: Request, res: Response): Promise<void> {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    res.status(400).json({ message: 'Invalid student ID' });
+    return;
+  }
+  const { actionNote } = req.body;
+  if (!actionNote || typeof actionNote !== 'string' || actionNote.trim().length === 0) {
+    res.status(400).json({ message: 'actionNote is required' });
+    return;
+  }
+  const student = await Student.findByIdAndUpdate(
+    id,
+    { lastClearedAt: new Date(), lastAdminActionNote: actionNote.trim(), currentEscalationLevel: 1 },
+    { new: true }
+  ).populate('batchId', 'name isArchived');
+  if (!student) { res.status(404).json({ message: 'Student not found' }); return; }
+  res.json(student);
+}
+
 export async function deleteStudent(req: Request, res: Response): Promise<void> {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {

@@ -15,6 +15,8 @@ export interface Student {
   fullName: string;
   batchId: string | Batch;
   currentEscalationLevel: EscalationLevel;
+  lastClearedAt?: string | null;
+  lastAdminActionNote?: string;
   entryCount: number;
   createdAt: string;
 }
@@ -25,6 +27,8 @@ export interface PopulatedStudent {
   fullName: string;
   batchId: Batch;
   currentEscalationLevel: EscalationLevel;
+  lastClearedAt?: string | null;
+  lastAdminActionNote?: string;
   entryCount: number;
   createdAt: string;
 }

@@ -106,8 +106,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ message: 'Custom remark is required' }, { status: 400 });
     }
 
-    const existingCount = await Entry.countDocuments({ studentId });
-    const hasHighExisting = await Entry.exists({ studentId, severity: 'high' });
+    const clearDate = (student as any).lastClearedAt;
+    const dateFilter = clearDate ? { createdAt: { $gt: clearDate } } : {};
+    const [existingCount, hasHighExisting] = await Promise.all([
+      Entry.countDocuments({ studentId, ...dateFilter }),
+      Entry.exists({ studentId, severity: 'high', ...dateFilter }),
+    ]);
     const hasHigh = remark.severity === 'high' || !!hasHighExisting;
     const escalationLevel = computeEscalationLevel(existingCount + 1, hasHigh);
 

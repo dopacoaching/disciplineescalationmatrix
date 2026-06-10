@@ -147,53 +147,54 @@ export default function AdminEntriesPage() {
             <p className="text-sm text-gray-400">{t('empty.noEntries')}</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="bg-surface rounded-2xl border border-bsoft shadow-card overflow-hidden">
+            {/* Column headers */}
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-bsoft bg-page/50">
+              <div className="w-1 shrink-0" />
+              <p className="flex-1 text-[10px] font-bold uppercase tracking-wider text-navy/50 dark:text-gray-500">{t('col.name')} / {t('col.remark')}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-navy/50 dark:text-gray-500 w-14 text-right">{t('col.severity')}</p>
+            </div>
             {entries?.map(entry => (
               <div
                 key={entry._id}
-                className={`bg-surface rounded-2xl border-l-4 border border-bsoft shadow-card ${severityBorder[entry.severity] ?? 'border-l-gray-200'}`}
+                className={`border-b border-bsoft last:border-0 border-l-4 ${severityBorder[entry.severity] ?? 'border-l-gray-200'} ${deleteId === entry._id ? 'bg-danger-bg/30' : ''}`}
               >
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 dark:text-gray-100 truncate text-sm">{entry.studentId?.fullName}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {entry.studentId?.registerNumber}
-                        {(entry.studentId?.batchId as any)?.name && ` · ${(entry.studentId.batchId as any).name}`}
-                      </p>
-                      <p className="text-sm text-gray-700 dark:text-gray-300 mt-2 font-medium">{t(`remark.${entry.remarkId}`)}</p>
-                      {entry.customRemark && (
-                        <p className="text-xs text-gray-400 italic mt-0.5">"{entry.customRemark}"</p>
-                      )}
-                      <p className="text-xs text-gray-400 mt-1.5">
-                        {t('admin.reportedBy')}: <span className="font-medium">{entry.staffId?.fullName}</span>
-                        {' · '}{new Date(entry.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-1.5 shrink-0">
-                      <Badge variant={entry.severity as BadgeVariant} label={t(`severity.${entry.severity}`)} />
-                      <Badge variant={`level${entry.escalationLevel}` as BadgeVariant} label={`L${entry.escalationLevel}`} />
-                    </div>
-                  </div>
-
-                  {deleteId === entry._id ? (
-                    <div className="mt-3 pt-3 border-t border-bsoft space-y-2">
-                      <div className="flex gap-2">
+                <div className="flex items-start gap-3 px-4 py-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-gray-900 dark:text-gray-100 truncate text-sm">{entry.studentId?.fullName}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {entry.studentId?.registerNumber}
+                      {(entry.studentId?.batchId as any)?.name && ` · ${(entry.studentId.batchId as any).name}`}
+                    </p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 mt-1.5 font-medium">{t(`remark.${entry.remarkId}`)}</p>
+                    {entry.customRemark && (
+                      <p className="text-xs text-gray-400 italic mt-0.5">"{entry.customRemark}"</p>
+                    )}
+                    <p className="text-xs text-gray-400 mt-1">
+                      {t('admin.reportedBy')}: <span className="font-medium">{entry.staffId?.fullName}</span>
+                      {' · '}{new Date(entry.createdAt).toLocaleString()}
+                    </p>
+                    {deleteId === entry._id ? (
+                      <div className="mt-2 flex gap-2 items-center">
                         <Button size="sm" variant="danger" loading={deleting} onClick={() => handleDelete(entry._id)}>
                           {t('action.confirmDelete')}
                         </Button>
                         <Button size="sm" variant="ghost" onClick={() => { setDeleteId(null); setDeleteError(null); }}>{t('action.cancel')}</Button>
+                        {deleteError && <p className="text-xs text-danger">{deleteError}</p>}
                       </div>
-                      {deleteError && <p className="text-xs text-danger">{deleteError}</p>}
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setDeleteId(entry._id)}
-                      className="mt-2 text-xs font-semibold text-danger hover:text-red-700 transition-colors"
-                    >
-                      {t('action.delete')}
-                    </button>
-                  )}
+                    ) : (
+                      <button
+                        onClick={() => setDeleteId(entry._id)}
+                        className="mt-1.5 text-xs font-semibold text-danger hover:text-red-700 transition-colors"
+                      >
+                        {t('action.delete')}
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    <Badge variant={entry.severity as BadgeVariant} label={t(`severity.${entry.severity}`)} />
+                    <Badge variant={`level${entry.escalationLevel}` as BadgeVariant} label={`L${entry.escalationLevel}`} />
+                  </div>
                 </div>
               </div>
             ))}

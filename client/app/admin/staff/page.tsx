@@ -105,38 +105,38 @@ export default function AdminStaffPage() {
         {toggleError && <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{toggleError}</p>}
 
         {isLoading ? <Spinner className="py-8" /> : (
-          <div className="space-y-2">
+          <div className="bg-surface rounded-2xl border border-bsoft shadow-card overflow-hidden">
+            {/* Column headers */}
+            <div className="flex items-center gap-3 px-4 py-2 border-b border-bsoft bg-page/50">
+              <p className="flex-1 text-[10px] font-bold uppercase tracking-wider text-navy/50 dark:text-gray-500">{t('col.name')}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-navy/50 dark:text-gray-500">{t('col.status')}</p>
+            </div>
             {staff?.map(s => (
               <div
                 key={s._id}
-                className={`bg-surface rounded-2xl border border-bsoft shadow-card p-4 ${!s.isActive ? 'opacity-60' : ''}`}
+                className={`flex items-start gap-3 px-4 py-3 border-b border-bsoft last:border-0 ${!s.isActive ? 'opacity-60' : ''}`}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-sm font-bold text-primary">{s.fullName.charAt(0)}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{s.fullName}</p>
-                        <Badge variant={s.role} label={s.role} />
-                        {!s.isActive && <Badge variant="archived" label={t('action.inactive')} />}
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">@{s.username}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{s.entryCount} {t('student.entriesCount')}</p>
-                      <div className="flex flex-wrap gap-1 mt-1.5">
-                        {(s.assignedBatches as Batch[])?.map(b => (
-                          <span key={b._id} className="text-xs bg-primary-bg dark:bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">{b.name}</span>
-                        ))}
-                      </div>
-                    </div>
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-xs font-bold text-primary">{s.fullName.charAt(0)}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{s.fullName}</p>
+                    <Badge variant={s.role} label={s.role} />
+                    {!s.isActive && <Badge variant="archived" label={t('action.inactive')} />}
                   </div>
-                  <div className="flex flex-col gap-1 shrink-0">
-                    <Button size="sm" variant="secondary" onClick={() => openEdit(s)}>{t('action.edit')}</Button>
-                    <Button size="sm" variant={s.isActive ? 'ghost' : 'secondary'} onClick={() => handleToggleActive(s)}>
-                      {s.isActive ? t('action.deactivate') : t('action.reactivate')}
-                    </Button>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">@{s.username} · {s.entryCount} {t('student.entriesCount')}</p>
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {(s.assignedBatches as Batch[])?.map(b => (
+                      <span key={b._id} className="text-xs bg-primary-bg dark:bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">{b.name}</span>
+                    ))}
                   </div>
+                </div>
+                <div className="flex flex-col gap-1 shrink-0">
+                  <Button size="sm" variant="secondary" onClick={() => openEdit(s)}>{t('action.edit')}</Button>
+                  <Button size="sm" variant={s.isActive ? 'ghost' : 'secondary'} onClick={() => handleToggleActive(s)}>
+                    {s.isActive ? t('action.deactivate') : t('action.reactivate')}
+                  </Button>
                 </div>
               </div>
             ))}

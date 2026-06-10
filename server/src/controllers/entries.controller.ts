@@ -126,10 +126,11 @@ export async function createEntry(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  // Use countDocuments + exists instead of fetching all documents (performance fix)
+  const clearDate = student.lastClearedAt;
+  const dateFilter = clearDate ? { createdAt: { $gt: clearDate } } : {};
   const [existingCount, hasHighExisting] = await Promise.all([
-    Entry.countDocuments({ studentId }),
-    Entry.exists({ studentId, severity: 'high' }),
+    Entry.countDocuments({ studentId, ...dateFilter }),
+    Entry.exists({ studentId, severity: 'high', ...dateFilter }),
   ]);
   const hasHigh = remark.severity === 'high' || !!hasHighExisting;
   const escalationLevel = computeEscalationLevel(existingCount + 1, hasHigh);

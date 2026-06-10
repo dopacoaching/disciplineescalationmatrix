@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getStudents, createStudent, updateStudent, deleteStudent } from '../controllers/students.controller';
+import { getStudents, createStudent, updateStudent, deleteStudent, clearStudentFlag } from '../controllers/students.controller';
 import { authenticate } from '../middleware/authenticate';
 import { requireAdmin } from '../middleware/requireAdmin';
 import { requireStaff } from '../middleware/requireStaff';
@@ -10,9 +10,10 @@ import { createStudentSchema, updateStudentSchema } from '../validators/student.
 
 const router = Router();
 
-router.get('/',       authenticate,              asyncHandler(getStudents));
-router.post('/',      authenticate, requireStaff, validateBody(createStudentSchema), requireBatchAccess, asyncHandler(createStudent));
-router.patch('/:id',  authenticate, requireAdmin, validateBody(updateStudentSchema), asyncHandler(updateStudent));
-router.delete('/:id', authenticate, requireAdmin, asyncHandler(deleteStudent));
+router.get('/',               authenticate,              asyncHandler(getStudents));
+router.post('/',              authenticate, requireStaff, validateBody(createStudentSchema), requireBatchAccess, asyncHandler(createStudent));
+router.post('/:id/clear-flag', authenticate, requireAdmin, asyncHandler(clearStudentFlag));
+router.patch('/:id',          authenticate, requireAdmin, validateBody(updateStudentSchema), asyncHandler(updateStudent));
+router.delete('/:id',         authenticate, requireAdmin, asyncHandler(deleteStudent));
 
 export default router;

@@ -46,27 +46,27 @@ export default function MyEntriesPage() {
             <p className="text-sm text-gray-400">{t('empty.noEntries')}</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="bg-surface rounded-2xl border border-bsoft shadow-card overflow-hidden">
+            {/* Column headers */}
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-bsoft bg-page/50">
+              <div className="w-1 shrink-0" />
+              <p className="flex-1 text-[10px] font-bold uppercase tracking-wider text-navy/50 dark:text-gray-500">{t('col.name')} / {t('col.remark')}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-navy/50 dark:text-gray-500 w-14 text-right">{t('col.severity')}</p>
+            </div>
             {filtered?.map(entry => (
               <div
                 key={entry._id}
-                className={`bg-surface rounded-2xl border-l-4 border border-bsoft shadow-card ${severityBorder[entry.severity] ?? 'border-l-gray-200'}`}
+                className={`flex items-start gap-3 px-4 py-3 border-b border-bsoft last:border-0 border-l-4 ${severityBorder[entry.severity] ?? 'border-l-gray-200'}`}
               >
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 dark:text-gray-100 truncate text-sm">{entry.studentId?.fullName}</p>
-                      <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 font-medium">{t(`remark.${entry.remarkId}`)}</p>
-                      {entry.customRemark && (
-                        <p className="text-xs text-gray-400 italic mt-0.5">"{entry.customRemark}"</p>
-                      )}
-                      <p className="text-xs text-gray-400 mt-1.5">
-                        {new Date(entry.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                    <Badge variant={entry.severity as BadgeVariant} label={t(`severity.${entry.severity}`)} />
-                  </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-gray-900 dark:text-gray-100 truncate text-sm">{entry.studentId?.fullName}</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mt-0.5 font-medium">{t(`remark.${entry.remarkId}`)}</p>
+                  {entry.customRemark && (
+                    <p className="text-xs text-gray-400 italic mt-0.5">"{entry.customRemark}"</p>
+                  )}
+                  <p className="text-xs text-gray-400 mt-1">{new Date(entry.createdAt).toLocaleString()}</p>
                 </div>
+                <Badge variant={entry.severity as BadgeVariant} label={t(`severity.${entry.severity}`)} />
               </div>
             ))}
           </div>

@@ -87,11 +87,16 @@ export default function AdminBatchesPage() {
         {pageError && <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{pageError}</p>}
 
         {isLoading ? <Spinner className="py-8" /> : (
-          <div className="space-y-2">
+          <div className="bg-surface rounded-2xl border border-bsoft shadow-card overflow-hidden">
+            {/* Column headers */}
+            <div className="flex items-center gap-3 px-4 py-2 border-b border-bsoft bg-page/50">
+              <p className="flex-1 text-[10px] font-bold uppercase tracking-wider text-navy/50 dark:text-gray-500">{t('col.name')}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-navy/50 dark:text-gray-500">{t('col.status')}</p>
+            </div>
             {batches?.map(batch => (
               <div
                 key={batch._id}
-                className={`bg-surface rounded-2xl border border-bsoft shadow-card p-4 transition-opacity ${batch.isArchived ? 'opacity-60' : ''}`}
+                className={`px-4 py-3 border-b border-bsoft last:border-0 transition-opacity ${batch.isArchived ? 'opacity-60' : ''}`}
               >
                 {editId === batch._id ? (
                   <div className="space-y-1.5">
@@ -112,7 +117,7 @@ export default function AdminBatchesPage() {
                   <div className="flex items-center justify-between gap-2">
                     <div className="min-w-0">
                       <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">{batch.name}</p>
-                      {batch.isArchived && <Badge variant="archived" label={t('batch.archived')} className="mt-1" />}
+                      {batch.isArchived && <Badge variant="archived" label={t('batch.archived')} className="mt-0.5" />}
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <button
@@ -123,7 +128,7 @@ export default function AdminBatchesPage() {
                       </button>
                       <button
                         onClick={() => handleArchive(batch._id, batch.isArchived)}
-                        className="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:underline px-2 py-1.5 rounded-lg hover:bg-surface2 transition-colors"
+                        className="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:underline px-2 py-1.5 rounded-lg hover:bg-page transition-colors"
                       >
                         {batch.isArchived ? t('batch.unarchive') : t('batch.archive')}
                       </button>

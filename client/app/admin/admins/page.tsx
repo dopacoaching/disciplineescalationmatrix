@@ -67,31 +67,32 @@ export default function AdminAdminsPage() {
         {toggleError && <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{toggleError}</p>}
 
         {isLoading ? <Spinner className="py-8" /> : (
-          <div className="space-y-2">
+          <div className="bg-surface rounded-2xl border border-bsoft shadow-card overflow-hidden">
+            {/* Column headers */}
+            <div className="flex items-center gap-3 px-4 py-2 border-b border-bsoft bg-page/50">
+              <p className="flex-1 text-[10px] font-bold uppercase tracking-wider text-navy/50 dark:text-gray-500">{t('col.username')}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-navy/50 dark:text-gray-500">{t('col.status')}</p>
+            </div>
             {admins?.map(admin => (
               <div
                 key={admin._id}
-                className={`bg-surface rounded-2xl border border-bsoft shadow-card p-4 flex items-center justify-between ${!admin.isActive ? 'opacity-60' : ''}`}
+                className={`flex items-center gap-3 px-4 py-3 border-b border-bsoft last:border-0 ${!admin.isActive ? 'opacity-60' : ''}`}
               >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-navy/10 dark:bg-navy/20 flex items-center justify-center shrink-0">
-                      <span className="text-xs font-bold text-navy dark:text-gray-300">{admin.username.charAt(0).toUpperCase()}</span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">@{admin.username}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{admin.email}</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1.5 pl-10">{t('admin.joined')} {new Date(admin.createdAt).toLocaleDateString()}</p>
-                  {!admin.isActive && <p className="text-xs text-danger font-semibold pl-10 mt-0.5">{t('action.inactive')}</p>}
+                <div className="w-8 h-8 rounded-full bg-navy/10 dark:bg-navy/20 flex items-center justify-center shrink-0">
+                  <span className="text-xs font-bold text-navy dark:text-gray-300">{admin.username.charAt(0).toUpperCase()}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">@{admin.username}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{admin.email}</p>
+                  <p className="text-xs text-gray-400">{t('admin.joined')} {new Date(admin.createdAt).toLocaleDateString()}</p>
+                  {!admin.isActive && <p className="text-xs text-danger font-semibold">{t('action.inactive')}</p>}
                 </div>
                 {admin._id !== currentUser?.id && (
                   <Button
                     size="sm"
                     variant={admin.isActive ? 'ghost' : 'secondary'}
                     onClick={() => handleToggle(admin)}
-                    className="shrink-0 ml-2"
+                    className="shrink-0"
                   >
                     {admin.isActive ? t('action.deactivate') : t('action.reactivate')}
                   </Button>

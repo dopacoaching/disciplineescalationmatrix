@@ -5,6 +5,8 @@ export interface IStudent extends Document {
   fullName: string;
   batchId: mongoose.Types.ObjectId;
   currentEscalationLevel: 1 | 2 | 3;
+  lastClearedAt: Date | null;
+  lastAdminActionNote: string;
   createdAt: Date;
   createdBy: mongoose.Types.ObjectId;
 }
@@ -14,6 +16,8 @@ const StudentSchema = new Schema<IStudent>({
   fullName: { type: String, required: true },
   batchId: { type: Schema.Types.ObjectId, ref: 'Batch', required: true },
   currentEscalationLevel: { type: Number, enum: [1, 2, 3], default: 1 },
+  lastClearedAt: { type: Date, default: null },
+  lastAdminActionNote: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now },
   createdBy: { type: Schema.Types.ObjectId, ref: 'Staff', required: true },
 });
