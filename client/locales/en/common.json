@@ -185,5 +185,17 @@
   "col.role": "Role",
   "col.status": "Status",
   "col.username": "Username",
-  "col.email": "Email"
+  "col.email": "Email",
+  "action.done": "Got it",
+  "pwa.bannerTitle": "Install App",
+  "pwa.bannerSubtitle": "Add to your home screen for quick access",
+  "pwa.install": "Install",
+  "pwa.iosTitle": "Add to Home Screen",
+  "pwa.iosSubtitle": "Install this app on your iPhone for the best experience",
+  "pwa.iosStep1a": "Tap the",
+  "pwa.iosStep1b": "Share",
+  "pwa.iosStep1c": "button at the bottom of your browser",
+  "pwa.iosStep2a": "Scroll down and tap",
+  "pwa.iosStep2b": "Add to Home Screen",
+  "pwa.iosStep3": "Tap \"Add\" in the top right corner"
 }

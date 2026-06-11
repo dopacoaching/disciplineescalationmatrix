@@ -10,6 +10,7 @@ import { setLanguage } from '@/store/languageSlice';
 import { setTheme } from '@/store/themeSlice';
 import { useMeQuery } from '@/store/api/authApi';
 import { useTranslation } from 'react-i18next';
+import { PwaInstallBanner } from '@/components/ui/PwaInstallBanner';
 
 // Public paths where no session exists yet — skip /me entirely to avoid 401 noise
 const PUBLIC_PATHS = ['/', '/login', '/admin/login', '/offline'];
@@ -123,7 +124,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <Provider store={store}>
       <ThemeInitializer />
-      <AuthInitializer>{children}</AuthInitializer>
+      <AuthInitializer>
+        {children}
+        <PwaInstallBanner />
+      </AuthInitializer>
     </Provider>
   );
 }

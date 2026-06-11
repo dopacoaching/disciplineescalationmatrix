@@ -185,5 +185,17 @@
   "col.role": "റോൾ",
   "col.status": "സ്റ്റാറ്റസ്",
   "col.username": "യൂസർനെയിം",
-  "col.email": "ഇമെയിൽ"
+  "col.email": "ഇമെയിൽ",
+  "action.done": "മനസ്സിലായി",
+  "pwa.bannerTitle": "ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യൂ",
+  "pwa.bannerSubtitle": "ഹോം സ്ക്രീനിൽ ചേർക്കൂ",
+  "pwa.install": "ഇൻസ്റ്റാൾ",
+  "pwa.iosTitle": "ഹോം സ്ക്രീനിൽ ചേർക്കൂ",
+  "pwa.iosSubtitle": "മികച്ച അനുഭവത്തിനായി ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യൂ",
+  "pwa.iosStep1a": "ബ്രൗസറിൻ്റെ അടിഭാഗത്തുള്ള",
+  "pwa.iosStep1b": "Share",
+  "pwa.iosStep1c": "ബട്ടൺ ടാപ്പ് ചെയ്യൂ",
+  "pwa.iosStep2a": "താഴേക്ക് സ്ക്രോൾ ചെയ്ത്",
+  "pwa.iosStep2b": "Add to Home Screen",
+  "pwa.iosStep3": "മുകളിൽ വലതുവശത്ത് \"Add\" ടാപ്പ് ചെയ്യൂ"
 }
