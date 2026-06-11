@@ -28,7 +28,7 @@ export default function RemarkEntryPage() {
   const previewLevel = selected
     ? computePreviewLevel(
         currentCount + 1,
-        selectedRemark?.severity === 'high' || student?.currentEscalationLevel === 3
+        selectedRemark?.severity === 'high'
       )
     : null;
 

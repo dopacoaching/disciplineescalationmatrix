@@ -100,7 +100,7 @@ export default function AdminLoginPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
             label={t('login.identifier')}
-            placeholder="admin@dopacoaching.com"
+            placeholder="Email or username"
             autoComplete="username"
             {...register('identifier')}
             error={errors.identifier?.message}

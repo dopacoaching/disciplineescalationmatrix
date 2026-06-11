@@ -16,7 +16,7 @@ i18n
     defaultNS: 'common',
     fallbackLng: 'en',
     detection: {
-      order: ['localStorage'],
+      order: ['localStorage', 'navigator'],
       lookupLocalStorage: 'dopa_lang',
       caches: ['localStorage'],
     },
