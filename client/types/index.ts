@@ -17,6 +17,7 @@ export interface Student {
   currentEscalationLevel: EscalationLevel;
   lastClearedAt?: string | null;
   lastAdminActionNote?: string;
+  lastClearedByUsername?: string;
   entryCount: number;
   createdAt: string;
 }
@@ -29,6 +30,7 @@ export interface PopulatedStudent {
   currentEscalationLevel: EscalationLevel;
   lastClearedAt?: string | null;
   lastAdminActionNote?: string;
+  lastClearedByUsername?: string;
   entryCount: number;
   createdAt: string;
 }

@@ -116,7 +116,12 @@ export async function clearStudentFlag(req: Request, res: Response): Promise<voi
   }
   const student = await Student.findByIdAndUpdate(
     id,
-    { lastClearedAt: new Date(), lastAdminActionNote: actionNote.trim(), currentEscalationLevel: 1 },
+    {
+      lastClearedAt: new Date(),
+      lastAdminActionNote: actionNote.trim(),
+      lastClearedByUsername: req.user!.username,
+      currentEscalationLevel: 1,
+    },
     { new: true }
   ).populate('batchId', 'name isArchived');
   if (!student) { res.status(404).json({ message: 'Student not found' }); return; }

@@ -23,7 +23,12 @@ export async function POST(req: NextRequest, { params }: Ctx): Promise<NextRespo
     }
     const student = await Student.findByIdAndUpdate(
       id,
-      { lastClearedAt: new Date(), lastAdminActionNote: actionNote.trim(), currentEscalationLevel: 1 },
+      {
+        lastClearedAt: new Date(),
+        lastAdminActionNote: actionNote.trim(),
+        lastClearedByUsername: user.username,
+        currentEscalationLevel: 1,
+      },
       { new: true }
     ).populate('batchId', 'name isArchived');
     if (!student) return NextResponse.json({ message: 'Student not found' }, { status: 404 });

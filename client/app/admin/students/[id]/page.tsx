@@ -153,12 +153,20 @@ export default function StudentProfilePage() {
                 </div>
               )}
 
-              {/* Previous admin action note */}
+              {/* Previous admin action summary */}
               {student.lastAdminActionNote && student.lastClearedAt && (
                 <div className="mt-3 bg-success/5 border border-success/20 rounded-xl p-3">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-success mb-1">{t('student.lastActionNote')}</p>
                   <p className="text-xs text-gray-700 dark:text-gray-300 italic">"{student.lastAdminActionNote}"</p>
-                  <p className="text-[10px] text-gray-400 mt-1">{t('student.clearedOn')}: {new Date(student.lastClearedAt).toLocaleString()}</p>
+                  <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                    {student.lastClearedByUsername && (
+                      <span className="text-[10px] font-semibold text-gray-600 dark:text-gray-300">
+                        @{student.lastClearedByUsername}
+                      </span>
+                    )}
+                    {student.lastClearedByUsername && <span className="text-gray-300 dark:text-gray-600 text-[10px]">·</span>}
+                    <span className="text-[10px] text-gray-400">{new Date(student.lastClearedAt).toLocaleString()}</span>
+                  </div>
                 </div>
               )}
 
@@ -240,12 +248,36 @@ export default function StudentProfilePage() {
                 return (
                   <div key={entry._id}>
                     {isClearPoint && (
-                      <div className="flex items-center gap-2 px-4 py-2 bg-success/5 border-y border-success/20">
-                        <div className="flex-1 h-px bg-success/30" />
-                        <span className="text-[10px] font-bold text-success uppercase tracking-wider shrink-0">
-                          {t('student.clearedOn')}: {new Date(student!.lastClearedAt!).toLocaleDateString()}
-                        </span>
-                        <div className="flex-1 h-px bg-success/30" />
+                      <div className="mx-3 my-2 rounded-xl bg-success/5 border border-success/25 overflow-hidden">
+                        {/* header bar */}
+                        <div className="flex items-center gap-2 px-3 py-2 bg-success/10 border-b border-success/20">
+                          <svg className="w-3.5 h-3.5 text-success shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-success flex-1">
+                            {t('student.adminActionRecorded')}
+                          </span>
+                          <span className="text-[10px] text-success/70 shrink-0">
+                            {new Date(student!.lastClearedAt!).toLocaleDateString()}
+                          </span>
+                        </div>
+                        {/* action note */}
+                        <div className="px-3 py-2.5">
+                          <p className="text-sm text-gray-800 dark:text-gray-200 leading-snug">
+                            "{student!.lastAdminActionNote}"
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
+                            <span className="font-medium">{t('student.actionBy')}:</span>
+                            {' '}
+                            <span className="font-semibold text-gray-700 dark:text-gray-300">
+                              @{student!.lastClearedByUsername || 'admin'}
+                            </span>
+                            <span className="text-gray-300 dark:text-gray-600 mx-1.5">·</span>
+                            {new Date(student!.lastClearedAt!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {', '}
+                            {new Date(student!.lastClearedAt!).toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
                     )}
                     <div className={`border-b border-bsoft last:border-0 ${deleteEntryId === entry._id ? 'bg-danger-bg/30' : ''}`}>

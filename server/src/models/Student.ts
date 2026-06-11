@@ -7,6 +7,7 @@ export interface IStudent extends Document {
   currentEscalationLevel: 1 | 2 | 3;
   lastClearedAt: Date | null;
   lastAdminActionNote: string;
+  lastClearedByUsername: string;
   createdAt: Date;
   createdBy: mongoose.Types.ObjectId;
 }
@@ -18,6 +19,7 @@ const StudentSchema = new Schema<IStudent>({
   currentEscalationLevel: { type: Number, enum: [1, 2, 3], default: 1 },
   lastClearedAt: { type: Date, default: null },
   lastAdminActionNote: { type: String, default: '' },
+  lastClearedByUsername: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now },
   createdBy: { type: Schema.Types.ObjectId, ref: 'Staff', required: true },
 });
