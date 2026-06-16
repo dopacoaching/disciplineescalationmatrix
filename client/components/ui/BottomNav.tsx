@@ -28,7 +28,7 @@ export function StaffBottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-bsoft shadow-nav flex z-30 transition-colors duration-200">
+    <nav className="glass fixed bottom-0 left-0 right-0 border-t border-bsoft shadow-nav flex z-30 pb-[env(safe-area-inset-bottom)] transition-colors duration-200">
       {items.map(item => {
         const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
         return (
@@ -78,7 +78,7 @@ export function AdminBottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-bsoft shadow-nav flex z-30 transition-colors duration-200">
+    <nav className="glass fixed bottom-0 left-0 right-0 border-t border-bsoft shadow-nav flex z-30 pb-[env(safe-area-inset-bottom)] transition-colors duration-200">
       {items.map(item => {
         const active = pathname === item.href || pathname.startsWith(item.href + '/');
         return (

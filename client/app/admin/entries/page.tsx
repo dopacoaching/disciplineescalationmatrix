@@ -84,7 +84,7 @@ export default function AdminEntriesPage() {
         <select
           value={batchId ?? ''}
           onChange={e => setBatchId(e.target.value || undefined)}
-          className="h-10 w-full px-3 rounded-xl border-2 border-bmedium text-sm bg-surface text-gray-700 dark:text-gray-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 font-medium"
+          className="h-10 w-full px-3 rounded-2xl border border-bmedium text-sm bg-surface text-gray-700 dark:text-gray-200 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/12 font-medium"
         >
           <option value="">{t('filter.allBatches')}</option>
           {batches?.map(b => (
@@ -96,7 +96,7 @@ export default function AdminEntriesPage() {
           <button
             onClick={() => handleExport('pdf')}
             disabled={!!downloading}
-            className="flex-1 flex items-center justify-center gap-1.5 h-10 rounded-xl border-2 border-danger/30 bg-danger/5 text-danger text-xs font-semibold hover:bg-danger/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 h-10 rounded-2xl border border-danger/30 bg-danger/5 text-danger text-xs font-semibold hover:bg-danger/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {downloading === 'pdf' ? (
               <>{t('export.downloading')}</>
@@ -112,7 +112,7 @@ export default function AdminEntriesPage() {
           <button
             onClick={() => handleExport('excel')}
             disabled={!!downloading}
-            className="flex-1 flex items-center justify-center gap-1.5 h-10 rounded-xl border-2 border-emerald-500/30 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400 text-xs font-semibold hover:bg-emerald-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 h-10 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400 text-xs font-semibold hover:bg-emerald-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {downloading === 'excel' ? (
               <>{t('export.downloading')}</>
@@ -133,7 +133,7 @@ export default function AdminEntriesPage() {
         <select
           value={sort}
           onChange={e => setSort(e.target.value)}
-          className="h-10 w-full px-3 rounded-xl border-2 border-bmedium text-sm bg-surface text-gray-700 dark:text-gray-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 font-medium"
+          className="h-10 w-full px-3 rounded-2xl border border-bmedium text-sm bg-surface text-gray-700 dark:text-gray-200 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/12 font-medium"
         >
           <option value="newest">{t('sort.mostRecent')}</option>
           <option value="oldest">{t('sort.oldest')}</option>
@@ -143,11 +143,11 @@ export default function AdminEntriesPage() {
         {isLoading ? (
           <Spinner className="py-12" />
         ) : entries?.length === 0 ? (
-          <div className="bg-surface rounded-2xl border border-bsoft shadow-card p-10 text-center">
+          <div className="bg-surface rounded-3xl border border-bsoft shadow-card p-10 text-center">
             <p className="text-sm text-gray-400">{t('empty.noEntries')}</p>
           </div>
         ) : (
-          <div className="bg-surface rounded-2xl border border-bsoft shadow-card overflow-hidden">
+          <div className="bg-surface rounded-3xl border border-bsoft shadow-card overflow-hidden">
             {/* Column headers */}
             <div className="flex items-center gap-2 px-4 py-2 border-b border-bsoft bg-page/50">
               <div className="w-1 shrink-0" />

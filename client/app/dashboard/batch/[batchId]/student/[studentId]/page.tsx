@@ -54,7 +54,7 @@ export default function RemarkEntryPage() {
       <div className="px-4 pt-4 space-y-4">
         {/* Student card */}
         {student && (
-          <div className="bg-surface rounded-2xl border border-bsoft shadow-card overflow-hidden">
+          <div className="bg-surface rounded-3xl border border-bsoft shadow-card overflow-hidden">
             <div className={`h-1 w-full ${student.currentEscalationLevel === 3 ? 'bg-danger' : student.currentEscalationLevel === 2 ? 'bg-flagged' : 'bg-success'}`} />
             <div className="p-4 flex items-center justify-between">
               <div>
@@ -79,14 +79,14 @@ export default function RemarkEntryPage() {
             <textarea
               value={customRemark}
               onChange={e => setCustomRemark(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border-2 border-bmedium bg-surface text-gray-900 dark:text-gray-100 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 min-h-[100px] resize-none text-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
+              className="w-full px-4 py-3 rounded-2xl border border-bmedium bg-surface text-gray-900 dark:text-gray-100 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/12 min-h-[100px] resize-none text-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
               placeholder="Describe the issue..."
             />
           </div>
         )}
 
         {selected && previewLevel && (
-          <div className="bg-surface rounded-2xl border border-bsoft shadow-card p-4 flex items-center justify-between">
+          <div className="bg-surface rounded-3xl border border-bsoft shadow-card p-4 flex items-center justify-between">
             <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">{t('entry.afterEntry')}</p>
             <Badge
               variant={escalationBadgeVariant(previewLevel)}

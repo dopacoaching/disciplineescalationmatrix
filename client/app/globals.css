@@ -9,22 +9,29 @@
   --color-primary-dark: #17829e;
   --color-navy:         #1a365d;
 
-  /* Semantic surface tokens — light mode */
-  --color-page:    #f0f4f8;
+  /* Semantic surface tokens — light mode (airy, low-contrast) */
+  --color-page:    #f5f7fb;
   --color-surface: #ffffff;
-  --color-surface2: #f8fafc;
-  --color-bsoft:   #f1f5f9;  /* border-gray-100 equivalent */
-  --color-bmedium: #e5e7eb;  /* border-gray-200 equivalent */
+  --color-surface2: #f3f6fa;
+  --color-bsoft:   #eef2f7;  /* hairline borders */
+  --color-bmedium: #e3e9f1;  /* input / divider borders */
+
+  /* Glass / translucent surfaces */
+  --glass-surface: rgba(255, 255, 255, 0.72);
+  --glass-border:  rgba(255, 255, 255, 0.55);
 }
 
 .dark {
   color-scheme: dark;
   /* Semantic surface tokens — dark mode (navy-tinted palette) */
-  --color-page:    #0f1b2d;
-  --color-surface: #1a2742;
-  --color-surface2: #223352;
-  --color-bsoft:   #2a3f5c;
-  --color-bmedium: #374f72;
+  --color-page:    #0c1626;
+  --color-surface: #16223a;
+  --color-surface2: #1d2b46;
+  --color-bsoft:   #213050;
+  --color-bmedium: #2e466b;
+
+  --glass-surface: rgba(22, 34, 58, 0.72);
+  --glass-border:  rgba(255, 255, 255, 0.08);
 }
 
 html {
@@ -43,6 +50,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-page);
   color: #1a365d;
+  letter-spacing: -0.011em;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
@@ -59,6 +67,22 @@ body {
 ::-webkit-scrollbar-track      { background: transparent; }
 ::-webkit-scrollbar-thumb      { background: #c7d2e0; border-radius: 999px; }
 ::-webkit-scrollbar-thumb:hover{ background: #94a3b8; }
+
+/* ── Glass surface (frosted, modern-minimal) ──────── */
+.glass {
+  background-color: var(--glass-surface);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  backdrop-filter: saturate(180%) blur(16px);
+}
+
+/* ── Entrance animation ───────────────────────────── */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 
 /* ── Focus ring ───────────────────────────────────── */
 *:focus-visible {

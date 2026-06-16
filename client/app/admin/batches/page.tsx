@@ -21,7 +21,7 @@ export default function AdminBatchesPage() {
   const [renameError, setRenameError] = useState<string | null>(null);
   const [pageError, setPageError] = useState<string | null>(null);
 
-  const inputClass = 'h-11 px-3.5 rounded-xl border-2 border-bmedium bg-surface text-gray-800 dark:text-gray-100 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-sm font-medium placeholder-gray-400 dark:placeholder-gray-600 transition-all';
+  const inputClass = 'h-11 px-3.5 rounded-2xl border border-bmedium bg-surface text-gray-800 dark:text-gray-100 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/12 text-sm font-medium placeholder-gray-400 dark:placeholder-gray-600 transition-all';
 
   const handleCreate = async () => {
     if (!newName.trim()) return;
@@ -69,7 +69,7 @@ export default function AdminBatchesPage() {
       <TopBar title={t('nav.batches')} />
       <div className="px-4 pt-4 space-y-4">
         {/* Create new */}
-        <div className="bg-surface rounded-2xl border border-bsoft shadow-card p-4">
+        <div className="bg-surface rounded-3xl border border-bsoft shadow-card p-4">
           <p className="text-xs font-bold text-navy/60 dark:text-gray-400 uppercase tracking-wider mb-3">{t('batch.newBatch')}</p>
           <div className="flex gap-2">
             <input
@@ -87,11 +87,11 @@ export default function AdminBatchesPage() {
         {pageError && <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{pageError}</p>}
 
         {isLoading ? <Spinner className="py-8" /> : batches?.length === 0 ? (
-          <div className="bg-surface rounded-2xl border border-bsoft shadow-card p-10 text-center">
+          <div className="bg-surface rounded-3xl border border-bsoft shadow-card p-10 text-center">
             <p className="text-sm text-gray-400">{t('empty.noAdminBatches')}</p>
           </div>
         ) : (
-          <div className="bg-surface rounded-2xl border border-bsoft shadow-card overflow-hidden">
+          <div className="bg-surface rounded-3xl border border-bsoft shadow-card overflow-hidden">
             {/* Column headers */}
             <div className="flex items-center gap-3 px-4 py-2 border-b border-bsoft bg-page/50">
               <p className="flex-1 text-[10px] font-bold uppercase tracking-wider text-navy/50 dark:text-gray-500">{t('col.name')}</p>

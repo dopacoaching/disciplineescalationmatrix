@@ -48,11 +48,11 @@ export function TopBar({ title, showBack, backHref }: TopBarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-navy shadow-topbar px-4 h-14 flex items-center gap-2">
+    <header className="glass sticky top-0 z-40 border-b border-bsoft px-4 h-16 flex items-center gap-2">
       {showBack && (
         <button
           onClick={handleBack}
-          className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-white/10 active:bg-white/20 text-white transition-colors shrink-0"
+          className="flex items-center justify-center w-9 h-9 -ml-1 rounded-full text-navy dark:text-gray-200 hover:bg-surface2 active:bg-bmedium transition-colors shrink-0"
           aria-label="Go back"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,12 +60,12 @@ export function TopBar({ title, showBack, backHref }: TopBarProps) {
           </svg>
         </button>
       )}
-      <h1 className="flex-1 text-[15px] font-bold text-white truncate tracking-wide">{title}</h1>
+      <h1 className="flex-1 text-[17px] font-bold text-navy dark:text-gray-100 truncate tracking-tight">{title}</h1>
 
       {/* Theme toggle */}
       <button
         onClick={() => dispatch(toggleTheme())}
-        className="flex items-center justify-center w-8 h-8 rounded-full bg-white/15 text-white border border-white/25 hover:bg-white/25 active:bg-white/30 transition-colors shrink-0"
+        className="flex items-center justify-center w-9 h-9 rounded-full bg-surface2 text-navy/70 dark:text-gray-300 border border-bmedium hover:bg-bmedium active:scale-95 transition-all shrink-0"
         aria-label="Toggle theme"
       >
         {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
@@ -74,7 +74,7 @@ export function TopBar({ title, showBack, backHref }: TopBarProps) {
       {/* Language toggle */}
       <button
         onClick={toggleLang}
-        className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-white/15 text-white border border-white/25 hover:bg-white/25 active:bg-white/30 transition-colors shrink-0"
+        className="text-[11px] font-bold px-3 h-9 rounded-full bg-surface2 text-navy/70 dark:text-gray-300 border border-bmedium hover:bg-bmedium active:scale-95 transition-all shrink-0"
         aria-label="Toggle language"
       >
         {lang === 'en' ? 'ML' : 'EN'}

@@ -25,9 +25,9 @@ export function RemarkSelector({ selected, onSelect }: RemarkSelectorProps) {
           <button
             key={remark.id}
             onClick={() => onSelect(isSelected ? null : remark.id)}
-            className={`w-full text-left px-4 py-3.5 rounded-xl border-2 transition-all duration-150 flex items-center gap-3
+            className={`w-full text-left px-4 py-4 rounded-2xl border-2 transition-all duration-150 flex items-center gap-3
               ${isSelected
-                ? 'border-primary bg-primary/5 dark:bg-primary/10 shadow-sm'
+                ? 'border-primary bg-primary/5 dark:bg-primary/10 shadow-card-md'
                 : 'border-transparent bg-surface shadow-card hover:shadow-card-md hover:border-bmedium'
               }`}
           >

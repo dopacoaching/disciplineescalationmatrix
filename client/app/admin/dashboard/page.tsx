@@ -41,11 +41,11 @@ export default function AdminDashboard() {
             </Link>
           </div>
           {flaggedLoading ? <Spinner className="py-6" /> : flagged?.length === 0 ? (
-            <div className="bg-surface rounded-2xl border border-bsoft shadow-card p-6 text-center">
+            <div className="bg-surface rounded-3xl border border-bsoft shadow-card p-6 text-center">
               <p className="text-sm text-gray-400">{t('empty.noStudents')}</p>
             </div>
           ) : (
-            <div className="bg-surface rounded-2xl border border-bsoft shadow-card overflow-hidden">
+            <div className="bg-surface rounded-3xl border border-bsoft shadow-card overflow-hidden">
               {/* Column headers */}
               <div className="flex items-center gap-3 px-4 py-2 border-b border-bsoft bg-page/50">
                 <div className="w-1 shrink-0" />
@@ -72,7 +72,7 @@ export default function AdminDashboard() {
         </section>
 
         <Link href="/admin/admins">
-          <div className="bg-surface rounded-2xl border border-bsoft shadow-card hover:shadow-card-md transition-shadow p-4 flex items-center justify-between">
+          <div className="bg-surface rounded-3xl border border-bsoft shadow-card hover:shadow-card-md transition-shadow p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-navy-bg dark:bg-navy/20 flex items-center justify-center">
                 <svg className="w-4 h-4 text-navy dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

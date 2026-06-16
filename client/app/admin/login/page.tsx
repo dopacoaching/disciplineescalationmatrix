@@ -60,19 +60,19 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-navy via-navy-light to-[#17829e] flex flex-col items-center justify-center px-4 py-10">
+    <main className="min-h-screen bg-brand-gradient flex flex-col items-center justify-center px-4 py-10">
       {/* Controls: language + theme */}
       <div className="absolute top-4 right-4 flex gap-2">
         <button
           onClick={() => dispatch(toggleTheme())}
-          className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/15 text-white border border-white/25 hover:bg-white/25 transition-colors"
+          className="flex items-center justify-center w-9 h-9 rounded-full bg-white/15 text-white border border-white/25 hover:bg-white/25 transition-colors"
           aria-label="Toggle theme"
         >
           {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
         </button>
         <button
           onClick={toggleLang}
-          className="text-xs font-bold px-3 py-1.5 rounded-lg bg-white/15 text-white border border-white/25 hover:bg-white/25 transition-colors"
+          className="text-xs font-bold px-3.5 h-9 rounded-full bg-white/15 text-white border border-white/25 hover:bg-white/25 transition-colors"
         >
           {lang === 'en' ? 'ML' : 'EN'}
         </button>

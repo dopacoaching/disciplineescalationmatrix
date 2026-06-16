@@ -10,8 +10,8 @@ interface CardProps {
 export function Card({ children, className = '', onClick }: CardProps) {
   return (
     <div
-      className={`rounded-2xl shadow-card border border-bsoft bg-surface p-4 transition-colors duration-200
-        ${onClick ? 'cursor-pointer active:scale-[0.985] hover:shadow-card-md transition-all duration-150' : ''}
+      className={`rounded-3xl shadow-card border border-bsoft bg-surface p-5 transition-all duration-200
+        ${onClick ? 'cursor-pointer active:scale-[0.985] hover:shadow-card-md hover:-translate-y-0.5' : ''}
         ${className}`}
       onClick={onClick}
     >

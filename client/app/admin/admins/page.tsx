@@ -67,11 +67,11 @@ export default function AdminAdminsPage() {
         {toggleError && <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{toggleError}</p>}
 
         {isLoading ? <Spinner className="py-8" /> : admins?.length === 0 ? (
-          <div className="bg-surface rounded-2xl border border-bsoft shadow-card p-10 text-center">
+          <div className="bg-surface rounded-3xl border border-bsoft shadow-card p-10 text-center">
             <p className="text-sm text-gray-400">{t('empty.noAdmins')}</p>
           </div>
         ) : (
-          <div className="bg-surface rounded-2xl border border-bsoft shadow-card overflow-hidden">
+          <div className="bg-surface rounded-3xl border border-bsoft shadow-card overflow-hidden">
             {/* Column headers */}
             <div className="flex items-center gap-3 px-4 py-2 border-b border-bsoft bg-page/50">
               <p className="flex-1 text-[10px] font-bold uppercase tracking-wider text-navy/50 dark:text-gray-500">{t('col.username')}</p>

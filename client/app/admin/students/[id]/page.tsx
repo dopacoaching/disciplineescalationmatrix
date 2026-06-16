@@ -125,7 +125,7 @@ export default function StudentProfilePage() {
       <div className="px-4 pt-4 space-y-4">
         {/* Student card */}
         {student && (
-          <div className="bg-surface rounded-2xl border border-bsoft shadow-card-md overflow-hidden">
+          <div className="bg-surface rounded-3xl border border-bsoft shadow-card-md overflow-hidden">
             <div className={`h-1.5 w-full ${student.currentEscalationLevel === 3 ? 'bg-danger' : student.currentEscalationLevel === 2 ? 'bg-flagged' : 'bg-success'}`} />
             <div className="p-4">
               <div className="flex items-start justify-between gap-3">
@@ -194,7 +194,7 @@ export default function StudentProfilePage() {
               <button
                 onClick={() => handleExport('pdf')}
                 disabled={!!downloading}
-                className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-xl border-2 border-danger/30 bg-danger/5 text-danger text-xs font-semibold hover:bg-danger/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-2xl border border-danger/30 bg-danger/5 text-danger text-xs font-semibold hover:bg-danger/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {downloading === 'pdf' ? t('export.downloading') : (
                   <>
@@ -208,7 +208,7 @@ export default function StudentProfilePage() {
               <button
                 onClick={() => handleExport('excel')}
                 disabled={!!downloading}
-                className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-xl border-2 border-emerald-500/30 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400 text-xs font-semibold hover:bg-emerald-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400 text-xs font-semibold hover:bg-emerald-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {downloading === 'excel' ? t('export.downloading') : (
                   <>
@@ -226,11 +226,11 @@ export default function StudentProfilePage() {
           {entriesLoading ? (
             <Spinner className="py-8" />
           ) : entries?.length === 0 ? (
-            <div className="bg-surface rounded-2xl border border-bsoft shadow-card p-8 text-center">
+            <div className="bg-surface rounded-3xl border border-bsoft shadow-card p-8 text-center">
               <p className="text-sm text-gray-400">{t('empty.noEntries')}</p>
             </div>
           ) : (
-            <div className="bg-surface rounded-2xl border border-bsoft shadow-card overflow-hidden">
+            <div className="bg-surface rounded-3xl border border-bsoft shadow-card overflow-hidden">
               {/* Column headers */}
               <div className="flex items-center gap-2 px-4 py-2 border-b border-bsoft bg-page/50">
                 <div className="w-1 shrink-0" />
@@ -330,7 +330,7 @@ export default function StudentProfilePage() {
           <select
             value={transferBatch}
             onChange={e => setTransferBatch(e.target.value)}
-            className="h-12 w-full px-4 rounded-xl border-2 border-bmedium bg-surface text-gray-700 dark:text-gray-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-sm font-medium"
+            className="h-12 w-full px-4 rounded-2xl border border-bmedium bg-surface text-gray-700 dark:text-gray-200 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/12 text-sm font-medium"
           >
             <option value="">{t('student.selectBatch')}</option>
             {batches?.filter(b => !b.isArchived && b._id !== student?.batchId?._id).map(b => (
@@ -353,7 +353,7 @@ export default function StudentProfilePage() {
             onChange={e => setActionNote(e.target.value)}
             rows={4}
             placeholder={t('student.clearFlagNote')}
-            className="w-full px-4 py-3 rounded-xl border-2 border-bmedium bg-surface text-gray-900 dark:text-gray-100 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 text-sm resize-none"
+            className="w-full px-4 py-3 rounded-2xl border border-bmedium bg-surface text-gray-900 dark:text-gray-100 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/12 text-sm resize-none"
           />
           {clearFlagError && <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{clearFlagError}</p>}
           <Button size="lg" loading={clearingFlag} onClick={handleClearFlag} disabled={!actionNote.trim()}>

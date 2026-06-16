@@ -12,16 +12,16 @@ interface BadgeProps {
 }
 
 const styles: Record<BadgeVariant, { chip: string; dot: string }> = {
-  low:      { chip: 'bg-success/12 text-success border border-success/20',    dot: 'bg-success' },
-  medium:   { chip: 'bg-flagged/12 text-flagged border border-flagged/20',    dot: 'bg-flagged' },
-  high:     { chip: 'bg-danger/12 text-danger border border-danger/20',       dot: 'bg-danger' },
-  level1:   { chip: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700', dot: 'bg-blue-400' },
-  level2:   { chip: 'bg-flagged-bg text-flagged border border-flagged/25',    dot: 'bg-flagged' },
-  level3:   { chip: 'bg-danger-bg text-danger border border-danger/25',       dot: 'bg-danger' },
-  teacher:  { chip: 'bg-primary-bg text-primary-dark border border-primary/20 dark:bg-primary/10 dark:text-primary dark:border-primary/30', dot: 'bg-primary' },
-  warden:   { chip: 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700', dot: 'bg-purple-500' },
-  admin:    { chip: 'bg-navy-bg text-navy border border-navy/20 dark:bg-navy/20 dark:text-gray-200 dark:border-navy/40', dot: 'bg-navy' },
-  archived: { chip: 'bg-surface2 text-gray-500 dark:text-gray-400 border border-bmedium', dot: 'bg-gray-400' },
+  low:      { chip: 'bg-success/12 text-success',    dot: 'bg-success' },
+  medium:   { chip: 'bg-flagged/12 text-flagged',    dot: 'bg-flagged' },
+  high:     { chip: 'bg-danger/12 text-danger',      dot: 'bg-danger' },
+  level1:   { chip: 'bg-blue-500/12 text-blue-600 dark:text-blue-300', dot: 'bg-blue-400' },
+  level2:   { chip: 'bg-flagged/12 text-flagged',    dot: 'bg-flagged' },
+  level3:   { chip: 'bg-danger/12 text-danger',      dot: 'bg-danger' },
+  teacher:  { chip: 'bg-primary/12 text-primary-dark dark:text-primary', dot: 'bg-primary' },
+  warden:   { chip: 'bg-purple-500/12 text-purple-600 dark:text-purple-300', dot: 'bg-purple-500' },
+  admin:    { chip: 'bg-navy/10 text-navy dark:bg-navy/30 dark:text-gray-200', dot: 'bg-navy' },
+  archived: { chip: 'bg-surface2 text-gray-500 dark:text-gray-400', dot: 'bg-gray-400' },
 };
 
 const SHOW_DOT: BadgeVariant[] = ['low', 'medium', 'high', 'level1', 'level2', 'level3'];
@@ -30,7 +30,7 @@ export function Badge({ variant, label, className = '' }: BadgeProps) {
   const { chip, dot } = styles[variant];
   const showDot = SHOW_DOT.includes(variant);
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${chip} ${className}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${chip} ${className}`}>
       {showDot && <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dot}`} />}
       {label}
     </span>

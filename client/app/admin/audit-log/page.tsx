@@ -126,7 +126,7 @@ export default function AuditLogPage() {
           </div>
         )}
 
-        <div className="bg-surface rounded-2xl border border-bsoft shadow-card px-4">
+        <div className="bg-surface rounded-3xl border border-bsoft shadow-card px-4">
           {isLoading ? (
             <Spinner className="py-8" />
           ) : !logs?.length ? (

@@ -105,7 +105,7 @@ export function PwaInstallBanner() {
   return (
     <>
       {/* Banner floating above bottom nav */}
-      <div className="fixed bottom-[68px] left-3 right-3 z-20 flex items-center gap-3 bg-surface border border-bsoft rounded-2xl shadow-card-md px-4 py-3 animate-in slide-in-from-bottom-2 duration-300">
+      <div className="fixed bottom-[68px] left-3 right-3 z-20 flex items-center gap-3 glass border border-bsoft rounded-3xl shadow-card-md px-4 py-3 animate-fade-in-up">
         <img src="/icons/icon-192.png" alt="" className="w-9 h-9 rounded-xl shrink-0 border border-bsoft" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold text-gray-900 dark:text-gray-100 leading-tight">{t('pwa.bannerTitle')}</p>
@@ -113,7 +113,7 @@ export function PwaInstallBanner() {
         </div>
         <button
           onClick={handleInstall}
-          className="shrink-0 h-8 px-3 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary/90 active:scale-95 transition-all"
+          className="shrink-0 h-9 px-4 rounded-full bg-primary text-white text-xs font-bold hover:brightness-110 active:scale-95 transition-all"
         >
           {t('pwa.install')}
         </button>

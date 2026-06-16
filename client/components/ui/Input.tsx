@@ -12,17 +12,17 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label htmlFor={inputId} className="block text-xs font-semibold text-navy/70 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+          <label htmlFor={inputId} className="block text-[13px] font-semibold text-navy/80 dark:text-gray-300 mb-2">
             {label}
           </label>
         )}
         <input
           ref={ref}
           id={inputId}
-          className={`h-12 w-full px-4 rounded-xl border-2 shadow-input transition-all duration-150 bg-surface text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600
+          className={`h-[52px] w-full px-4 rounded-2xl border transition-all duration-150 bg-surface2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600
             ${error
-              ? 'border-danger focus:border-danger focus:ring-2 focus:ring-danger/20'
-              : 'border-bmedium focus:border-primary focus:ring-2 focus:ring-primary/15'
+              ? 'border-danger focus:border-danger focus:ring-4 focus:ring-danger/15'
+              : 'border-bmedium focus:border-primary focus:ring-4 focus:ring-primary/12 focus:bg-surface'
             }
             focus:outline-none ${className}`}
           {...props}
