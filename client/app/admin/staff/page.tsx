@@ -130,7 +130,7 @@ export default function AdminStaffPage() {
                     {!s.isActive && <Badge variant="archived" label={t('action.inactive')} />}
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">@{s.username} · {s.entryCount} {t('student.entriesCount')}</p>
-                  <div className="flex flex-wrap gap-x-2 gap-y-1.5 mt-2">
+                  <div className="flex flex-wrap gap-x-3 gap-y-2 mt-2.5">
                     {(s.assignedBatches as Batch[])?.map(b => (
                       <span key={b._id} className="text-xs bg-primary-bg dark:bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium">{b.name}</span>
                     ))}
