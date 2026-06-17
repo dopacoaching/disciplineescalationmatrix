@@ -23,8 +23,16 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const filter: Record<string, unknown> = {};
     if (user.role !== 'admin') {
-      const ids = (user.assignedBatches || []).map(id => new mongoose.Types.ObjectId(id));
-      filter.batchId = { $in: ids };
+      const assigned = user.assignedBatches || [];
+      if (batchId) {
+        // Staff picked a specific batch — scope to just that one, but only if it's theirs
+        if (!mongoose.Types.ObjectId.isValid(batchId)) return NextResponse.json({ message: 'Invalid batchId' }, { status: 400 });
+        if (!assigned.includes(batchId)) return NextResponse.json({ message: 'Access denied to this batch' }, { status: 403 });
+        filter.batchId = new mongoose.Types.ObjectId(batchId);
+      } else {
+        // No batch specified — show all batches the staff is assigned to
+        filter.batchId = { $in: assigned.map(id => new mongoose.Types.ObjectId(id)) };
+      }
     } else if (batchId) {
       if (!mongoose.Types.ObjectId.isValid(batchId)) return NextResponse.json({ message: 'Invalid batchId' }, { status: 400 });
       filter.batchId = new mongoose.Types.ObjectId(batchId);
