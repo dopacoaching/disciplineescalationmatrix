@@ -66,8 +66,12 @@ export async function getStaffActivityWithCounts(dateFilter: Record<string, unkn
 
   const staff = await Staff.find(staffFilter).select('-passwordHash').sort({ fullName: 1 });
   const staffIds = staff.map(s => s._id);
+  // Count only entries about in-scope students, so a scoped admin doesn't see a
+  // staff member's activity volume in batches outside their scope.
+  const studentIds = await studentIdsInScope(scope);
+  const studentMatch = studentIds ? { studentId: { $in: studentIds } } : {};
   const activity = await Entry.aggregate([
-    { $match: { staffId: { $in: staffIds }, ...dateFilter } },
+    { $match: { staffId: { $in: staffIds }, ...studentMatch, ...dateFilter } },
     { $group: { _id: '$staffId', count: { $sum: 1 }, lastEntry: { $max: '$createdAt' } } },
   ]);
   const actMap: Record<string, { count: number; lastEntry: Date | null }> = {};

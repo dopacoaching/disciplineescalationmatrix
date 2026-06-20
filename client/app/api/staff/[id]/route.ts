@@ -23,16 +23,25 @@ export async function PATCH(req: NextRequest, { params }: Ctx): Promise<NextResp
     if (!result.success) return NextResponse.json({ message: result.error.errors[0].message }, { status: 400 });
     const { password, ...rest } = result.data;
 
-    // Scoped admins may only manage staff within their batches, and may not
-    // assign batches outside their scope.
+    // Scoped admins may only manage staff that share one of their batches, and
+    // their batch edits only control batches within their own scope.
     const scope = adminBatchScope(user);
     if (scope) {
       const existingStaff = await Staff.findById(id).select('assignedBatches');
       if (!existingStaff) return NextResponse.json({ message: 'Staff not found' }, { status: 404 });
-      const inScope = (existingStaff.assignedBatches || []).some((b: mongoose.Types.ObjectId) => scope.some(id => id.toString() === b.toString()));
-      if (!inScope) return NextResponse.json({ message: 'Access denied to this staff member' }, { status: 403 });
-      if (rest.assignedBatches && rest.assignedBatches.some(b => !scope.some(id => id.toString() === b))) {
-        return NextResponse.json({ message: 'Cannot assign a batch outside your access' }, { status: 403 });
+      const existing: string[] = (existingStaff.assignedBatches || []).map((b: mongoose.Types.ObjectId) => b.toString());
+      const inScopeSet = new Set(scope.map(id => id.toString()));
+      // Must already co-manage this staff member (share at least one batch).
+      if (!existing.some(b => inScopeSet.has(b))) {
+        return NextResponse.json({ message: 'Access denied to this staff member' }, { status: 403 });
+      }
+      // When batches are edited, preserve the staff's batches outside this admin's
+      // scope and let the admin control only the in-scope portion — they can
+      // neither add batches they don't own nor strip ones another admin manages.
+      if (rest.assignedBatches !== undefined) {
+        const preserved = existing.filter(b => !inScopeSet.has(b));
+        const submittedInScope = rest.assignedBatches.filter(b => inScopeSet.has(b));
+        rest.assignedBatches = Array.from(new Set([...preserved, ...submittedInScope]));
       }
     }
 
