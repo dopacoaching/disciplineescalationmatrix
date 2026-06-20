@@ -4,7 +4,7 @@ import { connectDB, isDuplicateKeyError } from '@/lib/server/db';
 import Staff from '@/lib/server/models/Staff';
 import Entry from '@/lib/server/models/Entry';
 import '@/lib/server/models/Batch';
-import { getAuthUser } from '@/lib/server/auth';
+import { getAuthUser, adminBatchScope } from '@/lib/server/auth';
 import { hashPassword } from '@/lib/server/hash';
 import { createStaffSchema } from '@/lib/server/validators/staff.validator';
 import { writeAuditLog } from '@/lib/server/audit';
@@ -29,7 +29,15 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       filter.$or = [{ fullName: { $regex: escaped, $options: 'i' } }, { username: { $regex: escaped, $options: 'i' } }];
     }
     if (role) filter.role = role;
-    if (batchId) filter.assignedBatches = new mongoose.Types.ObjectId(batchId);
+
+    // Scoped admins only see staff assigned to one of their batches.
+    const scope = adminBatchScope(user);
+    if (batchId) {
+      if (scope && !scope.some(id => id.toString() === batchId)) return NextResponse.json({ message: 'Access denied to this batch' }, { status: 403 });
+      filter.assignedBatches = new mongoose.Types.ObjectId(batchId);
+    } else if (scope) {
+      filter.assignedBatches = { $in: scope };
+    }
 
     const staff = await Staff.find(filter)
       .select('-passwordHash')
@@ -63,6 +71,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const result = createStaffSchema.safeParse(body);
     if (!result.success) return NextResponse.json({ message: result.error.errors[0].message }, { status: 400 });
     const { fullName, username, password, role, assignedBatches } = result.data;
+
+    // A scoped admin can only assign staff to batches within their own scope, and
+    // must assign at least one — otherwise the new staff would be invisible to them.
+    const scope = adminBatchScope(user);
+    if (scope) {
+      if ((assignedBatches || []).length === 0) {
+        return NextResponse.json({ message: 'Assign at least one of your batches' }, { status: 400 });
+      }
+      if ((assignedBatches || []).some(b => !scope.some(id => id.toString() === b))) {
+        return NextResponse.json({ message: 'Cannot assign a batch outside your access' }, { status: 403 });
+      }
+    }
+
     const passwordHash = await hashPassword(password);
     const staff = await Staff.create({
       fullName, username: username.toLowerCase(), passwordHash, role,

@@ -1,5 +1,6 @@
 'use client';
 import { useTranslation } from 'react-i18next';
+import { useAppSelector } from '@/store';
 import { useGetDashboardStatsQuery, useGetFlaggedQuery } from '@/store/api/dashboardApi';
 import { TopBar } from '@/components/ui/TopBar';
 import { AdminBottomNav } from '@/components/ui/BottomNav';
@@ -11,6 +12,7 @@ import Link from 'next/link';
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
+  const isSuper = useAppSelector(s => s.auth.user?.isSuperAdmin) !== false;
 
   const { data: stats, isLoading: statsLoading } = useGetDashboardStatsQuery({});
   const { data: flagged, isLoading: flaggedLoading } = useGetFlaggedQuery({});
@@ -71,6 +73,7 @@ export default function AdminDashboard() {
           )}
         </section>
 
+        {isSuper && (
         <Link href="/admin/admins">
           <div className="bg-surface rounded-3xl border border-bsoft shadow-card hover:shadow-card-md transition-shadow p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -86,6 +89,7 @@ export default function AdminDashboard() {
             </svg>
           </div>
         </Link>
+        )}
       </div>
       <AdminBottomNav />
     </div>

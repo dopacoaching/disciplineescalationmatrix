@@ -68,7 +68,10 @@ export interface Admin {
   _id: string;
   email: string;
   username: string;
+  fullName?: string;
   isActive: boolean;
+  isSuperAdmin: boolean;
+  assignedBatches: string[] | Batch[];
   createdAt: string;
 }
 

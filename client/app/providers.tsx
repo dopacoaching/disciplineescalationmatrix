@@ -109,6 +109,7 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
         fullName: data.fullName,
         role: data.role,
         assignedBatches: data.assignedBatches,
+        isSuperAdmin: data.isSuperAdmin,
       }));
     }
   }, [data, isLoading, isError, isPublic, dispatch, pathname, router]);

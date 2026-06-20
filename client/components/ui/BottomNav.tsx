@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useLogoutMutation } from '@/store/api/authApi';
-import { useAppDispatch } from '@/store';
+import { useAppDispatch, useAppSelector } from '@/store';
 import { clearUser } from '@/store/authSlice';
 import { baseApi } from '@/store/api/baseApi';
 import { useRouter } from 'next/navigation';
@@ -60,6 +60,8 @@ export function AdminBottomNav() {
   const [logout] = useLogoutMutation();
   const dispatch = useAppDispatch();
   const router = useRouter();
+  // Undefined = legacy admin, treated as super.
+  const isSuper = useAppSelector(s => s.auth.user?.isSuperAdmin) !== false;
 
   const handleLogout = async () => {
     await logout();
@@ -68,13 +70,14 @@ export function AdminBottomNav() {
     router.replace('/admin/login');
   };
 
+  // Batches and audit log are super-admin-only management areas.
   const items = [
     { href: '/admin/dashboard', label: t('nav.dashboard'), icon: <ChartIcon /> },
     { href: '/admin/students',  label: t('nav.students'),  icon: <UsersIcon /> },
     { href: '/admin/staff',     label: t('nav.staff'),     icon: <PersonIcon /> },
-    { href: '/admin/batches',   label: t('nav.batches'),   icon: <FolderIcon /> },
+    ...(isSuper ? [{ href: '/admin/batches', label: t('nav.batches'), icon: <FolderIcon /> }] : []),
     { href: '/admin/entries',   label: t('nav.entries'),   icon: <ListIcon /> },
-    { href: '/admin/audit-log', label: t('nav.auditLog'),  icon: <AuditIcon /> },
+    ...(isSuper ? [{ href: '/admin/audit-log', label: t('nav.auditLog'), icon: <AuditIcon /> }] : []),
   ];
 
   return (

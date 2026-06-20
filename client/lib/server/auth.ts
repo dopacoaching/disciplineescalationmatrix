@@ -1,12 +1,45 @@
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 
 export interface AuthPayload {
   id: string;
   role: 'admin' | 'teacher' | 'warden';
   username: string;
   assignedBatches?: string[];
+  // Only present for admins. Absent (undefined) is treated as a super admin so
+  // pre-existing admin sessions/tokens keep full access without a migration.
+  isSuperAdmin?: boolean;
+}
+
+/**
+ * A super admin has unrestricted access to every batch and may manage other
+ * admins. Any admin whose isSuperAdmin is not explicitly false is super — this
+ * makes existing admins (created before this feature) super by default.
+ */
+export function isSuperAdmin(user: AuthPayload | null): boolean {
+  return !!user && user.role === 'admin' && user.isSuperAdmin !== false;
+}
+
+/**
+ * Batch restriction for an admin. Returns `null` for full (unrestricted) access
+ * — i.e. super admins — and an array of allowed batch ObjectIds for a scoped
+ * admin. Not meant for staff (their scoping is handled inline per-route).
+ */
+export function adminBatchScope(user: AuthPayload): mongoose.Types.ObjectId[] | null {
+  if (isSuperAdmin(user)) return null;
+  return (user.assignedBatches || []).map(id => new mongoose.Types.ObjectId(id));
+}
+
+/**
+ * Whether an admin may act on a resource belonging to the given batch. Super
+ * admins always can; scoped admins only within their assigned batches.
+ */
+export function adminCanAccessBatch(user: AuthPayload, batchId: string | mongoose.Types.ObjectId): boolean {
+  const scope = adminBatchScope(user);
+  if (scope === null) return true;
+  return scope.some(id => id.toString() === batchId.toString());
 }
 
 export async function getAuthUser(): Promise<AuthPayload | null> {

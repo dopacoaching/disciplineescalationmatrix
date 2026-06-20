@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/server/db';
-import { getAuthUser } from '@/lib/server/auth';
+import { getAuthUser, isSuperAdmin } from '@/lib/server/auth';
 import AuditLog from '@/lib/server/models/AuditLog';
 
 const VALID_ACTIONS = new Set(['auth', 'staff', 'admin', 'batch', 'student', 'entry']);
@@ -9,7 +9,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const user = await getAuthUser();
     if (!user) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
-    if (user.role !== 'admin') return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
+    if (!isSuperAdmin(user)) return NextResponse.json({ message: 'Super admin access required' }, { status: 403 });
     await connectDB();
 
     const sp = req.nextUrl.searchParams;

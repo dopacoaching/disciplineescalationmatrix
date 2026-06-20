@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import { connectDB } from '@/lib/server/db';
 import Admin from '@/lib/server/models/Admin';
 import { verifyPassword } from '@/lib/server/hash';
@@ -40,12 +41,22 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
 
+    // Absent isSuperAdmin (legacy admins) resolves to super for safety.
+    const superAdmin = admin.isSuperAdmin !== false;
+    const assignedBatches = superAdmin ? [] : (admin.assignedBatches || []).map((id: mongoose.Types.ObjectId) => id.toString());
     const token = jwt.sign(
-      { id: admin._id.toString(), role: 'admin', username: admin.username },
+      { id: admin._id.toString(), role: 'admin', username: admin.username, isSuperAdmin: superAdmin, assignedBatches },
       process.env.JWT_SECRET!,
       { expiresIn: (process.env.JWT_EXPIRES_IN || '8h') as string } as jwt.SignOptions,
     );
-    const res = NextResponse.json({ id: admin._id, username: admin.username, role: 'admin' });
+    const res = NextResponse.json({
+      id: admin._id,
+      username: admin.username,
+      fullName: admin.fullName,
+      role: 'admin',
+      isSuperAdmin: superAdmin,
+      assignedBatches,
+    });
     setAuthCookie(res, token);
     await writeAuditLog({ action: 'auth.login', actorId: admin._id.toString(), actorUsername: admin.username, actorRole: 'admin' });
     return res;

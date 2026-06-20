@@ -48,7 +48,14 @@ export default function AdminLoginPage() {
   const onSubmit = async (data: FormData) => {
     try {
       const user = await adminLogin(data).unwrap();
-      dispatch(setUser({ id: user.id, username: user.username, role: 'admin' }));
+      dispatch(setUser({
+        id: user.id,
+        username: user.username,
+        fullName: user.fullName,
+        role: 'admin',
+        assignedBatches: user.assignedBatches,
+        isSuperAdmin: user.isSuperAdmin,
+      }));
       router.replace('/admin/dashboard');
     } catch (err: any) {
       if (err?.data?.message === 'Account deactivated') {

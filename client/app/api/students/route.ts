@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import { connectDB } from '@/lib/server/db';
 import Student from '@/lib/server/models/Student';
 import '@/lib/server/models/Batch';
-import { getAuthUser } from '@/lib/server/auth';
+import { getAuthUser, adminBatchScope } from '@/lib/server/auth';
 import { getEntryCountsForStudents } from '@/lib/server/services/student.service';
 import { createStudentSchema } from '@/lib/server/validators/student.validator';
 import { writeAuditLog } from '@/lib/server/audit';
@@ -22,18 +22,20 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const toDate = sp.get('toDate') ?? undefined;
 
     const filter: Record<string, unknown> = {};
-    if (user.role !== 'admin') {
-      const assigned = user.assignedBatches || [];
+    // Batch scope: null = unrestricted (staff use their own list below; super admins see all).
+    const scope = user.role === 'admin' ? adminBatchScope(user) : (user.assignedBatches || []).map(id => new mongoose.Types.ObjectId(id));
+    if (scope) {
+      // Scoped admin or staff — limited to their assigned batches.
       if (batchId) {
-        // Staff picked a specific batch — scope to just that one, but only if it's theirs
+        // A specific batch was picked — narrow to it, but only if it is within scope.
         if (!mongoose.Types.ObjectId.isValid(batchId)) return NextResponse.json({ message: 'Invalid batchId' }, { status: 400 });
-        if (!assigned.includes(batchId)) return NextResponse.json({ message: 'Access denied to this batch' }, { status: 403 });
+        if (!scope.some(id => id.toString() === batchId)) return NextResponse.json({ message: 'Access denied to this batch' }, { status: 403 });
         filter.batchId = new mongoose.Types.ObjectId(batchId);
       } else {
-        // No batch specified — show all batches the staff is assigned to
-        filter.batchId = { $in: assigned.map(id => new mongoose.Types.ObjectId(id)) };
+        filter.batchId = { $in: scope };
       }
     } else if (batchId) {
+      // Super admin filtering by a specific batch.
       if (!mongoose.Types.ObjectId.isValid(batchId)) return NextResponse.json({ message: 'Invalid batchId' }, { status: 400 });
       filter.batchId = new mongoose.Types.ObjectId(batchId);
     }

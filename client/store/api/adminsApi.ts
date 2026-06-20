@@ -7,7 +7,7 @@ export const adminsApi = baseApi.injectEndpoints({
       query: () => '/admins',
       providesTags: ['Admin'],
     }),
-    createAdmin: builder.mutation<Admin, { email: string; username: string; password: string }>({
+    createAdmin: builder.mutation<Admin, { email: string; fullName: string; username: string; password: string; isSuperAdmin: boolean; assignedBatches: string[] }>({
       query: (body) => ({ url: '/admins', method: 'POST', body }),
       invalidatesTags: ['Admin'],
     }),

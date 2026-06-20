@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/server/db';
-import { getAuthUser } from '@/lib/server/auth';
+import { getAuthUser, adminBatchScope } from '@/lib/server/auth';
 import { buildDateFilter, getStaffActivityWithCounts } from '@/lib/server/services/dashboard.service';
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
@@ -11,7 +11,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     await connectDB();
     const sp = req.nextUrl.searchParams;
     const dateFilter = buildDateFilter(sp.get('fromDate') ?? undefined, sp.get('toDate') ?? undefined);
-    return NextResponse.json(await getStaffActivityWithCounts(dateFilter));
+    return NextResponse.json(await getStaffActivityWithCounts(dateFilter, adminBatchScope(user)));
   } catch {
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAppSelector } from '@/store';
 import { useGetBatchesQuery, useCreateBatchMutation, useUpdateBatchMutation, useDeleteBatchMutation } from '@/store/api/batchesApi';
 import { TopBar } from '@/components/ui/TopBar';
 import { AdminBottomNav } from '@/components/ui/BottomNav';
@@ -10,6 +11,7 @@ import { Spinner } from '@/components/ui/Spinner';
 
 export default function AdminBatchesPage() {
   const { t } = useTranslation();
+  const isSuper = useAppSelector(s => s.auth.user?.isSuperAdmin) !== false;
   const { data: batches, isLoading } = useGetBatchesQuery();
   const [createBatch, { isLoading: creating }] = useCreateBatchMutation();
   const [updateBatch] = useUpdateBatchMutation();
@@ -63,6 +65,20 @@ export default function AdminBatchesPage() {
       setPageError(err?.data?.message || t('error.generic'));
     }
   };
+
+  if (!isSuper) {
+    return (
+      <div className="min-h-screen bg-page pb-24">
+        <TopBar title={t('nav.batches')} />
+        <div className="px-4 pt-4">
+          <div className="bg-surface rounded-3xl border border-bsoft shadow-card p-10 text-center">
+            <p className="text-sm text-gray-400">{t('admin.superOnly')}</p>
+          </div>
+        </div>
+        <AdminBottomNav />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-page pb-24">

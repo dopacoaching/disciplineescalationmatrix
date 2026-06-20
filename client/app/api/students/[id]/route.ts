@@ -4,7 +4,7 @@ import { connectDB } from '@/lib/server/db';
 import Student from '@/lib/server/models/Student';
 import Entry from '@/lib/server/models/Entry';
 import '@/lib/server/models/Batch';
-import { getAuthUser } from '@/lib/server/auth';
+import { getAuthUser, adminCanAccessBatch } from '@/lib/server/auth';
 import { updateStudentSchema } from '@/lib/server/validators/student.validator';
 import { writeAuditLog } from '@/lib/server/audit';
 
@@ -20,7 +20,10 @@ export async function GET(_req: NextRequest, { params }: Ctx): Promise<NextRespo
     const student = await Student.findById(id).populate('batchId', 'name isArchived');
     if (!student) return NextResponse.json({ message: 'Student not found' }, { status: 404 });
     const batchIdStr = (student.batchId as any)?._id?.toString() ?? student.batchId.toString();
-    if (user.role !== 'admin' && !(user.assignedBatches || []).includes(batchIdStr)) {
+    const allowed = user.role === 'admin'
+      ? adminCanAccessBatch(user, batchIdStr)
+      : (user.assignedBatches || []).includes(batchIdStr);
+    if (!allowed) {
       return NextResponse.json({ message: 'Access denied' }, { status: 403 });
     }
     return NextResponse.json(student);
@@ -40,6 +43,13 @@ export async function PATCH(req: NextRequest, { params }: Ctx): Promise<NextResp
     const body = await req.json().catch(() => null);
     const result = updateStudentSchema.safeParse(body);
     if (!result.success) return NextResponse.json({ message: result.error.errors[0].message }, { status: 400 });
+
+    const existing = await Student.findById(id).select('batchId');
+    if (!existing) return NextResponse.json({ message: 'Student not found' }, { status: 404 });
+    // Scoped admins may only edit students in their batches — and not move them out of scope.
+    if (!adminCanAccessBatch(user, existing.batchId.toString())) return NextResponse.json({ message: 'Access denied' }, { status: 403 });
+    if (result.data.batchId && !adminCanAccessBatch(user, result.data.batchId)) return NextResponse.json({ message: 'Access denied to target batch' }, { status: 403 });
+
     const student = await Student.findByIdAndUpdate(id, result.data, { new: true, runValidators: true });
     if (!student) return NextResponse.json({ message: 'Student not found' }, { status: 404 });
     await writeAuditLog({ action: 'student.update', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'student', targetId: student._id.toString(), targetName: student.fullName });
@@ -59,6 +69,7 @@ export async function DELETE(_req: NextRequest, { params }: Ctx): Promise<NextRe
     await connectDB();
     const student = await Student.findById(id);
     if (!student) return NextResponse.json({ message: 'Student not found' }, { status: 404 });
+    if (!adminCanAccessBatch(user, student.batchId.toString())) return NextResponse.json({ message: 'Access denied' }, { status: 403 });
     await Entry.deleteMany({ studentId: id });
     await Student.findByIdAndDelete(id);
     await writeAuditLog({ action: 'student.delete', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'student', targetId: id, targetName: student.fullName });

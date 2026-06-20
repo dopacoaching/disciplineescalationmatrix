@@ -1,7 +1,12 @@
+import mongoose from 'mongoose';
 import Entry from '../models/Entry';
 import Student from '../models/Student';
 import Staff from '../models/Staff';
 import '../models/Batch';
+
+// A batch scope of `null` means unrestricted (super admin). An array restricts
+// every metric to students/staff belonging to those batches (scoped admin).
+type BatchScope = mongoose.Types.ObjectId[] | null;
 
 export function buildDateFilter(fromDate?: string, toDate?: string): Record<string, unknown> {
   if (!fromDate && !toDate) return {};
@@ -13,18 +18,32 @@ export function buildDateFilter(fromDate?: string, toDate?: string): Record<stri
   };
 }
 
-export async function getAdminStats(dateFilter: Record<string, unknown>) {
+// Resolve the set of student ids that fall within a batch scope (for entry queries).
+async function studentIdsInScope(scope: BatchScope): Promise<mongoose.Types.ObjectId[] | null> {
+  if (!scope) return null;
+  const students = await Student.find({ batchId: { $in: scope } }).select('_id').lean();
+  return students.map(s => s._id as mongoose.Types.ObjectId);
+}
+
+export async function getAdminStats(dateFilter: Record<string, unknown>, scope: BatchScope = null) {
+  const studentIds = await studentIdsInScope(scope);
+  const entryScope = studentIds ? { studentId: { $in: studentIds } } : {};
+  const studentScope = scope ? { batchId: { $in: scope } } : {};
+
   const [totalEntries, highSeverityCount, flaggedCount, adminActionCount] = await Promise.all([
-    Entry.countDocuments(dateFilter),
-    Entry.countDocuments({ ...dateFilter, severity: 'high' }),
-    Student.countDocuments({ currentEscalationLevel: 2 }),
-    Student.countDocuments({ currentEscalationLevel: 3 }),
+    Entry.countDocuments({ ...dateFilter, ...entryScope }),
+    Entry.countDocuments({ ...dateFilter, ...entryScope, severity: 'high' }),
+    Student.countDocuments({ ...studentScope, currentEscalationLevel: 2 }),
+    Student.countDocuments({ ...studentScope, currentEscalationLevel: 3 }),
   ]);
   return { totalEntries, flaggedCount, adminActionCount, highSeverityCount };
 }
 
-export async function getFlaggedStudentsWithCounts(dateFilter: Record<string, unknown>) {
-  const students = await Student.find({ currentEscalationLevel: { $gte: 2 } })
+export async function getFlaggedStudentsWithCounts(dateFilter: Record<string, unknown>, scope: BatchScope = null) {
+  const studentFilter: Record<string, unknown> = { currentEscalationLevel: { $gte: 2 } };
+  if (scope) studentFilter.batchId = { $in: scope };
+
+  const students = await Student.find(studentFilter)
     .populate('batchId', 'name')
     .sort({ currentEscalationLevel: -1 });
   const studentIds = students.map(s => s._id);
@@ -41,8 +60,11 @@ export async function getFlaggedStudentsWithCounts(dateFilter: Record<string, un
   }));
 }
 
-export async function getStaffActivityWithCounts(dateFilter: Record<string, unknown>) {
-  const staff = await Staff.find().select('-passwordHash').sort({ fullName: 1 });
+export async function getStaffActivityWithCounts(dateFilter: Record<string, unknown>, scope: BatchScope = null) {
+  const staffFilter: Record<string, unknown> = {};
+  if (scope) staffFilter.assignedBatches = { $in: scope };
+
+  const staff = await Staff.find(staffFilter).select('-passwordHash').sort({ fullName: 1 });
   const staffIds = staff.map(s => s._id);
   const activity = await Entry.aggregate([
     { $match: { staffId: { $in: staffIds }, ...dateFilter } },

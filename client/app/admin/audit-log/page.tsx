@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAppSelector } from '@/store';
 import { useGetAuditLogQuery } from '@/store/api/dashboardApi';
 import { TopBar } from '@/components/ui/TopBar';
 import { AdminBottomNav } from '@/components/ui/BottomNav';
@@ -84,6 +85,7 @@ function AuditRow({ log }: { log: AuditLogEntry }) {
 
 export default function AuditLogPage() {
   const { t } = useTranslation();
+  const isSuper = useAppSelector(s => s.auth.user?.isSuperAdmin) !== false;
   const [from, setFrom] = useState<string | undefined>();
   const [to, setTo]     = useState<string | undefined>();
   const [action, setAction] = useState('');
@@ -93,9 +95,23 @@ export default function AuditLogPage() {
     fromDate: from,
     toDate: to,
     action: action || undefined,
-  });
+  }, { skip: !isSuper });
 
   const errorCount = logs?.filter(l => l.status === 'error').length ?? 0;
+
+  if (!isSuper) {
+    return (
+      <div className="min-h-screen bg-page pb-24">
+        <TopBar title={t('nav.auditLog')} />
+        <div className="px-4 pt-4">
+          <div className="bg-surface rounded-3xl border border-bsoft shadow-card p-10 text-center">
+            <p className="text-sm text-gray-400">{t('admin.superOnly')}</p>
+          </div>
+        </div>
+        <AdminBottomNav />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-page pb-24">

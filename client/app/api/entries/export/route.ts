@@ -6,7 +6,7 @@ import Entry from '@/lib/server/models/Entry';
 import Student from '@/lib/server/models/Student';
 import '@/lib/server/models/Staff';
 import '@/lib/server/models/Batch';
-import { getAuthUser } from '@/lib/server/auth';
+import { getAuthUser, adminBatchScope } from '@/lib/server/auth';
 import ExcelJS from 'exceljs';
 import PDFDocument from 'pdfkit';
 
@@ -108,14 +108,26 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const studentId = sp.get('studentId');
 
+    // Scoped admins may only export entries for students in their assigned batches.
+    const scope = adminBatchScope(user);
     const filter: Record<string, unknown> = {};
     if (studentId) {
       if (!mongoose.Types.ObjectId.isValid(studentId)) return NextResponse.json({ message: 'Invalid studentId' }, { status: 400 });
+      if (scope) {
+        const student = await Student.findById(studentId).select('batchId').lean();
+        if (!student || !scope.some(id => id.toString() === student.batchId.toString())) {
+          return NextResponse.json({ message: 'Access denied to this student' }, { status: 403 });
+        }
+      }
       filter.studentId = new mongoose.Types.ObjectId(studentId);
     } else if (batchId) {
       if (!mongoose.Types.ObjectId.isValid(batchId)) return NextResponse.json({ message: 'Invalid batchId' }, { status: 400 });
+      if (scope && !scope.some(id => id.toString() === batchId)) return NextResponse.json({ message: 'Access denied to this batch' }, { status: 403 });
       const studentsInBatch = await Student.find({ batchId: new mongoose.Types.ObjectId(batchId) }).select('_id').lean();
       filter.studentId = { $in: studentsInBatch.map(s => s._id) };
+    } else if (scope) {
+      const studentsInScope = await Student.find({ batchId: { $in: scope } }).select('_id').lean();
+      filter.studentId = { $in: studentsInScope.map(s => s._id) };
     }
     const from = parseDate(fromDate);
     const to = parseDate(toDate);

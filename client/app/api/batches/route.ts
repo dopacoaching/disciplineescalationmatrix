@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { connectDB } from '@/lib/server/db';
 import Batch from '@/lib/server/models/Batch';
-import { getAuthUser } from '@/lib/server/auth';
+import { getAuthUser, isSuperAdmin } from '@/lib/server/auth';
 import { createBatchSchema } from '@/lib/server/validators/batch.validator';
 import { writeAuditLog } from '@/lib/server/audit';
 
@@ -11,7 +11,8 @@ export async function GET(): Promise<NextResponse> {
     const user = await getAuthUser();
     if (!user) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     await connectDB();
-    if (user.role === 'admin') {
+    // Super admins see every batch; scoped admins and staff see only their own.
+    if (isSuperAdmin(user)) {
       return NextResponse.json(await Batch.find().sort({ createdAt: -1 }));
     }
     const ids = (user.assignedBatches || []).map(id => new mongoose.Types.ObjectId(id));
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const user = await getAuthUser();
     if (!user) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
-    if (user.role !== 'admin') return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
+    if (!isSuperAdmin(user)) return NextResponse.json({ message: 'Super admin access required' }, { status: 403 });
     await connectDB();
     const body = await req.json().catch(() => null);
     const result = createBatchSchema.safeParse(body);

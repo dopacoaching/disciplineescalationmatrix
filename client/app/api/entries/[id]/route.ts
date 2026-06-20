@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { connectDB } from '@/lib/server/db';
 import Entry from '@/lib/server/models/Entry';
-import { getAuthUser } from '@/lib/server/auth';
+import Student from '@/lib/server/models/Student';
+import { getAuthUser, adminCanAccessBatch } from '@/lib/server/auth';
 import { recalculateEscalation } from '@/lib/server/services/entry.service';
 import { writeAuditLog } from '@/lib/server/audit';
 
@@ -19,6 +20,11 @@ export async function DELETE(_req: NextRequest, { params }: Ctx): Promise<NextRe
     const entry = await Entry.findById(id);
     if (!entry) return NextResponse.json({ message: 'Entry not found' }, { status: 404 });
     const studentId = entry.studentId.toString();
+    // Scoped admins can only delete entries for students in their batches.
+    const student = await Student.findById(studentId).select('batchId');
+    if (student && !adminCanAccessBatch(user, student.batchId.toString())) {
+      return NextResponse.json({ message: 'Access denied' }, { status: 403 });
+    }
     await Entry.findByIdAndDelete(id);
     await recalculateEscalation(studentId);
     await writeAuditLog({ action: 'entry.delete', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'entry', targetId: id });

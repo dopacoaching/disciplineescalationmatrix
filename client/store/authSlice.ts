@@ -7,6 +7,8 @@ export interface AuthUser {
   fullName?: string;
   role: 'admin' | 'teacher' | 'warden';
   assignedBatches?: string[];
+  // Only meaningful for admins. Undefined/true = super admin (full access).
+  isSuperAdmin?: boolean;
 }
 
 interface AuthState {

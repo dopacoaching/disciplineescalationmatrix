@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import { connectDB } from '@/lib/server/db';
 import Student from '@/lib/server/models/Student';
 import '@/lib/server/models/Batch';
-import { getAuthUser } from '@/lib/server/auth';
+import { getAuthUser, adminCanAccessBatch } from '@/lib/server/auth';
 import { writeAuditLog } from '@/lib/server/audit';
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -21,6 +21,9 @@ export async function POST(req: NextRequest, { params }: Ctx): Promise<NextRespo
     if (!actionNote || typeof actionNote !== 'string' || actionNote.trim().length === 0) {
       return NextResponse.json({ message: 'actionNote is required' }, { status: 400 });
     }
+    const target = await Student.findById(id).select('batchId');
+    if (!target) return NextResponse.json({ message: 'Student not found' }, { status: 404 });
+    if (!adminCanAccessBatch(user, target.batchId.toString())) return NextResponse.json({ message: 'Access denied' }, { status: 403 });
     const student = await Student.findByIdAndUpdate(
       id,
       {

@@ -12,7 +12,15 @@ export async function GET(): Promise<NextResponse> {
     if (user.role === 'admin') {
       const admin = await Admin.findById(user.id).select('-passwordHash');
       if (!admin || !admin.isActive) return NextResponse.json({ message: 'Account not found' }, { status: 401 });
-      return NextResponse.json({ ...admin.toObject(), role: 'admin' });
+      const adminObj = admin.toObject();
+      // Normalize legacy admins (missing field) to super; scoped admins have no batch scope here as ids
+      const superAdmin = adminObj.isSuperAdmin !== false;
+      return NextResponse.json({
+        ...adminObj,
+        role: 'admin',
+        isSuperAdmin: superAdmin,
+        assignedBatches: superAdmin ? [] : (adminObj.assignedBatches || []).map((id: { toString(): string }) => id.toString()),
+      });
     }
     const staff = await Staff.findById(user.id).select('-passwordHash');
     if (!staff || !staff.isActive) return NextResponse.json({ message: 'Account not found' }, { status: 401 });
