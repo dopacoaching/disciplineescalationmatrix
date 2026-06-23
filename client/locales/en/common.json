@@ -72,6 +72,7 @@
   "filter.showing": "Showing:",
   "filter.allBatches": "All batches",
   "filter.allLevels": "All levels",
+  "filter.allSeverities": "All severities",
   "sort.mostFlagged": "Most flagged",
   "sort.leastFlagged": "Least flagged",
   "sort.mostRecent": "Most recent",

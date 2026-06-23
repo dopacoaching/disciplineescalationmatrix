@@ -27,10 +27,18 @@ export default function AdminDashboard() {
           <Spinner className="py-8" />
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            <StatCard value={stats?.totalEntries ?? 0}      label={t('admin.totalEntries')}    color="primary"  />
-            <StatCard value={stats?.flaggedCount ?? 0}      label={t('admin.flaggedStudents')} color="flagged"  />
-            <StatCard value={stats?.adminActionCount ?? 0}  label={t('admin.adminAction')}     color="danger"   />
-            <StatCard value={stats?.highSeverityCount ?? 0} label={t('admin.highSeverity')}    color="danger"   />
+            <Link href="/admin/entries" className="block rounded-2xl transition-transform hover:scale-[1.02] active:scale-[0.98]">
+              <StatCard value={stats?.totalEntries ?? 0}      label={t('admin.totalEntries')}    color="primary"  />
+            </Link>
+            <Link href="/admin/students?escalationLevel=2" className="block rounded-2xl transition-transform hover:scale-[1.02] active:scale-[0.98]">
+              <StatCard value={stats?.flaggedCount ?? 0}      label={t('admin.flaggedStudents')} color="flagged"  />
+            </Link>
+            <Link href="/admin/students?escalationLevel=3" className="block rounded-2xl transition-transform hover:scale-[1.02] active:scale-[0.98]">
+              <StatCard value={stats?.adminActionCount ?? 0}  label={t('admin.adminAction')}     color="danger"   />
+            </Link>
+            <Link href="/admin/entries?severity=high" className="block rounded-2xl transition-transform hover:scale-[1.02] active:scale-[0.98]">
+              <StatCard value={stats?.highSeverityCount ?? 0} label={t('admin.highSeverity')}    color="danger"   />
+            </Link>
           </div>
         )}
 

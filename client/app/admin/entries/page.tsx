@@ -36,13 +36,17 @@ export default function AdminEntriesPage() {
   const [to, setTo] = useState<string | undefined>();
   const [sort, setSort] = useState('newest');
   const [batchId, setBatchId] = useState<string | undefined>();
+  // Seed the severity filter from the URL (e.g. when arriving from the
+  // dashboard "High Severity" stat card → /admin/entries?severity=high).
+  const [severity, setSeverity] = useState<string>(() =>
+    typeof window !== 'undefined' ? (new URLSearchParams(window.location.search).get('severity') ?? '') : '');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<'pdf' | 'excel' | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
 
   const { data: batches } = useGetBatchesQuery();
-  const { data: entries, isLoading } = useGetEntriesQuery({ fromDate: from, toDate: to, sort, batchId });
+  const { data: entries, isLoading } = useGetEntriesQuery({ fromDate: from, toDate: to, sort, batchId, severity: severity || undefined });
   const [deleteEntry, { isLoading: deleting }] = useDeleteEntryMutation();
 
   const handleDateChange = (f?: string, t2?: string) => { setFrom(f); setTo(t2); };
@@ -81,16 +85,28 @@ export default function AdminEntriesPage() {
       <div className="px-4 pt-4 space-y-3">
         <DateRangeFilter onChange={handleDateChange} />
 
-        <select
-          value={batchId ?? ''}
-          onChange={e => setBatchId(e.target.value || undefined)}
-          className="h-10 w-full px-3 rounded-2xl border border-bmedium text-sm bg-surface text-gray-700 dark:text-gray-200 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/12 font-medium"
-        >
-          <option value="">{t('filter.allBatches')}</option>
-          {batches?.map(b => (
-            <option key={b._id} value={b._id}>{b.name}{b.isArchived ? ` (${t('batch.archived')})` : ''}</option>
-          ))}
-        </select>
+        <div className="flex gap-2">
+          <select
+            value={batchId ?? ''}
+            onChange={e => setBatchId(e.target.value || undefined)}
+            className="flex-1 h-10 px-3 rounded-2xl border border-bmedium text-sm bg-surface text-gray-700 dark:text-gray-200 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/12 font-medium"
+          >
+            <option value="">{t('filter.allBatches')}</option>
+            {batches?.map(b => (
+              <option key={b._id} value={b._id}>{b.name}{b.isArchived ? ` (${t('batch.archived')})` : ''}</option>
+            ))}
+          </select>
+          <select
+            value={severity}
+            onChange={e => setSeverity(e.target.value)}
+            className="flex-1 h-10 px-3 rounded-2xl border border-bmedium text-sm bg-surface text-gray-700 dark:text-gray-200 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/12 font-medium"
+          >
+            <option value="">{t('filter.allSeverities')}</option>
+            <option value="high">{t('severity.high')}</option>
+            <option value="medium">{t('severity.medium')}</option>
+            <option value="low">{t('severity.low')}</option>
+          </select>
+        </div>
 
         <div className="flex gap-2">
           <button

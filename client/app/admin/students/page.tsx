@@ -14,7 +14,10 @@ export default function AdminStudentsPage() {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [batchId, setBatchId] = useState('');
-  const [escalationLevel, setEscalationLevel] = useState('');
+  // Seed the level filter from the URL (e.g. arriving from the dashboard
+  // "Flagged Students" / "Admin Action Required" stat cards).
+  const [escalationLevel, setEscalationLevel] = useState(() =>
+    typeof window !== 'undefined' ? (new URLSearchParams(window.location.search).get('escalationLevel') ?? '') : '');
   const [sort, setSort] = useState('most_flagged');
 
   const { data: students, isLoading } = useGetStudentsQuery({
