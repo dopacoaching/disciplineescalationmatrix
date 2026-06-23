@@ -85,6 +85,28 @@ export interface StaffActivity extends Omit<Staff, 'assignedBatches'> {
   lastEntryAt: string | null;
 }
 
+export interface StaffActivityDetail {
+  staff: {
+    _id: string;
+    fullName: string;
+    username: string;
+    role: StaffRole;
+    isActive: boolean;
+    assignedBatches: Batch[];
+    createdAt: string;
+  };
+  totalEntries: number;
+  firstEntryAt: string | null;
+  lastEntryAt: string | null;
+  bySeverity: { low: number; medium: number; high: number };
+  daily: { _id: string; count: number }[];
+  activeDays: number;
+  missedDays: number;
+  missedDates: string[];
+  rangeStart: string;
+  rangeDays: number;
+}
+
 export interface AuditLogEntry {
   _id: string;
   action: string;

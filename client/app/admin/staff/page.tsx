@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -123,9 +124,9 @@ export default function AdminStaffPage() {
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
                   <span className="text-xs font-bold text-primary">{s.fullName.charAt(0)}</span>
                 </div>
-                <div className="flex-1 min-w-0">
+                <Link href={`/admin/staff/${s._id}`} className="flex-1 min-w-0 group">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{s.fullName}</p>
+                    <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm group-hover:text-primary transition-colors">{s.fullName}</p>
                     <Badge variant={s.role} label={s.role} />
                     {!s.isActive && <Badge variant="archived" label={t('action.inactive')} />}
                   </div>
@@ -135,7 +136,8 @@ export default function AdminStaffPage() {
                       <span key={b._id} className="text-xs bg-primary-bg dark:bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium">{b.name}</span>
                     ))}
                   </div>
-                </div>
+                  <p className="text-[11px] font-semibold text-primary/80 mt-2 group-hover:text-primary transition-colors">{t('staff.viewActivity')} →</p>
+                </Link>
                 <div className="flex flex-col gap-1 shrink-0">
                   <Button size="sm" variant="secondary" onClick={() => openEdit(s)}>{t('action.edit')}</Button>
                   <Button size="sm" variant={s.isActive ? 'ghost' : 'secondary'} onClick={() => handleToggleActive(s)}>

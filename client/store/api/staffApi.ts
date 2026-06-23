@@ -1,5 +1,5 @@
 import { baseApi } from './baseApi';
-import type { Staff, Entry } from '@/types';
+import type { Staff, Entry, StaffActivityDetail } from '@/types';
 
 interface StaffFilters {
   search?: string;
@@ -42,7 +42,11 @@ export const staffApi = baseApi.injectEndpoints({
       query: (id) => `/staff/${id}/entries`,
       providesTags: ['Entry'],
     }),
+    getStaffActivity: builder.query<StaffActivityDetail, string>({
+      query: (id) => `/staff/${id}/activity`,
+      providesTags: ['Entry', 'Staff'],
+    }),
   }),
 });
 
-export const { useGetStaffQuery, useCreateStaffMutation, useUpdateStaffMutation, useGetStaffEntriesQuery } = staffApi;
+export const { useGetStaffQuery, useCreateStaffMutation, useUpdateStaffMutation, useGetStaffEntriesQuery, useGetStaffActivityQuery } = staffApi;
