@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '@/store';
 import { useGetDashboardStatsQuery, useGetFlaggedQuery } from '@/store/api/dashboardApi';
@@ -6,6 +7,7 @@ import { TopBar } from '@/components/ui/TopBar';
 import { AdminBottomNav } from '@/components/ui/BottomNav';
 import { StatCard } from '@/components/admin/StatCard';
 import { Badge } from '@/components/ui/Badge';
+import { Modal } from '@/components/ui/Modal';
 import { Spinner } from '@/components/ui/Spinner';
 import { escalationBadgeVariant, escalationKey } from '@/lib/escalation';
 import Link from 'next/link';
@@ -13,9 +15,13 @@ import Link from 'next/link';
 export default function AdminDashboard() {
   const { t } = useTranslation();
   const isSuper = useAppSelector(s => s.auth.user?.isSuperAdmin) !== false;
+  // Which marked-students modal is open: level 2 (flagged), 3 (admin action), or none.
+  const [markedLevel, setMarkedLevel] = useState<2 | 3 | null>(null);
 
   const { data: stats, isLoading: statsLoading } = useGetDashboardStatsQuery({});
   const { data: flagged, isLoading: flaggedLoading } = useGetFlaggedQuery({});
+
+  const markedStudents = flagged?.filter(s => s.currentEscalationLevel === markedLevel) ?? [];
 
   return (
     <div className="min-h-screen bg-page pb-24">
@@ -30,12 +36,12 @@ export default function AdminDashboard() {
             <Link href="/admin/entries" className="block rounded-2xl transition-transform hover:scale-[1.02] active:scale-[0.98]">
               <StatCard value={stats?.totalEntries ?? 0}      label={t('admin.totalEntries')}    color="primary"  />
             </Link>
-            <Link href="/admin/students?escalationLevel=2" className="block rounded-2xl transition-transform hover:scale-[1.02] active:scale-[0.98]">
+            <button type="button" onClick={() => setMarkedLevel(2)} className="block text-left rounded-2xl transition-transform hover:scale-[1.02] active:scale-[0.98]">
               <StatCard value={stats?.flaggedCount ?? 0}      label={t('admin.flaggedStudents')} color="flagged"  />
-            </Link>
-            <Link href="/admin/students?escalationLevel=3" className="block rounded-2xl transition-transform hover:scale-[1.02] active:scale-[0.98]">
+            </button>
+            <button type="button" onClick={() => setMarkedLevel(3)} className="block text-left rounded-2xl transition-transform hover:scale-[1.02] active:scale-[0.98]">
               <StatCard value={stats?.adminActionCount ?? 0}  label={t('admin.adminAction')}     color="danger"   />
-            </Link>
+            </button>
             <Link href="/admin/entries?severity=high" className="block rounded-2xl transition-transform hover:scale-[1.02] active:scale-[0.98]">
               <StatCard value={stats?.highSeverityCount ?? 0} label={t('admin.highSeverity')}    color="danger"   />
             </Link>
@@ -99,6 +105,41 @@ export default function AdminDashboard() {
         </Link>
         )}
       </div>
+
+      {/* Marked students modal — shows only the students behind the clicked stat */}
+      <Modal
+        open={markedLevel !== null}
+        onClose={() => setMarkedLevel(null)}
+        title={markedLevel === 3 ? t('admin.adminAction') : t('admin.flaggedStudents')}
+      >
+        {flaggedLoading ? (
+          <Spinner className="py-6" />
+        ) : markedStudents.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-6">{t('empty.noStudents')}</p>
+        ) : (
+          <div className="space-y-2">
+            {markedStudents.map(s => (
+              <Link
+                key={s._id}
+                href={`/admin/students/${s._id}`}
+                onClick={() => setMarkedLevel(null)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-2xl border border-bsoft hover:bg-page/40 transition-colors"
+              >
+                <div className={`w-1 self-stretch rounded-full shrink-0 ${s.currentEscalationLevel === 3 ? 'bg-danger' : 'bg-flagged'}`} />
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-900 dark:text-gray-100 truncate text-sm">{s.fullName}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{(s.batchId as any)?.name} · {s.entryCount} {t('student.entriesCount')}</p>
+                  {s.lastEntryAt && (
+                    <p className="text-xs text-gray-400">{t('admin.lastEntry')}: {new Date(s.lastEntryAt).toLocaleDateString()}</p>
+                  )}
+                </div>
+                <Badge variant={escalationBadgeVariant(s.currentEscalationLevel)} label={t(escalationKey(s.currentEscalationLevel))} />
+              </Link>
+            ))}
+          </div>
+        )}
+      </Modal>
+
       <AdminBottomNav />
     </div>
   );
