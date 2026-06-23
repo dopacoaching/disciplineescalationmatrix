@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useGetEntriesQuery, useDeleteEntryMutation } from '@/store/api/entriesApi';
 import { useGetBatchesQuery } from '@/store/api/batchesApi';
@@ -31,15 +32,24 @@ const severityBorder: Record<string, string> = {
 };
 
 export default function AdminEntriesPage() {
+  // useSearchParams must sit inside a Suspense boundary.
+  return (
+    <Suspense fallback={null}>
+      <AdminEntriesPageInner />
+    </Suspense>
+  );
+}
+
+function AdminEntriesPageInner() {
   const { t } = useTranslation();
+  const searchParams = useSearchParams();
   const [from, setFrom] = useState<string | undefined>();
   const [to, setTo] = useState<string | undefined>();
   const [sort, setSort] = useState('newest');
   const [batchId, setBatchId] = useState<string | undefined>();
   // Seed the severity filter from the URL (e.g. when arriving from the
   // dashboard "High Severity" stat card → /admin/entries?severity=high).
-  const [severity, setSeverity] = useState<string>(() =>
-    typeof window !== 'undefined' ? (new URLSearchParams(window.location.search).get('severity') ?? '') : '');
+  const [severity, setSeverity] = useState<string>(searchParams.get('severity') ?? '');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<'pdf' | 'excel' | null>(null);

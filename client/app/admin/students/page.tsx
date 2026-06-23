@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { useGetStudentsQuery } from '@/store/api/studentsApi';
@@ -11,13 +12,21 @@ import { Spinner } from '@/components/ui/Spinner';
 import { escalationBadgeVariant, escalationKey } from '@/lib/escalation';
 
 export default function AdminStudentsPage() {
+  // useSearchParams must sit inside a Suspense boundary.
+  return (
+    <Suspense fallback={null}>
+      <AdminStudentsPageInner />
+    </Suspense>
+  );
+}
+
+function AdminStudentsPageInner() {
   const { t } = useTranslation();
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState('');
   const [batchId, setBatchId] = useState('');
-  // Seed the level filter from the URL (e.g. arriving from the dashboard
-  // "Flagged Students" / "Admin Action Required" stat cards).
-  const [escalationLevel, setEscalationLevel] = useState(() =>
-    typeof window !== 'undefined' ? (new URLSearchParams(window.location.search).get('escalationLevel') ?? '') : '');
+  // Seed the level filter from the URL (e.g. a bookmarked filtered view).
+  const [escalationLevel, setEscalationLevel] = useState(searchParams.get('escalationLevel') ?? '');
   const [sort, setSort] = useState('most_flagged');
 
   const { data: students, isLoading } = useGetStudentsQuery({
