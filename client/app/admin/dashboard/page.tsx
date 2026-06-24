@@ -48,44 +48,27 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Flagged students */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-navy dark:text-gray-200 uppercase tracking-wider">{t('admin.flaggedList')}</h3>
-            <Link href="/admin/students?sort=most_flagged" className="text-xs font-semibold text-primary hover:underline">
-              {t('action.viewAll')}
-            </Link>
-          </div>
-          {flaggedLoading ? <Spinner className="py-6" /> : flagged?.length === 0 ? (
-            <div className="bg-surface rounded-3xl border border-bsoft shadow-card p-6 text-center">
-              <p className="text-sm text-gray-400">{t('empty.noStudents')}</p>
-            </div>
-          ) : (
-            <div className="bg-surface rounded-3xl border border-bsoft shadow-card overflow-hidden">
-              {/* Column headers */}
-              <div className="flex items-center gap-3 px-4 py-2 border-b border-bsoft bg-page/50">
-                <div className="w-1 shrink-0" />
-                <p className="flex-1 text-[10px] font-bold uppercase tracking-wider text-navy/50 dark:text-gray-500">{t('col.name')}</p>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-navy/50 dark:text-gray-500">{t('col.level')}</p>
+        {/* Requires Attention — moved to its own page, reachable via this button */}
+        <Link href="/admin/requires-attention">
+          <div className="bg-surface rounded-3xl border border-bsoft shadow-card hover:shadow-card-md transition-shadow p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-flagged/15 flex items-center justify-center">
+                <svg className="w-4 h-4 text-flagged" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
               </div>
-              {flagged?.map(s => (
-                <Link key={s._id} href={`/admin/students/${s._id}`}>
-                  <div className="flex items-center gap-3 px-4 py-3 border-b border-bsoft last:border-0 hover:bg-page/40 transition-colors">
-                    <div className={`w-1 self-stretch rounded-full shrink-0 ${s.currentEscalationLevel === 3 ? 'bg-danger' : 'bg-flagged'}`} />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 dark:text-gray-100 truncate text-sm">{s.fullName}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{(s.batchId as any)?.name} · {s.entryCount} {t('student.entriesCount')}</p>
-                      {s.lastEntryAt && (
-                        <p className="text-xs text-gray-400">{t('admin.lastEntry')}: {new Date(s.lastEntryAt).toLocaleDateString()}</p>
-                      )}
-                    </div>
-                    <Badge variant={escalationBadgeVariant(s.currentEscalationLevel)} label={t(escalationKey(s.currentEscalationLevel))} />
-                  </div>
-                </Link>
-              ))}
+              <div>
+                <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">{t('admin.flaggedList')}</p>
+                {!flaggedLoading && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{(flagged?.length ?? 0)} {t('admin.studentsNeedAttention')}</p>
+                )}
+              </div>
             </div>
-          )}
-        </section>
+            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </Link>
 
         {isSuper && (
         <Link href="/admin/admins">
