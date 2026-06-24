@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { useGetStaffActivityQuery, useGetStaffEntriesQuery } from '@/store/api/staffApi';
+import { useGetStaffActivityDetailQuery, useGetStaffEntriesQuery } from '@/store/api/staffApi';
 import { TopBar } from '@/components/ui/TopBar';
 import { AdminBottomNav } from '@/components/ui/BottomNav';
 import { Badge } from '@/components/ui/Badge';
@@ -42,7 +42,7 @@ function fmtDay(s: string): string {
 export default function StaffActivityPage() {
   const { id } = useParams<{ id: string }>();
   const { t } = useTranslation();
-  const { data: activity, isLoading } = useGetStaffActivityQuery(id);
+  const { data: activity, isLoading } = useGetStaffActivityDetailQuery(id);
   const { data: entries, isLoading: entriesLoading } = useGetStaffEntriesQuery(id);
 
   const [entriesExpanded, setEntriesExpanded] = useState(false);

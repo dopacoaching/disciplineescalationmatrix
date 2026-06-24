@@ -42,11 +42,13 @@ export const staffApi = baseApi.injectEndpoints({
       query: (id) => `/staff/${id}/entries`,
       providesTags: ['Entry'],
     }),
-    getStaffActivity: builder.query<StaffActivityDetail, string>({
+    // Named *Detail to avoid colliding with dashboardApi's getStaffActivity,
+    // which injects into the same baseApi but returns a different shape.
+    getStaffActivityDetail: builder.query<StaffActivityDetail, string>({
       query: (id) => `/staff/${id}/activity`,
       providesTags: ['Entry', 'Staff'],
     }),
   }),
 });
 
-export const { useGetStaffQuery, useCreateStaffMutation, useUpdateStaffMutation, useGetStaffEntriesQuery, useGetStaffActivityQuery } = staffApi;
+export const { useGetStaffQuery, useCreateStaffMutation, useUpdateStaffMutation, useGetStaffEntriesQuery, useGetStaffActivityDetailQuery } = staffApi;
