@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { Spinner } from '@/components/ui/Spinner';
+import { FAB } from '@/components/ui/FAB';
 
 const schema = z.object({
   fullName: z.string().min(1),
@@ -30,7 +31,8 @@ export default function AdminStaffPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
   const [toggleError, setToggleError] = useState<string | null>(null);
-  const { data: staff, isLoading } = useGetStaffQuery({});
+  const [search, setSearch] = useState('');
+  const { data: staff, isLoading } = useGetStaffQuery({ search: search || undefined });
   const { data: batches } = useGetBatchesQuery();
   const [createStaff, { isLoading: creating }] = useCreateStaffMutation();
   const [updateStaff, { isLoading: updating }] = useUpdateStaffMutation();
@@ -101,13 +103,25 @@ export default function AdminStaffPage() {
     <div className="min-h-screen bg-page pb-24">
       <TopBar title={t('nav.staff')} />
       <div className="px-4 pt-4 space-y-4">
-        <Button onClick={openCreate} className="w-full">{t('staff.addStaff')}</Button>
+        {/* Search */}
+        <div className="relative">
+          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="search"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder={t('staff.searchPlaceholder')}
+            className="h-12 w-full pl-10 pr-4 rounded-2xl border border-bmedium bg-surface text-gray-900 dark:text-gray-100 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/12 text-sm placeholder-gray-400 dark:placeholder-gray-600"
+          />
+        </div>
 
         {toggleError && <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{toggleError}</p>}
 
         {isLoading ? <Spinner className="py-8" /> : staff?.length === 0 ? (
           <div className="bg-surface rounded-3xl border border-bsoft shadow-card p-10 text-center">
-            <p className="text-sm text-gray-400">{t('empty.noStaff')}</p>
+            <p className="text-sm text-gray-400">{search ? t('empty.noSearchResults') : t('empty.noStaff')}</p>
           </div>
         ) : (
           <div className="bg-surface rounded-3xl border border-bsoft shadow-card overflow-hidden">
@@ -201,6 +215,7 @@ export default function AdminStaffPage() {
         </form>
       </Modal>
 
+      <FAB onClick={openCreate} label={t('staff.addStaff')} />
       <AdminBottomNav />
     </div>
   );
