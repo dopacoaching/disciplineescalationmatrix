@@ -91,6 +91,8 @@
   "action.save": "Save",
   "action.add": "Add",
   "action.viewAll": "View all",
+  "action.showAll": "Show all ({{count}})",
+  "action.showLess": "Show less",
   "action.tryAgain": "Try Again",
   "empty.noStudents": "No students yet. Tap + to add one.",
   "empty.noEntries": "No entries yet.",

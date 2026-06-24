@@ -91,6 +91,8 @@
   "action.save": "സേവ് ചെയ്യൂ",
   "action.add": "ചേർക്കൂ",
   "action.viewAll": "എല്ലാം കാണൂ",
+  "action.showAll": "എല്ലാം കാണിക്കൂ ({{count}})",
+  "action.showLess": "കുറച്ച് കാണിക്കൂ",
   "action.tryAgain": "വീണ്ടും ശ്രമിക്കൂ",
   "empty.noStudents": "ഇതുവരെ വിദ്യാർഥികൾ ഇല്ല. + ടാപ്പ് ചെയ്ത് ചേർക്കൂ.",
   "empty.noEntries": "ഇതുവരെ എൻട്രികൾ ഇല്ല.",
