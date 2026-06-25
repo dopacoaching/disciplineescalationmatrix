@@ -17,7 +17,7 @@ export const entriesApi = baseApi.injectEndpoints({
       query: (params) => ({ url: '/entries', params }),
       providesTags: ['Entry'],
     }),
-    createEntry: builder.mutation<Entry, { studentId: string; remarkId: string; customRemark?: string }>({
+    createEntry: builder.mutation<Entry, { studentId: string; remarkId: string; customRemark?: string; severity?: 'low' | 'medium' | 'high' }>({
       query: (body) => ({ url: '/entries', method: 'POST', body }),
       invalidatesTags: ['Entry', 'Student', 'Dashboard'],
     }),

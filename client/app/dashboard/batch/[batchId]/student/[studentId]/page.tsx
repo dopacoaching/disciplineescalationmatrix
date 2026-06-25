@@ -20,6 +20,7 @@ export default function RemarkEntryPage() {
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
   const [customRemark, setCustomRemark] = useState('');
+  const [otherSeverity, setOtherSeverity] = useState<'low' | 'medium' | 'high'>('low');
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [removeOpen, setRemoveOpen] = useState(false);
   const [removeError, setRemoveError] = useState<string | null>(null);
@@ -31,11 +32,10 @@ export default function RemarkEntryPage() {
   const student = students?.find(s => s._id === studentId);
   const selectedRemark = PRESET_REMARKS.find(r => r.id === selected);
   const currentCount = student?.entryCount || 0;
+  // For "other", severity is the staff's pick; preset remarks use their fixed severity.
+  const effectiveHigh = selected === 'other' ? otherSeverity === 'high' : selectedRemark?.severity === 'high';
   const previewLevel = selected
-    ? computePreviewLevel(
-        currentCount + 1,
-        selectedRemark?.severity === 'high'
-      )
+    ? computePreviewLevel(currentCount + 1, effectiveHigh)
     : null;
 
   const handleSubmit = async () => {
@@ -46,6 +46,7 @@ export default function RemarkEntryPage() {
         studentId,
         remarkId: selected,
         customRemark: selected === 'other' ? customRemark : undefined,
+        severity: selected === 'other' ? otherSeverity : undefined,
       }).unwrap();
       router.replace('/dashboard/entry-confirmed');
     } catch (err: any) {
@@ -90,15 +91,39 @@ export default function RemarkEntryPage() {
         <RemarkSelector selected={selected} onSelect={setSelected} />
 
         {selected === 'other' && (
-          <div>
-            <label className="block text-xs font-bold text-navy/60 dark:text-gray-400 uppercase tracking-wider mb-2">{t('remark.otherPrompt')}</label>
-            <textarea
-              value={customRemark}
-              onChange={e => setCustomRemark(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl border border-bmedium bg-surface text-gray-900 dark:text-gray-100 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/12 min-h-[100px] resize-none text-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
-              placeholder="Describe the issue..."
-            />
-          </div>
+          <>
+            <div>
+              <label className="block text-xs font-bold text-navy/60 dark:text-gray-400 uppercase tracking-wider mb-2">{t('remark.otherPrompt')}</label>
+              <textarea
+                value={customRemark}
+                onChange={e => setCustomRemark(e.target.value)}
+                className="w-full px-4 py-3 rounded-2xl border border-bmedium bg-surface text-gray-900 dark:text-gray-100 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/12 min-h-[100px] resize-none text-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
+                placeholder="Describe the issue..."
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-navy/60 dark:text-gray-400 uppercase tracking-wider mb-2">{t('remark.severityPrompt')}</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(['low', 'medium', 'high'] as const).map(sev => {
+                  const active = otherSeverity === sev;
+                  const activeClass =
+                    sev === 'high'   ? 'border-danger bg-danger/10 text-danger'
+                    : sev === 'medium' ? 'border-flagged bg-flagged/10 text-flagged'
+                    : 'border-success bg-success/10 text-success';
+                  return (
+                    <button
+                      key={sev}
+                      type="button"
+                      onClick={() => setOtherSeverity(sev)}
+                      className={`h-11 rounded-2xl border text-sm font-semibold transition-all ${active ? activeClass : 'border-bmedium text-gray-500 dark:text-gray-400 hover:bg-page/50'}`}
+                    >
+                      {t(`severity.${sev}`)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </>
         )}
 
         {selected && previewLevel && (

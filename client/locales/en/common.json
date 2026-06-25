@@ -40,6 +40,7 @@
   "student.removeWarning": "This permanently deletes this student and all their entries. This cannot be undone.",
   "remark.selectPrompt": "Select a remark",
   "remark.otherPrompt": "Describe the issue",
+  "remark.severityPrompt": "Set severity",
   "remark.submit": "Submit Entry",
   "remark.late_to_class": "Being late to class",
   "remark.leaving_early": "Leaving class early without permission",

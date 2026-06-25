@@ -107,10 +107,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const body = await req.json().catch(() => null);
     const result = createEntrySchema.safeParse(body);
     if (!result.success) return NextResponse.json({ message: result.error.errors[0].message }, { status: 400 });
-    const { studentId, remarkId, customRemark } = result.data;
+    const { studentId, remarkId, customRemark, severity: providedSeverity } = result.data;
 
     const remark = getRemarkById(remarkId);
     if (!remark) return NextResponse.json({ message: 'Invalid remarkId' }, { status: 400 });
+    // Preset remarks keep their fixed severity; "other" uses the severity the
+    // staff selected (defaulting to low) so it can reflect the incident content.
+    const severity = remarkId === 'other' ? (providedSeverity ?? 'low') : remark.severity;
     const student = await Student.findById(studentId);
     if (!student) return NextResponse.json({ message: 'Student not found' }, { status: 404 });
     if (!(user.assignedBatches || []).includes(student.batchId.toString())) {
@@ -126,12 +129,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       Entry.countDocuments({ studentId, ...dateFilter }),
       Entry.exists({ studentId, severity: 'high', ...dateFilter }),
     ]);
-    const hasHigh = remark.severity === 'high' || !!hasHighExisting;
+    const hasHigh = severity === 'high' || !!hasHighExisting;
     const escalationLevel = computeEscalationLevel(existingCount + 1, hasHigh);
 
     const entry = await Entry.create({
       studentId, staffId: user.id, remarkId,
-      customRemark: customRemark || '', severity: remark.severity, escalationLevel, createdAt: new Date(),
+      customRemark: customRemark || '', severity, escalationLevel, createdAt: new Date(),
     });
     await Student.findByIdAndUpdate(studentId, { currentEscalationLevel: escalationLevel });
     await writeAuditLog({ action: 'entry.create', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'student', targetId: studentId, targetName: student.fullName });
