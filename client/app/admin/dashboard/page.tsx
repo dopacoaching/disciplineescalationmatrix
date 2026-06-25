@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '@/store';
 import { useGetDashboardStatsQuery, useGetFlaggedQuery } from '@/store/api/dashboardApi';
+import { useGetEntriesQuery } from '@/store/api/entriesApi';
 import { TopBar } from '@/components/ui/TopBar';
 import { AdminBottomNav } from '@/components/ui/BottomNav';
 import { StatCard } from '@/components/admin/StatCard';
@@ -17,9 +18,15 @@ export default function AdminDashboard() {
   const isSuper = useAppSelector(s => s.auth.user?.isSuperAdmin) !== false;
   // Which marked-students modal is open: level 2 (flagged), 3 (admin action), or none.
   const [markedLevel, setMarkedLevel] = useState<2 | 3 | null>(null);
+  // High-severity entries modal (fetched on demand when opened).
+  const [highOpen, setHighOpen] = useState(false);
 
   const { data: stats, isLoading: statsLoading } = useGetDashboardStatsQuery({});
   const { data: flagged, isLoading: flaggedLoading } = useGetFlaggedQuery({});
+  const { data: highEntries, isLoading: highLoading } = useGetEntriesQuery(
+    { severity: 'high', sort: 'newest' },
+    { skip: !highOpen },
+  );
 
   const markedStudents = flagged?.filter(s => s.currentEscalationLevel === markedLevel) ?? [];
 
@@ -42,9 +49,9 @@ export default function AdminDashboard() {
             <button type="button" onClick={() => setMarkedLevel(3)} className="block text-left rounded-2xl transition-transform hover:scale-[1.02] active:scale-[0.98]">
               <StatCard value={stats?.adminActionCount ?? 0}  label={t('admin.adminAction')}     color="danger"   />
             </button>
-            <Link href="/admin/entries?severity=high" className="block rounded-2xl transition-transform hover:scale-[1.02] active:scale-[0.98]">
+            <button type="button" onClick={() => setHighOpen(true)} className="block text-left rounded-2xl transition-transform hover:scale-[1.02] active:scale-[0.98]">
               <StatCard value={stats?.highSeverityCount ?? 0} label={t('admin.highSeverity')}    color="danger"   />
-            </Link>
+            </button>
           </div>
         )}
 
@@ -117,6 +124,38 @@ export default function AdminDashboard() {
                   )}
                 </div>
                 <Badge variant={escalationBadgeVariant(s.currentEscalationLevel)} label={t(escalationKey(s.currentEscalationLevel))} />
+              </Link>
+            ))}
+          </div>
+        )}
+      </Modal>
+
+      {/* High-severity entries modal */}
+      <Modal open={highOpen} onClose={() => setHighOpen(false)} title={t('admin.highSeverity')}>
+        {highLoading ? (
+          <Spinner className="py-6" />
+        ) : (highEntries?.length ?? 0) === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-6">{t('empty.noEntries')}</p>
+        ) : (
+          <div className="space-y-2">
+            {highEntries?.map(entry => (
+              <Link
+                key={entry._id}
+                href={`/admin/students/${entry.studentId?._id}`}
+                onClick={() => setHighOpen(false)}
+                className="flex items-start gap-3 px-3 py-2.5 rounded-2xl border border-bsoft hover:bg-page/40 transition-colors"
+              >
+                <div className="w-1 self-stretch rounded-full shrink-0 bg-danger" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-900 dark:text-gray-100 truncate text-sm">{entry.studentId?.fullName}</p>
+                  <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">{t(`remark.${entry.remarkId}`)}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {(entry.studentId?.batchId as any)?.name}
+                    <span className="text-gray-300 dark:text-gray-600 mx-1">·</span>
+                    {new Date(entry.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <Badge variant="high" label={t('severity.high')} />
               </Link>
             ))}
           </div>
