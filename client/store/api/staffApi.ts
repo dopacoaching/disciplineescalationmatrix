@@ -13,6 +13,7 @@ interface CreateStaffPayload {
   password: string;
   role: 'teacher' | 'warden';
   assignedBatches?: string[];
+  isCampusIncharge?: boolean;
 }
 
 interface UpdateStaffPayload {
@@ -22,6 +23,7 @@ interface UpdateStaffPayload {
   role?: 'teacher' | 'warden';
   assignedBatches?: string[];
   isActive?: boolean;
+  isCampusIncharge?: boolean;
 }
 
 export const staffApi = baseApi.injectEndpoints({

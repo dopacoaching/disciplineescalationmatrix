@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { connectDB } from '@/lib/server/db';
 import Student from '@/lib/server/models/Student';
 import Entry from '@/lib/server/models/Entry';
+import Staff from '@/lib/server/models/Staff';
 import '@/lib/server/models/Batch';
 import { getAuthUser, adminCanAccessBatch } from '@/lib/server/auth';
 import { updateStudentSchema } from '@/lib/server/validators/student.validator';
@@ -63,13 +64,28 @@ export async function DELETE(_req: NextRequest, { params }: Ctx): Promise<NextRe
   try {
     const user = await getAuthUser();
     if (!user) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
-    if (user.role !== 'admin') return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
     const { id } = await params;
     if (!mongoose.Types.ObjectId.isValid(id)) return NextResponse.json({ message: 'Invalid ID' }, { status: 400 });
     await connectDB();
     const student = await Student.findById(id);
     if (!student) return NextResponse.json({ message: 'Student not found' }, { status: 404 });
-    if (!adminCanAccessBatch(user, student.batchId.toString())) return NextResponse.json({ message: 'Access denied' }, { status: 403 });
+    const batchIdStr = student.batchId.toString();
+    if (user.role === 'admin') {
+      // Admins delete within their batch scope.
+      if (!adminCanAccessBatch(user, batchIdStr)) return NextResponse.json({ message: 'Access denied' }, { status: 403 });
+    } else {
+      // Staff may delete only if they are a campus in-charge AND the student is in
+      // one of their assigned batches. Read live from the DB so the permission
+      // takes effect (or is revoked) without requiring the staff to re-login.
+      const me = await Staff.findById(user.id).select('isCampusIncharge assignedBatches isActive');
+      if (!me || !me.isActive || !me.isCampusIncharge) {
+        return NextResponse.json({ message: 'Campus in-charge permission required' }, { status: 403 });
+      }
+      if (!(me.assignedBatches || []).some((b: mongoose.Types.ObjectId) => b.toString() === batchIdStr)) {
+        return NextResponse.json({ message: 'Access denied' }, { status: 403 });
+      }
+    }
+    // Cascade: remove the student and every entry recorded against them.
     await Entry.deleteMany({ studentId: id });
     await Student.findByIdAndDelete(id);
     await writeAuditLog({ action: 'student.delete', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'student', targetId: id, targetName: student.fullName });

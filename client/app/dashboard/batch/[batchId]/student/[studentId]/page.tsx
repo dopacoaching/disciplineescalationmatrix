@@ -2,13 +2,15 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { useGetStudentsQuery } from '@/store/api/studentsApi';
+import { useAppSelector } from '@/store';
+import { useGetStudentsQuery, useDeleteStudentMutation } from '@/store/api/studentsApi';
 import { useCreateEntryMutation } from '@/store/api/entriesApi';
 import { PRESET_REMARKS } from '@/constants/remarks';
 import { TopBar } from '@/components/ui/TopBar';
 import { StaffBottomNav } from '@/components/ui/BottomNav';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { Modal } from '@/components/ui/Modal';
 import { RemarkSelector } from '@/components/staff/RemarkSelector';
 import { escalationKey, escalationBadgeVariant, computePreviewLevel } from '@/lib/escalation';
 
@@ -19,8 +21,12 @@ export default function RemarkEntryPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [customRemark, setCustomRemark] = useState('');
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [removeOpen, setRemoveOpen] = useState(false);
+  const [removeError, setRemoveError] = useState<string | null>(null);
   const [createEntry, { isLoading }] = useCreateEntryMutation();
+  const [deleteStudent, { isLoading: removing }] = useDeleteStudentMutation();
   const { data: students } = useGetStudentsQuery({ batchId });
+  const isCampusIncharge = useAppSelector(s => s.auth.user?.isCampusIncharge) === true;
 
   const student = students?.find(s => s._id === studentId);
   const selectedRemark = PRESET_REMARKS.find(r => r.id === selected);
@@ -44,6 +50,16 @@ export default function RemarkEntryPage() {
       router.replace('/dashboard/entry-confirmed');
     } catch (err: any) {
       setSubmitError(err?.data?.message || t('error.generic'));
+    }
+  };
+
+  const handleRemove = async () => {
+    setRemoveError(null);
+    try {
+      await deleteStudent(studentId).unwrap();
+      router.replace(`/dashboard/batch/${batchId}`);
+    } catch (err: any) {
+      setRemoveError(err?.data?.message || t('error.generic'));
     }
   };
 
@@ -109,7 +125,43 @@ export default function RemarkEntryPage() {
         >
           {t('remark.submit')}
         </Button>
+
+        {/* Remove student — campus in-charge only */}
+        {isCampusIncharge && (
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={() => { setRemoveError(null); setRemoveOpen(true); }}
+              className="w-full flex items-center justify-center gap-1.5 h-11 rounded-2xl border border-danger/30 bg-danger/5 text-danger text-sm font-semibold hover:bg-danger/10 transition-colors"
+            >
+              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              {t('student.remove')}
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* Remove confirmation */}
+      <Modal open={removeOpen} onClose={() => setRemoveOpen(false)} title={t('student.remove')}>
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            {t('student.removeWarning')}
+          </p>
+          {student && (
+            <div className="bg-page/60 rounded-2xl px-4 py-3">
+              <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{student.fullName}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{student.registerNumber}</p>
+            </div>
+          )}
+          {removeError && <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{removeError}</p>}
+          <div className="flex gap-2">
+            <Button variant="ghost" size="md" className="flex-1" onClick={() => setRemoveOpen(false)}>{t('action.cancel')}</Button>
+            <Button variant="danger" size="md" className="flex-1" loading={removing} onClick={handleRemove}>{t('action.confirmDelete')}</Button>
+          </div>
+        </div>
+      </Modal>
 
       <StaffBottomNav />
     </div>

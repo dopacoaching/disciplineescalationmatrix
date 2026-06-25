@@ -59,6 +59,7 @@ export interface Staff {
   username: string;
   role: StaffRole;
   isActive: boolean;
+  isCampusIncharge?: boolean;
   assignedBatches: string[] | Batch[];
   entryCount?: number;
   lastEntryAt?: string | null;

@@ -70,7 +70,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const body = await req.json().catch(() => null);
     const result = createStaffSchema.safeParse(body);
     if (!result.success) return NextResponse.json({ message: result.error.errors[0].message }, { status: 400 });
-    const { fullName, username, password, role, assignedBatches } = result.data;
+    const { fullName, username, password, role, assignedBatches, isCampusIncharge } = result.data;
 
     // A scoped admin can only assign staff to batches within their own scope, and
     // must assign at least one — otherwise the new staff would be invisible to them.
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const passwordHash = await hashPassword(password);
     const staff = await Staff.create({
       fullName, username: username.toLowerCase(), passwordHash, role,
-      assignedBatches: assignedBatches || [], createdBy: user.id,
+      assignedBatches: assignedBatches || [], isCampusIncharge: !!isCampusIncharge, createdBy: user.id,
     });
     const { passwordHash: _, ...safe } = staff.toObject();
     await writeAuditLog({ action: 'staff.create', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'staff', targetId: staff._id.toString(), targetName: staff.fullName });

@@ -53,6 +53,7 @@ export default function LoginPage() {
         fullName: user.fullName,
         role: user.role,
         assignedBatches: user.assignedBatches,
+        isCampusIncharge: user.isCampusIncharge,
       }));
       if (user.assignedBatches?.length === 1) {
         router.replace(`/dashboard/batch/${user.assignedBatches[0]}`);

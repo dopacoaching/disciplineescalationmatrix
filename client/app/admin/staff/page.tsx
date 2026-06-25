@@ -23,6 +23,7 @@ const schema = z.object({
   password: z.string().min(1).or(z.literal('')).optional(),
   role: z.enum(['teacher', 'warden']),
   assignedBatches: z.array(z.string()),
+  isCampusIncharge: z.boolean(),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -39,12 +40,12 @@ export default function AdminStaffPage() {
 
   const { register, handleSubmit, formState: { errors }, reset, watch, setValue, setError } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { role: 'teacher', assignedBatches: [] },
+    defaultValues: { role: 'teacher', assignedBatches: [], isCampusIncharge: false },
   });
 
   const openCreate = () => {
     setEditingStaff(null);
-    reset({ fullName: '', username: '', password: '', role: 'teacher', assignedBatches: [] });
+    reset({ fullName: '', username: '', password: '', role: 'teacher', assignedBatches: [], isCampusIncharge: false });
     setModalOpen(true);
   };
 
@@ -56,6 +57,7 @@ export default function AdminStaffPage() {
       password: '',
       role: s.role,
       assignedBatches: (s.assignedBatches as Batch[])?.map(b => b._id) || [],
+      isCampusIncharge: s.isCampusIncharge ?? false,
     });
     setModalOpen(true);
   };
@@ -142,6 +144,11 @@ export default function AdminStaffPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm group-hover:text-primary transition-colors">{s.fullName}</p>
                     <Badge variant={s.role} label={s.role} />
+                    {s.isCampusIncharge && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-navy/10 text-navy dark:bg-navy/30 dark:text-gray-200">
+                        {t('staff.campusInchargeShort')}
+                      </span>
+                    )}
                     {!s.isActive && <Badge variant="archived" label={t('action.inactive')} />}
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">@{s.username} · {s.entryCount} {t('student.entriesCount')}</p>
@@ -206,6 +213,16 @@ export default function AdminStaffPage() {
               </div>
             )}
           </div>
+          <div className="rounded-2xl border border-bmedium bg-surface2 px-3.5 py-3">
+            <label className="flex items-start gap-2.5 cursor-pointer">
+              <input type="checkbox" {...register('isCampusIncharge')} className="mt-0.5 rounded text-primary" />
+              <span>
+                <span className="block text-sm font-semibold text-gray-800 dark:text-gray-100">{t('staff.campusIncharge')}</span>
+                <span className="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">{t('staff.campusInchargeHint')}</span>
+              </span>
+            </label>
+          </div>
+
           {errors.root && (
             <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{errors.root.message}</p>
           )}

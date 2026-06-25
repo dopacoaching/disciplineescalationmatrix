@@ -9,6 +9,8 @@ export interface AuthUser {
   assignedBatches?: string[];
   // Only meaningful for admins. Undefined/true = super admin (full access).
   isSuperAdmin?: boolean;
+  // Only meaningful for staff. Campus in-charge may remove students.
+  isCampusIncharge?: boolean;
 }
 
 interface AuthState {

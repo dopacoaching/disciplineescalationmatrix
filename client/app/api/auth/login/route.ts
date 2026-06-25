@@ -47,7 +47,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
     const res = NextResponse.json({
       id: staff._id, fullName: staff.fullName, username: staff.username,
-      role: staff.role, assignedBatches,
+      role: staff.role, assignedBatches, isCampusIncharge: !!staff.isCampusIncharge,
     });
     setAuthCookie(res, token);
     await writeAuditLog({ action: 'auth.login', actorId: staff._id.toString(), actorUsername: staff.username, actorRole: staff.role });
