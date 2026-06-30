@@ -88,7 +88,7 @@ export default function AdminLoginPage() {
       {/* Branding */}
       <div className="mb-7 text-center">
         <div className="w-16 h-16 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 shadow-card-md overflow-hidden">
-          <img src="/icons/icon-512.png" alt="DEM" className="w-full h-full object-cover" />
+          <img src="/logo.png" alt="NERU" className="w-full h-full object-contain" />
         </div>
         <h1 className="text-xl font-extrabold text-white tracking-wide">{t('app.name')}</h1>
         <p className="text-sm text-white/60 mt-1">Admin {t('login.title')}</p>

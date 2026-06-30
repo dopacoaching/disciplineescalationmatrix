@@ -150,7 +150,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       : toDate           ? `Until ${fmtDate(toDate)}`
       : 'All time';
 
-    const fileBase = `DEM-Entries-${fromDate || 'all'}-to-${toDate || 'all'}`;
+    const fileBase = `NERU-Entries-${fromDate || 'all'}-to-${toDate || 'all'}`;
     const stats = calcStats(entries);
 
     if (format === 'excel') return await generateExcel(entries, dateLabel, fileBase, stats);
@@ -167,7 +167,7 @@ async function generateExcel(
   entries: any[], dateLabel: string, fileBase: string, stats: Stats,
 ): Promise<NextResponse> {
   const wb = new ExcelJS.Workbook();
-  wb.creator = 'Discipline Escalation Matrix – DOPA Coaching';
+  wb.creator = 'NERU – DOPA Coaching';
   wb.created = new Date();
 
   buildEntriesSheet(wb, entries, dateLabel, stats);
@@ -558,7 +558,7 @@ async function generatePDF(
        .text('Discipline Entries Report', M, 16, { width: usableW * 0.6, lineBreak: false });
     // Subtitle
     doc.font('Body').fontSize(8).fillColor('#a8c8e0')
-       .text('Discipline Escalation Matrix', M, 36, { width: usableW * 0.6, lineBreak: false });
+       .text('NERU', M, 36, { width: usableW * 0.6, lineBreak: false });
 
     // Stats row
     const statsY = 60;
@@ -722,7 +722,7 @@ async function generatePDF(
     doc.moveTo(M, fy).lineTo(M + usableW, fy)
        .strokeColor('#e2e8f0').lineWidth(0.5).stroke();
     doc.font('Body').fontSize(7).fillColor('#9ca3af')
-       .text('DOPA Coaching · Discipline Escalation Matrix · Confidential', M, fy + 4, { lineBreak: false });
+       .text('DOPA Coaching · NERU · Confidential', M, fy + 4, { lineBreak: false });
     doc.font('Body').fontSize(7).fillColor('#9ca3af')
        .text(`Page ${pageNum}`, M, fy + 4, { width: usableW, align: 'right', lineBreak: false });
   };

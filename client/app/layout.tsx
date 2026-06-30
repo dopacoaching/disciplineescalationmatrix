@@ -3,12 +3,12 @@ import './globals.css';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  title: 'Discipline Escalation Matrix',
-  description: 'Discipline escalation management system',
+  title: 'NERU',
+  description: 'NERU portal',
   manifest: '/manifest.json',
   appleWebApp: {
     statusBarStyle: 'default',
-    title: 'DEM',
+    title: 'NERU',
   },
   other: {
     'mobile-web-app-capable': 'yes',

@@ -1,7 +1,7 @@
 {
-  "name": "Discipline Escalation Matrix",
-  "short_name": "DEM",
-  "description": "Discipline escalation management system",
+  "name": "NERU",
+  "short_name": "NERU",
+  "description": "NERU portal",
   "start_url": "/login",
   "scope": "/",
   "display": "standalone",
