@@ -60,6 +60,7 @@ export function TopBar({ title, showBack, backHref }: TopBarProps) {
           </svg>
         </button>
       )}
+      <img src="/logo.png" alt="NERU" className="w-8 h-8 rounded-lg object-contain shrink-0" />
       <h1 className="flex-1 text-[17px] font-bold text-navy dark:text-gray-100 truncate tracking-tight">{title}</h1>
 
       {/* Theme toggle */}
