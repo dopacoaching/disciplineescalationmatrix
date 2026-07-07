@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import Entry from '../models/Entry';
 import Student from '../models/Student';
 import Staff from '../models/Staff';
+import AuditLog from '../models/AuditLog';
 import '../models/Batch';
 
 // A batch scope of `null` means unrestricted (super admin). An array restricts
@@ -30,13 +31,16 @@ export async function getAdminStats(dateFilter: Record<string, unknown>, scope: 
   const entryScope = studentIds ? { studentId: { $in: studentIds } } : {};
   const studentScope = scope ? { batchId: { $in: scope } } : {};
 
-  const [totalEntries, highSeverityCount, flaggedCount, adminActionCount] = await Promise.all([
+  const auditScope = scope ? { batchIds: { $in: scope } } : {};
+
+  const [totalEntries, highSeverityCount, flaggedCount, adminActionCount, recordedActionsCount] = await Promise.all([
     Entry.countDocuments({ ...dateFilter, ...entryScope }),
     Entry.countDocuments({ ...dateFilter, ...entryScope, severity: 'high' }),
     Student.countDocuments({ ...studentScope, currentEscalationLevel: 2 }),
     Student.countDocuments({ ...studentScope, currentEscalationLevel: 3 }),
+    AuditLog.countDocuments({ ...dateFilter, ...auditScope, action: 'student.clearFlag' }),
   ]);
-  return { totalEntries, flaggedCount, adminActionCount, highSeverityCount };
+  return { totalEntries, flaggedCount, adminActionCount, highSeverityCount, recordedActionsCount };
 }
 
 export async function getFlaggedStudentsWithCounts(dateFilter: Record<string, unknown>, scope: BatchScope = null) {

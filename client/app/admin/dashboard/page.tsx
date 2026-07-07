@@ -21,6 +21,8 @@ export default function AdminDashboard() {
   const [markedLevel, setMarkedLevel] = useState<2 | 3 | null>(null);
   // High-severity entries modal (fetched on demand when opened).
   const [highOpen, setHighOpen] = useState(false);
+  // Recorded admin actions modal (fetched on demand when opened).
+  const [actionsOpen, setActionsOpen] = useState(false);
 
   const { data: stats, isLoading: statsLoading } = useGetDashboardStatsQuery({});
   const { data: flagged, isLoading: flaggedLoading } = useGetFlaggedQuery({});
@@ -31,7 +33,10 @@ export default function AdminDashboard() {
   // "Record Admin Action" events (student.clearFlag) — super admins see
   // every batch's, scoped (batch-assigned) admins get theirs only, filtered
   // server-side.
-  const { data: recentActions, isLoading: actionsLoading } = useGetAuditLogQuery({ limit: 6, action: 'student.clearFlag' });
+  const { data: recentActions, isLoading: actionsLoading } = useGetAuditLogQuery(
+    { limit: 50, action: 'student.clearFlag' },
+    { skip: !actionsOpen },
+  );
 
   const markedStudents = flagged?.filter(s => s.currentEscalationLevel === markedLevel) ?? [];
 
@@ -56,6 +61,9 @@ export default function AdminDashboard() {
             </button>
             <button type="button" onClick={() => setHighOpen(true)} className="block text-left rounded-2xl transition-transform hover:scale-[1.02] active:scale-[0.98]">
               <StatCard value={stats?.highSeverityCount ?? 0} label={t('admin.highSeverity')}    color="danger"   />
+            </button>
+            <button type="button" onClick={() => setActionsOpen(true)} className="block text-left rounded-2xl transition-transform hover:scale-[1.02] active:scale-[0.98] col-span-2">
+              <StatCard value={stats?.recordedActionsCount ?? 0} label={t('admin.recordedActions')} color="success" />
             </button>
           </div>
         )}
@@ -99,27 +107,6 @@ export default function AdminDashboard() {
           </div>
         </Link>
         )}
-
-        {/* Recent Admin Actions — super admins see every batch; scoped
-            (batch-assigned) admins get the same feed pre-filtered to their
-            own batches by the server. */}
-        <div className="bg-surface rounded-3xl border border-bsoft shadow-card overflow-hidden">
-          <div className="flex items-center justify-between px-4 pt-4">
-            <h3 className="text-sm font-bold text-navy dark:text-gray-200">{t('admin.recentActions')}</h3>
-            <Link href="/admin/audit-log" className="text-xs font-semibold text-primary hover:underline">
-              {t('action.viewAll')}
-            </Link>
-          </div>
-          <div className="mt-2">
-            {actionsLoading ? (
-              <Spinner className="py-6" />
-            ) : !recentActions?.length ? (
-              <p className="text-sm text-gray-400 py-6 text-center px-4">{t('empty.noActivity')}</p>
-            ) : (
-              recentActions.map(log => <RecordedActionRow key={log._id} log={log} />)
-            )}
-          </div>
-        </div>
       </div>
 
       {/* Marked students modal — shows only the students behind the clicked stat */}
@@ -184,6 +171,19 @@ export default function AdminDashboard() {
                 <Badge variant="high" label={t('severity.high')} />
               </Link>
             ))}
+          </div>
+        )}
+      </Modal>
+
+      {/* Recorded admin actions modal */}
+      <Modal open={actionsOpen} onClose={() => setActionsOpen(false)} title={t('admin.recordedActions')}>
+        {actionsLoading ? (
+          <Spinner className="py-6" />
+        ) : !recentActions?.length ? (
+          <p className="text-sm text-gray-400 text-center py-6">{t('empty.noActivity')}</p>
+        ) : (
+          <div className="-m-5">
+            {recentActions.map(log => <RecordedActionRow key={log._id} log={log} />)}
           </div>
         )}
       </Modal>

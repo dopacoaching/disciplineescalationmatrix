@@ -121,7 +121,7 @@
   "admin.adminAction": "അഡ്മിൻ നടപടി ആവശ്യം",
   "admin.highSeverity": "ഉയർന്ന തീവ്രത",
   "admin.flaggedList": "ശ്രദ്ധ ആവശ്യം",
-  "admin.recentActions": "സമീപകാല അഡ്മിൻ പ്രവർത്തനങ്ങൾ",
+  "admin.recordedActions": "രേഖപ്പെടുത്തിയ നടപടികൾ",
   "admin.studentsNeedAttention": "വിദ്യാർഥികൾക്ക് ശ്രദ്ധ ആവശ്യം",
   "admin.staffActivity": "സ്റ്റാഫ് പ്രവർത്തനം",
   "admin.lastEntry": "അവസാന എൻട്രി",

@@ -128,4 +128,5 @@ export interface DashboardStats {
   flaggedCount: number;
   adminActionCount: number;
   highSeverityCount: number;
+  recordedActionsCount: number;
 }
