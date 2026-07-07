@@ -7,6 +7,7 @@ import { TopBar } from '@/components/ui/TopBar';
 import { AdminBottomNav } from '@/components/ui/BottomNav';
 import { DateRangeFilter } from '@/components/admin/DateRangeFilter';
 import { Spinner } from '@/components/ui/Spinner';
+import { downloadFile } from '@/lib/downloadFile';
 import type { AuditLogEntry } from '@/types';
 
 const ACTION_META: Record<string, { key: string; dot: string }> = {
@@ -89,29 +90,38 @@ export default function AuditLogPage() {
   const [from, setFrom] = useState<string | undefined>();
   const [to, setTo]     = useState<string | undefined>();
   const [action, setAction] = useState('');
+  const [downloading, setDownloading] = useState<'pdf' | 'excel' | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const { data: logs, isLoading } = useGetAuditLogQuery({
     limit: 100,
     fromDate: from,
     toDate: to,
     action: action || undefined,
-  }, { skip: !isSuper });
+  });
 
   const errorCount = logs?.filter(l => l.status === 'error').length ?? 0;
+  // Auth/admin-management actions are global, not batch-tagged — a scoped
+  // admin will never have any, so hide those chips for them.
+  const filters = isSuper ? FILTERS : FILTERS.filter(f => f.value !== 'auth' && f.value !== 'admin');
 
-  if (!isSuper) {
-    return (
-      <div className="min-h-screen bg-page pb-24">
-        <TopBar title={t('nav.auditLog')} />
-        <div className="px-4 pt-4">
-          <div className="bg-surface rounded-3xl border border-bsoft shadow-card p-10 text-center">
-            <p className="text-sm text-gray-400">{t('admin.superOnly')}</p>
-          </div>
-        </div>
-        <AdminBottomNav />
-      </div>
-    );
-  }
+  const handleExport = async (format: 'pdf' | 'excel') => {
+    setDownloading(format);
+    setExportError(null);
+    try {
+      const params = new URLSearchParams({ format });
+      if (from) params.set('fromDate', from);
+      if (to) params.set('toDate', to);
+      if (action) params.set('action', action);
+      const ext = format === 'pdf' ? 'pdf' : 'xlsx';
+      const label = from && to ? `${from}-to-${to}` : 'all';
+      await downloadFile(`/api/audit-log/export?${params}`, `audit-log-${label}.${ext}`);
+    } catch {
+      setExportError(t('export.failed'));
+    } finally {
+      setDownloading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-page pb-24">
@@ -120,7 +130,7 @@ export default function AuditLogPage() {
         <DateRangeFilter onChange={(f, t2) => { setFrom(f); setTo(t2); }} />
 
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-          {FILTERS.map(f => (
+          {filters.map(f => (
             <button
               key={f.value}
               onClick={() => setAction(f.value)}
@@ -134,6 +144,42 @@ export default function AuditLogPage() {
             </button>
           ))}
         </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleExport('pdf')}
+            disabled={!!downloading}
+            className="flex-1 flex items-center justify-center gap-1.5 h-10 rounded-2xl border border-danger/30 bg-danger/5 text-danger text-xs font-semibold hover:bg-danger/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {downloading === 'pdf' ? (
+              <>{t('export.downloading')}</>
+            ) : (
+              <>
+                <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                </svg>
+                {t('export.pdf')}
+              </>
+            )}
+          </button>
+          <button
+            onClick={() => handleExport('excel')}
+            disabled={!!downloading}
+            className="flex-1 flex items-center justify-center gap-1.5 h-10 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400 text-xs font-semibold hover:bg-emerald-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {downloading === 'excel' ? (
+              <>{t('export.downloading')}</>
+            ) : (
+              <>
+                <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                {t('export.excel')}
+              </>
+            )}
+          </button>
+        </div>
+        {exportError && <p className="text-xs text-danger bg-danger-bg rounded-xl px-3 py-2">{exportError}</p>}
 
         {!isLoading && errorCount > 0 && (
           <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl px-4 py-2.5">

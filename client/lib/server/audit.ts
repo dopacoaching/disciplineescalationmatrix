@@ -10,6 +10,7 @@ export interface AuditEvent {
   targetName?: string;
   status?: 'success' | 'error';
   details?: string;
+  batchIds?: string[];
 }
 
 export async function writeAuditLog(event: AuditEvent): Promise<void> {
@@ -24,6 +25,7 @@ export async function writeAuditLog(event: AuditEvent): Promise<void> {
       targetName:    event.targetName ?? null,
       status:        event.status     ?? 'success',
       details:       event.details    ?? null,
+      batchIds:      event.batchIds   ?? [],
     });
   } catch {
     // Audit failure must never break the main request

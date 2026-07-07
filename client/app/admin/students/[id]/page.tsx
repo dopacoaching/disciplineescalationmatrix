@@ -2,20 +2,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-
-async function downloadFile(url: string, filename: string) {
-  const res = await fetch(url, { credentials: 'include' });
-  if (!res.ok) throw new Error('Export failed');
-  const blob = await res.blob();
-  const href = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = href;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(href);
-}
+import { downloadFile } from '@/lib/downloadFile';
 import { useGetStudentByIdQuery, useUpdateStudentMutation, useDeleteStudentMutation, useClearStudentFlagMutation } from '@/store/api/studentsApi';
 import { useGetEntriesQuery, useDeleteEntryMutation } from '@/store/api/entriesApi';
 import { useGetBatchesQuery } from '@/store/api/batchesApi';

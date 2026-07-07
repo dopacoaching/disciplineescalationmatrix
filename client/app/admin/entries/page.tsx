@@ -10,20 +10,7 @@ import { Badge, type BadgeVariant } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { DateRangeFilter } from '@/components/admin/DateRangeFilter';
-
-async function downloadFile(url: string, filename: string) {
-  const res = await fetch(url, { credentials: 'include' });
-  if (!res.ok) throw new Error('Export failed');
-  const blob = await res.blob();
-  const href = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = href;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(href);
-}
+import { downloadFile } from '@/lib/downloadFile';
 
 const severityBorder: Record<string, string> = {
   high:   'border-l-danger',

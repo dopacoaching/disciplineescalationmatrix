@@ -53,7 +53,8 @@ export async function PATCH(req: NextRequest, { params }: Ctx): Promise<NextResp
     const action = 'isActive' in rest
       ? rest.isActive ? 'staff.reactivate' : 'staff.deactivate'
       : 'staff.update';
-    await writeAuditLog({ action, actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'staff', targetId: staff._id.toString(), targetName: staff.fullName });
+    const staffBatchIds = (staff.assignedBatches || []).map((b: any) => (b?._id ?? b).toString());
+    await writeAuditLog({ action, actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'staff', targetId: staff._id.toString(), targetName: staff.fullName, batchIds: staffBatchIds });
     return NextResponse.json(staff);
   } catch {
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

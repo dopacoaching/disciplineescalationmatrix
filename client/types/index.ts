@@ -119,6 +119,7 @@ export interface AuditLogEntry {
   targetName: string | null;
   status: 'success' | 'error';
   details: string | null;
+  batchIds: string[];
   createdAt: string;
 }
 

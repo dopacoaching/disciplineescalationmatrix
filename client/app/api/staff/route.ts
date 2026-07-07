@@ -90,7 +90,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       assignedBatches: assignedBatches || [], isCampusIncharge: !!isCampusIncharge, createdBy: user.id,
     });
     const { passwordHash: _, ...safe } = staff.toObject();
-    await writeAuditLog({ action: 'staff.create', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'staff', targetId: staff._id.toString(), targetName: staff.fullName });
+    await writeAuditLog({ action: 'staff.create', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'staff', targetId: staff._id.toString(), targetName: staff.fullName, batchIds: assignedBatches || [] });
     return NextResponse.json(safe, { status: 201 });
   } catch (err) {
     if (isDuplicateKeyError(err)) {

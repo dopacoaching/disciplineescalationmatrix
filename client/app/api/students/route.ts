@@ -89,7 +89,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const existing = await Student.findOne({ registerNumber, batchId });
     if (existing) return NextResponse.json({ message: 'Register number already exists in this batch' }, { status: 409 });
     const student = await Student.create({ registerNumber, fullName, batchId, createdBy: user.id });
-    await writeAuditLog({ action: 'student.create', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'student', targetId: student._id.toString(), targetName: fullName });
+    await writeAuditLog({ action: 'student.create', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'student', targetId: student._id.toString(), targetName: fullName, batchIds: [batchId] });
     return NextResponse.json(student, { status: 201 });
   } catch {
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

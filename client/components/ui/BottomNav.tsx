@@ -70,14 +70,15 @@ export function AdminBottomNav() {
     router.replace('/admin/login');
   };
 
-  // Batches and audit log are super-admin-only management areas.
+  // Batches are a super-admin-only management area; audit log is scoped
+  // per-admin (each admin sees only their own batches' history there).
   const items = [
     { href: '/admin/dashboard', label: t('nav.dashboard'), icon: <ChartIcon /> },
     { href: '/admin/students',  label: t('nav.students'),  icon: <UsersIcon /> },
     { href: '/admin/staff',     label: t('nav.staff'),     icon: <PersonIcon /> },
     ...(isSuper ? [{ href: '/admin/batches', label: t('nav.batches'), icon: <FolderIcon /> }] : []),
     { href: '/admin/entries',   label: t('nav.entries'),   icon: <ListIcon /> },
-    ...(isSuper ? [{ href: '/admin/audit-log', label: t('nav.auditLog'), icon: <AuditIcon /> }] : []),
+    { href: '/admin/audit-log', label: t('nav.auditLog'), icon: <AuditIcon /> },
   ];
 
   return (

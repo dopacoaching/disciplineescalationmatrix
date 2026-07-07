@@ -1,72 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
 import mongoose from 'mongoose';
 import { connectDB } from '@/lib/server/db';
 import Entry from '@/lib/server/models/Entry';
 import Student from '@/lib/server/models/Student';
 import '@/lib/server/models/Staff';
 import '@/lib/server/models/Batch';
+import AuditLog from '@/lib/server/models/AuditLog';
 import { getAuthUser, adminBatchScope } from '@/lib/server/auth';
 import ExcelJS from 'exceljs';
 import PDFDocument from 'pdfkit';
-
-// PDFKit's built-in Helvetica/Times/Courier only support Latin-1 — Malayalam and
-// other non-Latin characters render as gibberish. We embed Noto Sans (Latin) and
-// Noto Sans Malayalam, then pick per text run based on whether the string contains
-// any Malayalam codepoints.
-const FONT_DIR = path.join(process.cwd(), 'lib', 'server', 'fonts');
-const FONT_LATIN_REGULAR  = path.join(FONT_DIR, 'NotoSans-Regular.ttf');
-const FONT_LATIN_BOLD     = path.join(FONT_DIR, 'NotoSans-Bold.ttf');
-const FONT_ML_REGULAR     = path.join(FONT_DIR, 'NotoSansMalayalam-Regular.ttf');
-const FONT_ML_BOLD        = path.join(FONT_DIR, 'NotoSansMalayalam-Bold.ttf');
-const MALAYALAM_RE = /[ഀ-ൿ]/;
-
-function fontFor(text: string, bold = false): string {
-  if (MALAYALAM_RE.test(text)) return bold ? 'BodyMl-Bold' : 'BodyMl';
-  return bold ? 'Body-Bold' : 'Body';
-}
-
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-const REMARK_LABELS: Record<string, string> = {
-  late_to_class:       'Being late to class',
-  leaving_early:       'Leaving class early without permission',
-  sleeping_in_room:    'Sleeping in room during class hours',
-  bunking_class:       'Bunking class',
-  talking_in_class:    'Talking in class',
-  causing_disturbance: 'Causing disturbance in class',
-  timing_violation:    'Timing violation',
-  curfew_violation:    'Curfew violation',
-  misuse_devices:      'Misuse of digital devices',
-  misuse_social_media: 'Misuse of social media',
-  unauthorized_phone:  'Possession of unauthorized phone',
-  exam_malpractice:    'Exam malpractice',
-  cheating:            'Cheating',
-  other:               'Other',
-};
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function parseDate(val: string | null): Date | null {
-  if (!val) return null;
-  const d = new Date(val);
-  return isNaN(d.getTime()) ? null : d;
-}
-
-function fmtDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-function fmtDateTime(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-    + ' ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-}
-
-function remarkLabel(remarkId: string, customRemark?: string): string {
-  if (remarkId === 'other' && customRemark?.trim()) return customRemark.trim();
-  return REMARK_LABELS[remarkId] || remarkId;
-}
+import { fontFor, registerReportFonts } from '@/lib/server/reportFonts';
+import { parseDate, fmtDate, fmtDateTime } from '@/lib/server/reportFormat';
+import { XL, xlFill, xlBorder, xlHairBorder } from '@/lib/server/reportExcelStyles';
+import { PAGE_W, PAGE_H, MARGIN as M, drawReportFooter, drawContinuationHeader, drawTableHeaderRow } from '@/lib/server/reportPdfChrome';
+import { AUDIT_ACTION_LABELS, STUDENT_AUDIT_ACTIONS } from '@/lib/server/auditActions';
+import { remarkLabel } from '@/lib/server/remarks';
 
 interface Stats {
   total: number; high: number; medium: number; low: number;
@@ -138,11 +86,22 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       };
     }
 
-    const entries = await Entry.find(filter)
-      .populate({ path: 'studentId', select: 'fullName registerNumber batchId', populate: { path: 'batchId', select: 'name' } })
-      .populate('staffId', 'fullName username')
-      .sort(sort === 'oldest' ? { createdAt: 1 } : { createdAt: -1 })
-      .lean();
+    // For a single-student report, also surface admin actions taken on that
+    // student (flag clears, edits, deletions) so the report is a full history.
+    // Runs alongside the entries query since neither depends on the other.
+    const [entries, adminActions] = await Promise.all([
+      Entry.find(filter)
+        .populate({ path: 'studentId', select: 'fullName registerNumber batchId', populate: { path: 'batchId', select: 'name' } })
+        .populate('staffId', 'fullName username')
+        .sort(sort === 'oldest' ? { createdAt: 1 } : { createdAt: -1 })
+        .lean(),
+      studentId
+        ? AuditLog.find({ targetType: 'student', targetId: studentId, action: { $in: STUDENT_AUDIT_ACTIONS } })
+            .select('createdAt actorUsername action details')
+            .sort({ createdAt: 1 })
+            .lean()
+        : Promise.resolve([]),
+    ]);
 
     const dateLabel =
       fromDate && toDate ? `${fmtDate(fromDate)} – ${fmtDate(toDate)}`
@@ -153,8 +112,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const fileBase = `NERU-Entries-${fromDate || 'all'}-to-${toDate || 'all'}`;
     const stats = calcStats(entries);
 
-    if (format === 'excel') return await generateExcel(entries, dateLabel, fileBase, stats);
-    return await generatePDF(entries, dateLabel, fileBase, stats);
+    if (format === 'excel') return await generateExcel(entries, dateLabel, fileBase, stats, adminActions);
+    return await generatePDF(entries, dateLabel, fileBase, stats, adminActions);
   } catch (err) {
     console.error('[entries/export]', err);
     return NextResponse.json({ message: 'Export failed' }, { status: 500 });
@@ -164,7 +123,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 // ─── Excel ────────────────────────────────────────────────────────────────────
 
 async function generateExcel(
-  entries: any[], dateLabel: string, fileBase: string, stats: Stats,
+  entries: any[], dateLabel: string, fileBase: string, stats: Stats, adminActions: any[],
 ): Promise<NextResponse> {
   const wb = new ExcelJS.Workbook();
   wb.creator = 'NERU – DOPA Coaching';
@@ -172,6 +131,7 @@ async function generateExcel(
 
   buildEntriesSheet(wb, entries, dateLabel, stats);
   buildSummarySheet(wb, entries, dateLabel, stats);
+  if (adminActions.length > 0) buildAdminActionsSheet(wb, adminActions, dateLabel);
 
   const buffer = await wb.xlsx.writeBuffer();
   return new NextResponse(
@@ -185,46 +145,6 @@ async function generateExcel(
       },
     },
   );
-}
-
-// Shared ARGB palettes
-const XL = {
-  navy:       'FF0F2942',
-  navyMid:    'FF1E4060',
-  navyLight:  'FF2C5F85',
-  white:      'FFFFFFFF',
-  gray50:     'FFF8FAFC',
-  gray100:    'FFF1F5F9',
-  gray400:    'FF9CA3AF',
-  gray600:    'FF4B5563',
-  gray900:    'FF111827',
-  altRow:     'FFF0F4F8',
-  highFg:     'FFDC2626',
-  highBg:     'FFFEF2F2',
-  mediumFg:   'FFD97706',
-  mediumBg:   'FFFFFBEB',
-  lowFg:      'FF16A34A',
-  lowBg:      'FFF0FDF4',
-  l1Fg:       'FF3B82F6',
-  l1Bg:       'FFEFF6FF',
-  l2Fg:       'FFF59E0B',
-  l2Bg:       'FFFFFBEB',
-  l3Fg:       'FFEF4444',
-  l3Bg:       'FFFEF2F2',
-};
-
-function xlFill(argb: string): ExcelJS.Fill {
-  return { type: 'pattern', pattern: 'solid', fgColor: { argb } };
-}
-
-function xlBorder(style: ExcelJS.BorderStyle = 'thin', argb = 'FFD1D5DB'): Partial<ExcelJS.Borders> {
-  const b = { style, color: { argb } } as ExcelJS.Border;
-  return { top: b, bottom: b, left: b, right: b };
-}
-
-function xlHairBorder(argb = 'FFE5E7EB'): Partial<ExcelJS.Borders> {
-  const b: ExcelJS.Border = { style: 'hair', color: { argb } };
-  return { top: b, bottom: b, left: b, right: b };
 }
 
 function buildEntriesSheet(wb: ExcelJS.Workbook, entries: any[], dateLabel: string, stats: Stats) {
@@ -510,24 +430,78 @@ function buildSummarySheet(wb: ExcelJS.Workbook, entries: any[], dateLabel: stri
   }
 }
 
+function buildAdminActionsSheet(wb: ExcelJS.Workbook, adminActions: any[], dateLabel: string) {
+  const ws = wb.addWorksheet('Admin Actions', {
+    properties: { tabColor: { argb: XL.navy } },
+  });
+  ws.views = [{ showGridLines: false }];
+  ws.columns = [
+    { key: 'a', width: 20 },
+    { key: 'b', width: 18 },
+    { key: 'c', width: 28 },
+    { key: 'd', width: 50 },
+  ];
+
+  let r = 1;
+  ws.mergeCells(`A${r}:D${r}`);
+  Object.assign(ws.getCell(`A${r}`), {
+    value: 'Admin Actions on This Student',
+    font: { name: 'Calibri', size: 16, bold: true, color: { argb: XL.white } },
+    fill: xlFill(XL.navy),
+    alignment: { vertical: 'middle', horizontal: 'center' },
+  });
+  ws.getRow(r).height = 36;
+  r++;
+  ws.mergeCells(`A${r}:D${r}`);
+  Object.assign(ws.getCell(`A${r}`), {
+    value: dateLabel,
+    font: { name: 'Calibri', size: 10, color: { argb: 'FFB8D4EC' } },
+    fill: xlFill(XL.navyMid),
+    alignment: { vertical: 'middle', horizontal: 'center' },
+  });
+  ws.getRow(r).height = 20;
+  r += 2;
+
+  const hdrs = ['Date', 'Admin', 'Action', 'Details'];
+  const hdrRow = ws.getRow(r);
+  hdrRow.height = 20;
+  hdrs.forEach((h, i) => {
+    const cell = hdrRow.getCell(i + 1);
+    cell.value = h;
+    cell.font = { name: 'Calibri', size: 9, bold: true, color: { argb: XL.white } };
+    cell.fill = xlFill(XL.navyLight);
+    cell.border = xlBorder('medium', XL.navyMid);
+    cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+  });
+  r++;
+
+  adminActions.forEach(a => {
+    const row = ws.getRow(r);
+    row.height = 18;
+    const vals = [fmtDateTime(a.createdAt), a.actorUsername, AUDIT_ACTION_LABELS[a.action] || a.action, a.details || '—'];
+    vals.forEach((v, i) => {
+      const cell = row.getCell(i + 1);
+      cell.value = v;
+      cell.font = { name: 'Calibri', size: 9, color: { argb: XL.gray900 } };
+      cell.border = xlHairBorder();
+      cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1, wrapText: i === 3 };
+    });
+    r++;
+  });
+}
+
 // ─── PDF ──────────────────────────────────────────────────────────────────────
 
 async function generatePDF(
-  entries: any[], dateLabel: string, fileBase: string, stats: Stats,
+  entries: any[], dateLabel: string, fileBase: string, stats: Stats, adminActions: any[],
 ): Promise<NextResponse> {
   const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 40, autoFirstPage: true });
-  doc.registerFont('Body',         FONT_LATIN_REGULAR);
-  doc.registerFont('Body-Bold',    FONT_LATIN_BOLD);
-  doc.registerFont('BodyMl',       FONT_ML_REGULAR);
-  doc.registerFont('BodyMl-Bold',  FONT_ML_BOLD);
+  registerReportFonts(doc);
 
   const chunks: Buffer[] = [];
   doc.on('data', (c: Buffer) => chunks.push(c));
   const done = new Promise<void>(resolve => doc.on('end', resolve));
 
-  const PAGE_W        = 841.89;
-  const PAGE_H        = 595.28;
-  const M             = 40;           // left/right margin
   const usableW       = PAGE_W - M * 2;
   const CONTENT_BOT   = PAGE_H - 32; // content must end above footer
 
@@ -590,38 +564,6 @@ async function generatePDF(
        );
 
     return statsY + statsH + 22; // y where table starts
-  };
-
-  // ── Page 2+ mini-header ────────────────────────────────────────────────
-  const drawContinuationHeader = (): number => {
-    doc.rect(0, 0, PAGE_W, 24).fill('#0f2942');
-    doc.font('Body-Bold').fontSize(8.5).fillColor('#ffffff')
-       .text('Discipline Entries Report (continued)', M, 8, { lineBreak: false });
-    doc.font('Body').fontSize(7.5).fillColor('#7fa8c8')
-       .text('DOPA Coaching', M, 8, { width: usableW, align: 'right', lineBreak: false });
-    return 28; // y where table starts
-  };
-
-  // ── Table header ───────────────────────────────────────────────────────
-  const drawTableHeader = (y: number) => {
-    // Header row bg
-    doc.rect(M, y, usableW, HDR_H).fill('#1e4060');
-    // Subtle top accent line
-    doc.rect(M, y, usableW, 2).fill('#3b82f6');
-
-    let x = M;
-    for (const col of cols) {
-      doc.font('Body-Bold').fontSize(7.5).fillColor('#ffffff')
-         .text(col.label, x + 4, y + 9, { width: col.w - 6, lineBreak: false });
-      x += col.w;
-    }
-    // Column dividers in header
-    x = M;
-    for (let i = 0; i < cols.length - 1; i++) {
-      x += cols[i].w;
-      doc.moveTo(x, y + 4).lineTo(x, y + HDR_H - 4)
-         .strokeColor('#2c5f85').lineWidth(0.5).stroke();
-    }
   };
 
   // ── Data row ───────────────────────────────────────────────────────────
@@ -716,21 +658,13 @@ async function generatePDF(
        .text(staffName, x + 4, y + 8, { width: cols[8].w - 6, lineBreak: false, ellipsis: true });
   };
 
-  // ── Footer ─────────────────────────────────────────────────────────────
-  const drawFooter = (pageNum: number) => {
-    const fy = PAGE_H - 24;
-    doc.moveTo(M, fy).lineTo(M + usableW, fy)
-       .strokeColor('#e2e8f0').lineWidth(0.5).stroke();
-    doc.font('Body').fontSize(7).fillColor('#9ca3af')
-       .text('DOPA Coaching · NERU · Confidential', M, fy + 4, { lineBreak: false });
-    doc.font('Body').fontSize(7).fillColor('#9ca3af')
-       .text(`Page ${pageNum}`, M, fy + 4, { width: usableW, align: 'right', lineBreak: false });
-  };
+  const REPORT_TITLE = 'Discipline Entries Report';
+  const drawFooter = (pageNum: number) => drawReportFooter(doc, pageNum, usableW);
 
   // ── Render ─────────────────────────────────────────────────────────────
   let pageNum = 1;
   let tableTop = drawPage1Header();
-  drawTableHeader(tableTop);
+  drawTableHeaderRow(doc, cols, tableTop, usableW, HDR_H);
   let y = tableTop + HDR_H;
 
   if (entries.length === 0) {
@@ -743,12 +677,75 @@ async function generatePDF(
       drawFooter(pageNum);
       doc.addPage();
       pageNum++;
-      tableTop = drawContinuationHeader();
-      drawTableHeader(tableTop);
+      tableTop = drawContinuationHeader(doc, REPORT_TITLE, usableW);
+      drawTableHeaderRow(doc, cols, tableTop, usableW, HDR_H);
       y = tableTop + HDR_H;
     }
     drawDataRow(entries[i], i, y);
     y += ROW_H;
+  }
+
+  // ── Admin actions section (single-student reports only) ────────────────
+  if (adminActions.length > 0) {
+    const aaCols = [
+      { label: 'Date',   w: 92  },
+      { label: 'Admin',  w: 110 },
+      { label: 'Action', w: 150 },
+      { label: 'Details', w: usableW - 92 - 110 - 150 },
+    ];
+    const AA_ROW_H = 24;
+    const AA_HDR_H = 26;
+    const AA_TITLE_H = 30;
+
+    const spaceNeeded = AA_TITLE_H + AA_HDR_H + AA_ROW_H;
+    if (y + spaceNeeded > CONTENT_BOT) {
+      drawFooter(pageNum);
+      doc.addPage();
+      pageNum++;
+      y = drawContinuationHeader(doc, REPORT_TITLE, usableW);
+    } else {
+      y += 14;
+    }
+
+    doc.font('Body-Bold').fontSize(11).fillColor('#0f2942')
+       .text('Admin Actions on This Student', M, y, { width: usableW, lineBreak: false });
+    y += AA_TITLE_H;
+
+    drawTableHeaderRow(doc, aaCols, y, usableW, AA_HDR_H);
+    y += AA_HDR_H;
+
+    for (let i = 0; i < adminActions.length; i++) {
+      if (y + AA_ROW_H > CONTENT_BOT) {
+        drawFooter(pageNum);
+        doc.addPage();
+        pageNum++;
+        y = drawContinuationHeader(doc, REPORT_TITLE, usableW);
+        drawTableHeaderRow(doc, aaCols, y, usableW, AA_HDR_H);
+        y += AA_HDR_H;
+      }
+      const a = adminActions[i];
+      const isEven = i % 2 === 0;
+      doc.rect(M, y, usableW, AA_ROW_H).fill(isEven ? '#f0f4f8' : '#ffffff');
+      doc.moveTo(M, y + AA_ROW_H).lineTo(M + usableW, y + AA_ROW_H)
+         .strokeColor('#e2e8f0').lineWidth(0.4).stroke();
+
+      let ax = M;
+      doc.font('Body').fontSize(7).fillColor('#374151')
+         .text(fmtDateTime(a.createdAt), ax + 4, y + 8, { width: aaCols[0].w - 6, lineBreak: false });
+      ax += aaCols[0].w;
+      doc.font(fontFor(a.actorUsername)).fontSize(7).fillColor('#111827')
+         .text(a.actorUsername, ax + 4, y + 8, { width: aaCols[1].w - 6, lineBreak: false, ellipsis: true });
+      ax += aaCols[1].w;
+      const actionLabel = AUDIT_ACTION_LABELS[a.action] || a.action;
+      doc.font('Body').fontSize(7).fillColor('#374151')
+         .text(actionLabel, ax + 4, y + 8, { width: aaCols[2].w - 6, lineBreak: false, ellipsis: true });
+      ax += aaCols[2].w;
+      const details = a.details || '—';
+      doc.font(fontFor(details)).fontSize(7).fillColor('#374151')
+         .text(details, ax + 4, y + 8, { width: aaCols[3].w - 6, lineBreak: false, ellipsis: true });
+
+      y += AA_ROW_H;
+    }
   }
 
   drawFooter(pageNum);

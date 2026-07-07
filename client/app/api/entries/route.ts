@@ -137,7 +137,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       customRemark: customRemark || '', severity, escalationLevel, createdAt: new Date(),
     });
     await Student.findByIdAndUpdate(studentId, { currentEscalationLevel: escalationLevel });
-    await writeAuditLog({ action: 'entry.create', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'student', targetId: studentId, targetName: student.fullName });
+    await writeAuditLog({ action: 'entry.create', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'student', targetId: studentId, targetName: student.fullName, batchIds: [student.batchId.toString()] });
     const populated = await entry.populate([
       { path: 'studentId', select: 'fullName registerNumber batchId', populate: { path: 'batchId', select: 'name' } },
       { path: 'staffId', select: 'fullName username role' },

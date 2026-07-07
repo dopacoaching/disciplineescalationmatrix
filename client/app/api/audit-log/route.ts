@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/server/db';
-import { getAuthUser, isSuperAdmin } from '@/lib/server/auth';
+import { getAuthUser, adminBatchScope } from '@/lib/server/auth';
 import AuditLog from '@/lib/server/models/AuditLog';
-
-const VALID_ACTIONS = new Set(['auth', 'staff', 'admin', 'batch', 'student', 'entry']);
+import { AUDIT_ACTION_CATEGORIES } from '@/lib/server/auditActions';
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const user = await getAuthUser();
     if (!user) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
-    if (!isSuperAdmin(user)) return NextResponse.json({ message: 'Super admin access required' }, { status: 403 });
+    if (user.role !== 'admin') return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
     await connectDB();
 
     const sp = req.nextUrl.searchParams;
@@ -20,6 +19,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const filter: Record<string, unknown> = {};
 
+    // Scoped admins only see actions tagged with one of their batches.
+    const scope = adminBatchScope(user);
+    if (scope) filter.batchIds = { $in: scope };
+
     if (fromDate || toDate) {
       const dateFilter: Record<string, Date> = {};
       if (fromDate) { const d = new Date(fromDate); if (!isNaN(d.getTime())) dateFilter.$gte = d; }
@@ -27,7 +30,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       if (Object.keys(dateFilter).length) filter.createdAt = dateFilter;
     }
 
-    if (action && VALID_ACTIONS.has(action)) {
+    if (action && AUDIT_ACTION_CATEGORIES.has(action)) {
       filter.action = { $regex: `^${action}\\.`, $options: 'i' };
     }
 

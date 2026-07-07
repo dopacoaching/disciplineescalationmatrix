@@ -53,7 +53,11 @@ export async function PATCH(req: NextRequest, { params }: Ctx): Promise<NextResp
 
     const student = await Student.findByIdAndUpdate(id, result.data, { new: true, runValidators: true });
     if (!student) return NextResponse.json({ message: 'Student not found' }, { status: 404 });
-    await writeAuditLog({ action: 'student.update', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'student', targetId: student._id.toString(), targetName: student.fullName });
+    const oldBatchId = existing.batchId.toString();
+    const batchIds = result.data.batchId && result.data.batchId !== oldBatchId
+      ? [oldBatchId, result.data.batchId]
+      : [oldBatchId];
+    await writeAuditLog({ action: 'student.update', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'student', targetId: student._id.toString(), targetName: student.fullName, batchIds });
     return NextResponse.json(student);
   } catch {
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
@@ -88,7 +92,7 @@ export async function DELETE(_req: NextRequest, { params }: Ctx): Promise<NextRe
     // Cascade: remove the student and every entry recorded against them.
     await Entry.deleteMany({ studentId: id });
     await Student.findByIdAndDelete(id);
-    await writeAuditLog({ action: 'student.delete', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'student', targetId: id, targetName: student.fullName });
+    await writeAuditLog({ action: 'student.delete', actorId: user.id, actorUsername: user.username, actorRole: user.role, targetType: 'student', targetId: id, targetName: student.fullName, batchIds: [batchIdStr] });
     return NextResponse.json({ message: 'Student and all entries deleted' });
   } catch {
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

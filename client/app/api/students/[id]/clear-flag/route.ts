@@ -44,6 +44,8 @@ export async function POST(req: NextRequest, { params }: Ctx): Promise<NextRespo
         targetType: 'student',
         targetId: student._id.toString(),
         targetName: student.fullName,
+        details: actionNote.trim(),
+        batchIds: [target.batchId.toString()],
       });
     } catch { /* audit log failure must not roll back a successful flag clear */ }
     return NextResponse.json(student);
