@@ -28,11 +28,9 @@ export default function AdminDashboard() {
     { severity: 'high', sort: 'newest' },
     { skip: !highOpen },
   );
-  // Super admins get a live feed of every admin action across all batches.
-  const { data: recentActions, isLoading: actionsLoading } = useGetAuditLogQuery(
-    { limit: 6 },
-    { skip: !isSuper },
-  );
+  // Super admins see every admin action; scoped (batch-assigned) admins get
+  // the same feed already filtered server-side to their own batches.
+  const { data: recentActions, isLoading: actionsLoading } = useGetAuditLogQuery({ limit: 6 });
 
   const markedStudents = flagged?.filter(s => s.currentEscalationLevel === markedLevel) ?? [];
 
@@ -101,27 +99,26 @@ export default function AdminDashboard() {
         </Link>
         )}
 
-        {/* Recent Admin Actions — super admins only, scoped admins already see
-            their own batches' history at /admin/audit-log. */}
-        {isSuper && (
-          <div className="bg-surface rounded-3xl border border-bsoft shadow-card overflow-hidden">
-            <div className="flex items-center justify-between px-4 pt-4">
-              <h3 className="text-sm font-bold text-navy dark:text-gray-200">{t('admin.recentActions')}</h3>
-              <Link href="/admin/audit-log" className="text-xs font-semibold text-primary hover:underline">
-                {t('action.viewAll')}
-              </Link>
-            </div>
-            <div className="px-4 pb-1 mt-1">
-              {actionsLoading ? (
-                <Spinner className="py-6" />
-              ) : !recentActions?.length ? (
-                <p className="text-sm text-gray-400 py-6 text-center">{t('empty.noActivity')}</p>
-              ) : (
-                recentActions.map(log => <AuditRow key={log._id} log={log} />)
-              )}
-            </div>
+        {/* Recent Admin Actions — super admins see every batch; scoped
+            (batch-assigned) admins get the same feed pre-filtered to their
+            own batches by the server. */}
+        <div className="bg-surface rounded-3xl border border-bsoft shadow-card overflow-hidden">
+          <div className="flex items-center justify-between px-4 pt-4">
+            <h3 className="text-sm font-bold text-navy dark:text-gray-200">{t('admin.recentActions')}</h3>
+            <Link href="/admin/audit-log" className="text-xs font-semibold text-primary hover:underline">
+              {t('action.viewAll')}
+            </Link>
           </div>
-        )}
+          <div className="px-4 pb-1 mt-1">
+            {actionsLoading ? (
+              <Spinner className="py-6" />
+            ) : !recentActions?.length ? (
+              <p className="text-sm text-gray-400 py-6 text-center">{t('empty.noActivity')}</p>
+            ) : (
+              recentActions.map(log => <AuditRow key={log._id} log={log} />)
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Marked students modal — shows only the students behind the clicked stat */}
