@@ -53,8 +53,10 @@ export function AuditRow({ log }: { log: AuditLogEntry }) {
           <span className={isError ? 'text-red-600 font-semibold' : 'text-gray-700 dark:text-gray-300'}>{meta.key ? t(meta.key) : log.action}</span>
           {log.targetName && <span className="text-gray-500 dark:text-gray-400"> — {log.targetName}</span>}
         </p>
-        {isError && log.details && (
-          <p className="text-xs text-red-500 mt-0.5 font-medium">{log.details}</p>
+        {log.details && (
+          <p className={`text-xs mt-0.5 ${isError ? 'text-red-500 font-medium' : 'text-gray-500 dark:text-gray-400 italic'}`}>
+            "{log.details}"
+          </p>
         )}
         <p className="text-[10px] text-gray-400 mt-0.5">
           {timeAgo(log.createdAt)}

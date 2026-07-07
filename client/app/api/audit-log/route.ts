@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/server/db';
 import { getAuthUser, adminBatchScope } from '@/lib/server/auth';
 import AuditLog from '@/lib/server/models/AuditLog';
-import { AUDIT_ACTION_CATEGORIES } from '@/lib/server/auditActions';
+import { AUDIT_ACTION_CATEGORIES, AUDIT_ACTION_LABELS } from '@/lib/server/auditActions';
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
@@ -30,8 +30,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       if (Object.keys(dateFilter).length) filter.createdAt = dateFilter;
     }
 
+    // `action` may be a category prefix ("student" -> all student.* events)
+    // or an exact action name ("student.clearFlag" -> just that one).
     if (action && AUDIT_ACTION_CATEGORIES.has(action)) {
       filter.action = { $regex: `^${action}\\.`, $options: 'i' };
+    } else if (action && action in AUDIT_ACTION_LABELS) {
+      filter.action = action;
     }
 
     const logs = await AuditLog.find(filter).sort({ createdAt: -1 }).limit(limit);

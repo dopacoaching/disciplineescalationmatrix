@@ -28,9 +28,10 @@ export default function AdminDashboard() {
     { severity: 'high', sort: 'newest' },
     { skip: !highOpen },
   );
-  // Super admins see every admin action; scoped (batch-assigned) admins get
-  // the same feed already filtered server-side to their own batches.
-  const { data: recentActions, isLoading: actionsLoading } = useGetAuditLogQuery({ limit: 6 });
+  // "Record Admin Action" events (student.clearFlag) — super admins see
+  // every batch's, scoped (batch-assigned) admins get theirs only, filtered
+  // server-side.
+  const { data: recentActions, isLoading: actionsLoading } = useGetAuditLogQuery({ limit: 6, action: 'student.clearFlag' });
 
   const markedStudents = flagged?.filter(s => s.currentEscalationLevel === markedLevel) ?? [];
 
