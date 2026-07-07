@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '@/store';
-import { useGetDashboardStatsQuery, useGetFlaggedQuery } from '@/store/api/dashboardApi';
+import { useGetDashboardStatsQuery, useGetFlaggedQuery, useGetAuditLogQuery } from '@/store/api/dashboardApi';
 import { useGetEntriesQuery } from '@/store/api/entriesApi';
 import { TopBar } from '@/components/ui/TopBar';
 import { AdminBottomNav } from '@/components/ui/BottomNav';
@@ -10,6 +10,7 @@ import { StatCard } from '@/components/admin/StatCard';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { Spinner } from '@/components/ui/Spinner';
+import { AuditRow } from '@/components/admin/AuditRow';
 import { escalationBadgeVariant, escalationKey } from '@/lib/escalation';
 import Link from 'next/link';
 
@@ -26,6 +27,11 @@ export default function AdminDashboard() {
   const { data: highEntries, isLoading: highLoading } = useGetEntriesQuery(
     { severity: 'high', sort: 'newest' },
     { skip: !highOpen },
+  );
+  // Super admins get a live feed of every admin action across all batches.
+  const { data: recentActions, isLoading: actionsLoading } = useGetAuditLogQuery(
+    { limit: 6 },
+    { skip: !isSuper },
   );
 
   const markedStudents = flagged?.filter(s => s.currentEscalationLevel === markedLevel) ?? [];
@@ -93,6 +99,28 @@ export default function AdminDashboard() {
             </svg>
           </div>
         </Link>
+        )}
+
+        {/* Recent Admin Actions — super admins only, scoped admins already see
+            their own batches' history at /admin/audit-log. */}
+        {isSuper && (
+          <div className="bg-surface rounded-3xl border border-bsoft shadow-card overflow-hidden">
+            <div className="flex items-center justify-between px-4 pt-4">
+              <h3 className="text-sm font-bold text-navy dark:text-gray-200">{t('admin.recentActions')}</h3>
+              <Link href="/admin/audit-log" className="text-xs font-semibold text-primary hover:underline">
+                {t('action.viewAll')}
+              </Link>
+            </div>
+            <div className="px-4 pb-1 mt-1">
+              {actionsLoading ? (
+                <Spinner className="py-6" />
+              ) : !recentActions?.length ? (
+                <p className="text-sm text-gray-400 py-6 text-center">{t('empty.noActivity')}</p>
+              ) : (
+                recentActions.map(log => <AuditRow key={log._id} log={log} />)
+              )}
+            </div>
+          </div>
         )}
       </div>
 

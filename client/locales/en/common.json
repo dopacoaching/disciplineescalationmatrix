@@ -121,6 +121,7 @@
   "admin.adminAction": "Admin Action Required",
   "admin.highSeverity": "High Severity",
   "admin.flaggedList": "Requires Attention",
+  "admin.recentActions": "Recent Admin Actions",
   "admin.studentsNeedAttention": "students need attention",
   "admin.staffActivity": "Staff Activity",
   "admin.lastEntry": "Last entry",
