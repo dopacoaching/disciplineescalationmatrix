@@ -10,7 +10,7 @@ import { StatCard } from '@/components/admin/StatCard';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { Spinner } from '@/components/ui/Spinner';
-import { AuditRow } from '@/components/admin/AuditRow';
+import { RecordedActionRow } from '@/components/admin/RecordedActionRow';
 import { escalationBadgeVariant, escalationKey } from '@/lib/escalation';
 import Link from 'next/link';
 
@@ -110,13 +110,13 @@ export default function AdminDashboard() {
               {t('action.viewAll')}
             </Link>
           </div>
-          <div className="px-4 pb-1 mt-1">
+          <div className="mt-2">
             {actionsLoading ? (
               <Spinner className="py-6" />
             ) : !recentActions?.length ? (
-              <p className="text-sm text-gray-400 py-6 text-center">{t('empty.noActivity')}</p>
+              <p className="text-sm text-gray-400 py-6 text-center px-4">{t('empty.noActivity')}</p>
             ) : (
-              recentActions.map(log => <AuditRow key={log._id} log={log} />)
+              recentActions.map(log => <RecordedActionRow key={log._id} log={log} />)
             )}
           </div>
         </div>
