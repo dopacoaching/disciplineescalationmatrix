@@ -211,6 +211,7 @@
   "student.requiresAttention": "Requires Admin Attention",
   "student.adminActionRecorded": "Admin Action Recorded",
   "student.actionBy": "Action by",
+  "student.noActionDescription": "No action description recorded",
   "audit.action.studentClearFlag": "Cleared student flag",
   "col.name": "Name",
   "col.batch": "Batch",

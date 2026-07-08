@@ -211,6 +211,7 @@
   "student.requiresAttention": "അഡ്മിൻ ശ്രദ്ധ ആവശ്യം",
   "student.adminActionRecorded": "അഡ്മിൻ നടപടി രേഖപ്പെടുത്തി",
   "student.actionBy": "നടപടി എടുത്തത്",
+  "student.noActionDescription": "നടപടിയുടെ വിവരണം രേഖപ്പെടുത്തിയിട്ടില്ല",
   "audit.action.studentClearFlag": "വിദ്യാർഥി ഫ്ലാഗ് നീക്കി",
   "col.name": "പേര്",
   "col.batch": "ബാച്ച്",

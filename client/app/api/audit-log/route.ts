@@ -2,7 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/server/db';
 import { getAuthUser, adminBatchScope } from '@/lib/server/auth';
 import AuditLog from '@/lib/server/models/AuditLog';
+import Student from '@/lib/server/models/Student';
 import { AUDIT_ACTION_CATEGORIES, AUDIT_ACTION_LABELS } from '@/lib/server/auditActions';
+
+// Records written before `details` was captured on student.clearFlag events
+// have no note stored on the audit log itself, but the note still lives on
+// the student's own lastAdminActionNote field. Backfill it at read time when
+// the student's last-cleared timestamp lines up with this log entry.
+async function backfillClearFlagDetails(logs: any[]): Promise<void> {
+  const missing = logs.filter(l => l.action === 'student.clearFlag' && !l.details && l.targetId);
+  if (missing.length === 0) return;
+  const students = await Student.find({ _id: { $in: missing.map(l => l.targetId) } })
+    .select('lastAdminActionNote lastClearedAt')
+    .lean();
+  const byId = new Map(students.map(s => [s._id.toString(), s]));
+  for (const log of missing) {
+    const student = byId.get(log.targetId);
+    if (!student?.lastAdminActionNote || !student.lastClearedAt) continue;
+    const drift = Math.abs(new Date(student.lastClearedAt).getTime() - new Date(log.createdAt).getTime());
+    if (drift < 5000) log.details = student.lastAdminActionNote;
+  }
+}
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
@@ -38,7 +58,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       filter.action = action;
     }
 
-    const logs = await AuditLog.find(filter).sort({ createdAt: -1 }).limit(limit);
+    const logs = await AuditLog.find(filter).sort({ createdAt: -1 }).limit(limit).lean();
+    await backfillClearFlagDetails(logs);
     return NextResponse.json(logs);
   } catch {
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
