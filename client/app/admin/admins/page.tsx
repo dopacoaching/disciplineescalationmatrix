@@ -46,6 +46,11 @@ export default function AdminAdminsPage() {
   const [createAdmin, { isLoading: creating }] = useCreateAdminMutation();
   const [updateAdmin, { isLoading: updating }] = useUpdateAdminMutation();
 
+  // Only the primary admin account may edit other admins' details — everyone
+  // else can still deactivate/reactivate, matching the server-side rule.
+  const me = admins?.find(a => a._id === currentUser?.id);
+  const canEditAdmins = me?.email?.toLowerCase() === 'it@dopacoaching.com';
+
   const { register, handleSubmit, formState: { errors }, reset, watch, setValue, setError } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { isSuperAdmin: true, assignedBatches: [] },
@@ -183,9 +188,11 @@ export default function AdminAdminsPage() {
                 </div>
                 {admin._id !== currentUser?.id && (
                   <div className="flex flex-col gap-1 shrink-0">
-                    <Button size="sm" variant="secondary" onClick={() => openEdit(admin)}>
-                      {t('action.edit')}
-                    </Button>
+                    {canEditAdmins && (
+                      <Button size="sm" variant="secondary" onClick={() => openEdit(admin)}>
+                        {t('action.edit')}
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       variant={admin.isActive ? 'ghost' : 'secondary'}

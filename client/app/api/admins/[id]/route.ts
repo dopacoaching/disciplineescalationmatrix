@@ -9,6 +9,11 @@ import { writeAuditLog } from '@/lib/server/audit';
 
 type Ctx = { params: Promise<{ id: string }> };
 
+// Editing another admin's details (name/email/username/password/role/batches)
+// is restricted to this one primary account — every other super admin can
+// still deactivate/reactivate admins, just not edit their details.
+const PRIMARY_ADMIN_EMAIL = 'it@dopacoaching.com';
+
 export async function PATCH(req: NextRequest, { params }: Ctx): Promise<NextResponse> {
   try {
     const user = await getAuthUser();
@@ -22,6 +27,16 @@ export async function PATCH(req: NextRequest, { params }: Ctx): Promise<NextResp
     const result = updateAdminSchema.safeParse(body);
     if (!result.success) return NextResponse.json({ message: result.error.errors[0].message }, { status: 400 });
     const { fullName, email, username, password, isSuperAdmin: newSuper, assignedBatches, isActive } = result.data;
+
+    // isActive-only requests are the existing deactivate/reactivate toggle,
+    // open to any super admin. Anything else is a full edit, primary-admin-only.
+    const isFullEdit = Object.keys(result.data).some(k => k !== 'isActive');
+    if (isFullEdit) {
+      const actor = await Admin.findById(user.id).select('email');
+      if (!actor || actor.email.toLowerCase() !== PRIMARY_ADMIN_EMAIL) {
+        return NextResponse.json({ message: 'Only the primary admin account can edit other admins' }, { status: 403 });
+      }
+    }
 
     const existing = await Admin.findById(id).select('isSuperAdmin assignedBatches');
     if (!existing) return NextResponse.json({ message: 'Admin not found' }, { status: 404 });
