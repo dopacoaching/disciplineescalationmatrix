@@ -12,5 +12,11 @@ export const createAdminSchema = z.object({
 });
 
 export const updateAdminSchema = z.object({
-  isActive: z.boolean().optional(),
+  fullName:        z.string().min(1, 'Name is required').max(100).optional(),
+  email:           z.string().email().max(200).optional(),
+  username:        z.string().min(3).max(50).optional(),
+  password:        z.string().min(8).max(128).optional(),
+  isSuperAdmin:    z.boolean().optional(),
+  assignedBatches: z.array(objectId).optional(),
+  isActive:        z.boolean().optional(),
 });

@@ -156,6 +156,7 @@
   "admin.joined": "Joined",
   "admin.access": "Administrator access",
   "admin.addAdmin": "Add Admin",
+  "admin.editAdmin": "Edit Admin",
   "admin.fullName": "Name",
   "admin.email": "Email",
   "admin.username": "Username",

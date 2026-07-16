@@ -20,11 +20,11 @@ const schema = z.object({
   fullName: z.string().min(1),
   email: z.string().email(),
   username: z.string().min(3),
-  password: z.string().min(8),
-  confirmPassword: z.string().min(8),
+  password: z.string().min(8).or(z.literal('')).optional(),
+  confirmPassword: z.string().optional(),
   isSuperAdmin: z.boolean(),
   assignedBatches: z.array(z.string()),
-}).refine(d => d.password === d.confirmPassword, {
+}).refine(d => (d.password || '') === (d.confirmPassword || ''), {
   message: 'Passwords do not match',
   path: ['confirmPassword'],
 }).refine(d => d.isSuperAdmin || d.assignedBatches.length > 0, {
@@ -39,11 +39,12 @@ export default function AdminAdminsPage() {
   // Treat undefined as super (legacy admins) — matches the server's resolution.
   const isSuper = currentUser?.isSuperAdmin !== false;
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
   const [toggleError, setToggleError] = useState<string | null>(null);
   const { data: admins, isLoading } = useGetAdminsQuery(undefined, { skip: !isSuper });
   const { data: batches } = useGetBatchesQuery(undefined, { skip: !isSuper });
   const [createAdmin, { isLoading: creating }] = useCreateAdminMutation();
-  const [updateAdmin] = useUpdateAdminMutation();
+  const [updateAdmin, { isLoading: updating }] = useUpdateAdminMutation();
 
   const { register, handleSubmit, formState: { errors }, reset, watch, setValue, setError } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -54,7 +55,22 @@ export default function AdminAdminsPage() {
   const watchedBatches = watch('assignedBatches');
 
   const openCreate = () => {
+    setEditingAdmin(null);
     reset({ fullName: '', email: '', username: '', password: '', confirmPassword: '', isSuperAdmin: true, assignedBatches: [] });
+    setModalOpen(true);
+  };
+
+  const openEdit = (admin: Admin) => {
+    setEditingAdmin(admin);
+    reset({
+      fullName: admin.fullName || '',
+      email: admin.email,
+      username: admin.username,
+      password: '',
+      confirmPassword: '',
+      isSuperAdmin: admin.isSuperAdmin,
+      assignedBatches: (admin.assignedBatches as Batch[])?.map(b => typeof b === 'string' ? b : b._id) || [],
+    });
     setModalOpen(true);
   };
 
@@ -65,14 +81,32 @@ export default function AdminAdminsPage() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      await createAdmin({
-        fullName: data.fullName,
-        email: data.email,
-        username: data.username,
-        password: data.password,
-        isSuperAdmin: data.isSuperAdmin,
-        assignedBatches: data.isSuperAdmin ? [] : data.assignedBatches,
-      }).unwrap();
+      if (editingAdmin) {
+        await updateAdmin({
+          id: editingAdmin._id,
+          data: {
+            fullName: data.fullName,
+            email: data.email,
+            username: data.username,
+            ...(data.password ? { password: data.password } : {}),
+            isSuperAdmin: data.isSuperAdmin,
+            assignedBatches: data.isSuperAdmin ? [] : data.assignedBatches,
+          },
+        }).unwrap();
+      } else {
+        if (!data.password) {
+          setError('password', { message: t('error.passwordRequired') });
+          return;
+        }
+        await createAdmin({
+          fullName: data.fullName,
+          email: data.email,
+          username: data.username,
+          password: data.password,
+          isSuperAdmin: data.isSuperAdmin,
+          assignedBatches: data.isSuperAdmin ? [] : data.assignedBatches,
+        }).unwrap();
+      }
       setModalOpen(false);
       reset();
     } catch (err: any) {
@@ -148,14 +182,18 @@ export default function AdminAdminsPage() {
                   <p className="text-xs text-gray-400 mt-1">{t('admin.joined')} {new Date(admin.createdAt).toLocaleDateString()}</p>
                 </div>
                 {admin._id !== currentUser?.id && (
-                  <Button
-                    size="sm"
-                    variant={admin.isActive ? 'ghost' : 'secondary'}
-                    onClick={() => handleToggle(admin)}
-                    className="shrink-0"
-                  >
-                    {admin.isActive ? t('action.deactivate') : t('action.reactivate')}
-                  </Button>
+                  <div className="flex flex-col gap-1 shrink-0">
+                    <Button size="sm" variant="secondary" onClick={() => openEdit(admin)}>
+                      {t('action.edit')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={admin.isActive ? 'ghost' : 'secondary'}
+                      onClick={() => handleToggle(admin)}
+                    >
+                      {admin.isActive ? t('action.deactivate') : t('action.reactivate')}
+                    </Button>
+                  </div>
                 )}
               </div>
             ))}
@@ -163,12 +201,18 @@ export default function AdminAdminsPage() {
         )}
       </div>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={t('admin.addAdmin')}>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editingAdmin ? t('admin.editAdmin') : t('admin.addAdmin')}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input label={t('admin.fullName')} {...register('fullName')} error={errors.fullName?.message} />
           <Input label={t('admin.email')} type="email" {...register('email')} error={errors.email?.message} />
           <Input label={t('admin.username')} {...register('username')} error={errors.username?.message} />
-          <Input label={t('admin.password')} type="password" {...register('password')} error={errors.password?.message} />
+          <Input
+            label={t('admin.password')}
+            type="password"
+            placeholder={editingAdmin ? t('staff.passwordPlaceholder') : ''}
+            {...register('password')}
+            error={errors.password?.message}
+          />
           <Input label={t('admin.confirmPassword')} type="password" {...register('confirmPassword')} error={errors.confirmPassword?.message} />
 
           <label className="flex items-start gap-2 cursor-pointer">
@@ -206,7 +250,9 @@ export default function AdminAdminsPage() {
           {errors.root && (
             <p className="text-sm text-danger bg-danger-bg rounded-xl px-3 py-2">{errors.root.message}</p>
           )}
-          <Button type="submit" size="lg" loading={creating}>{t('action.add')}</Button>
+          <Button type="submit" size="lg" loading={editingAdmin ? updating : creating}>
+            {editingAdmin ? t('action.save') : t('action.add')}
+          </Button>
         </form>
       </Modal>
 
