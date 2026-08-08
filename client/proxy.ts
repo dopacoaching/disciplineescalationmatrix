@@ -51,6 +51,8 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Exclude: Next.js internals, API routes, static assets, PWA service worker files
-  matcher: ['/((?!_next|api|icons|manifest\\.json|favicon\\.ico|logo\\.png|sw\\.js|workbox-).*)'],
+  // Exclude: Next.js internals, API routes, static assets, PWA service worker files.
+  // fallback-*.js is next-pwa's offline-fallback script, importScripts()'d by sw.js —
+  // service workers cannot follow a redirect there, so it must never hit this gate.
+  matcher: ['/((?!_next|api|icons|manifest\\.json|favicon\\.ico|logo\\.png|sw\\.js|workbox-|fallback-).*)'],
 };
