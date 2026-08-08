@@ -1,5 +1,6 @@
 public/sw.js
 public/workbox-*.js
+public/fallback-*.js
 tsconfig.tsbuildinfo
 .next/
 node_modules/

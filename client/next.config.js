@@ -3,9 +3,22 @@ const withPWA = require('@ducanh2912/next-pwa').default({
   disable: process.env.NODE_ENV === 'development',
   register: true,
   skipWaiting: true,
+  // When a navigation's NetworkFirst request fails (offline, or the service
+  // worker races a failed fetch), show this instead of an uncaught
+  // "no-response" rejection.
+  fallbacks: {
+    document: '/offline',
+  },
   workboxOptions: {
     disableDevLogs: true,
     runtimeCaching: [
+      {
+        // API calls must always hit the network — never served from cache,
+        // never intercepted by the offline fallback. A cached 401/200 here
+        // would show stale auth state or silently swallow a real failure.
+        urlPattern: /^https?:\/\/[^/]+\/api\//,
+        handler: 'NetworkOnly',
+      },
       {
         urlPattern: /^https?.*/,
         handler: 'NetworkFirst',
